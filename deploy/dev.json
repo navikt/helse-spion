@@ -13,7 +13,7 @@
     "env": [
       {
         "name": "LOADBALANCER_FQDN",
-        "value": "spion.nais.preprod.local"
+        "value": "helse-spion.nais.preprod.local"
       }
     ],
     "image": "repo.adeo.no:5443/helse-spion:RELEASE_VERSION",
@@ -49,6 +49,7 @@
         }
       }
     },
+    "ingresses": "https://helse-spion.nais.preprod.local",
     "vault": {
       "enabled": false
     }
