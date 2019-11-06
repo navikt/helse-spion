@@ -1,0 +1,56 @@
+{
+  "apiVersion": "nais.io/v1alpha1",
+  "kind": "Application",
+  "metadata": {
+    "labels": {
+      "team": "arbeidsgiver"
+    },
+    "name": "spion",
+    "namespace": "default"
+  },
+  "spec": {
+    "cpuThresholdPercentage": 90,
+    "env": [
+      {
+        "name": "LOADBALANCER_FQDN",
+        "value": "spion.nais.preprod.local"
+      }
+    ],
+    "image": "repo.adeo.no:5443/helse-spion:RELEASE_VERSION",
+    "istio": {
+      "enabled": false
+    },
+    "liveness": {
+      "failureThreshold": 3,
+      "initialDelay": 60,
+      "path": "/internal/isAlive",
+      "periodSeconds": 10,
+      "timeout": 1
+    },
+    "port": 8080,
+    "readiness": {
+      "failureThreshold": 3,
+      "initialDelay": 60,
+      "path": "/internal/isReady",
+      "periodSeconds": 10,
+      "timeout": 1
+    },
+    "replicas": {
+      "max": 1,
+      "min": 1
+    },
+    "resources": {
+      "limits": {
+        "cpu": "100m",
+        "memory": "128Mi",
+        "requests": {
+          "cpu": "50m",
+          "memory": "32Mi"
+        }
+      }
+    },
+    "vault": {
+      "enabled": false
+    }
+  }
+}

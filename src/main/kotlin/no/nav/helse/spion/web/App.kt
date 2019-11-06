@@ -1,5 +1,7 @@
 package no.nav.helse.spion.web
 
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -24,6 +26,11 @@ fun Application.module(testing: Boolean = false) {
             this.registerModule(Jdk8Module())
             this.registerModule(JavaTimeModule())
             this.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            configure(SerializationFeature.INDENT_OUTPUT, true)
+            setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
+                indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+                indentObjectsWith(DefaultIndenter("  ", "\n"))
+            })
         }
     }
 
