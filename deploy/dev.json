@@ -43,7 +43,9 @@
         }
       }
     },
-    "ingresses": "https://helse-spion.nais.preprod.local",
+    "ingresses": [
+      "https://helse-spion.nais.preprod.local"
+    ],
     "vault": {
       "enabled": false
     }
