@@ -5,6 +5,9 @@ val kotlin_version = "1.3.50"
 val logback_version = "1.2.1"
 val jacksonVersion = "2.9.9"
 
+val mainClass = "no.nav.helse.spion.web.AppKt"
+
+
 plugins {
     id("application")
     id("org.jetbrains.kotlin.jvm") version "1.3.50"
@@ -59,4 +62,23 @@ repositories {
 
 application {
     mainClassName = "App.kt"
+}
+
+tasks.named<Jar>("jar") {
+    baseName = ("app")
+
+    manifest {
+        attributes["Main-Class"] = mainClass
+        attributes["Class-Path"] = configurations["compile"].map {
+            it.name
+        }.joinToString(separator = " ")
+    }
+
+    doLast {
+        configurations["compile"].forEach {
+            val file = File("$buildDir/libs/${it.name}")
+            if (!file.exists())
+                it.copyTo(file)
+        }
+    }
 }
