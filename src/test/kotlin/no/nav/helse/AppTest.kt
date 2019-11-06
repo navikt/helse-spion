@@ -8,7 +8,7 @@ import no.nav.helse.spion.web.module
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ApplicationTest {
+class AppTest {
     @Test
     fun testRoot() {
         withTestApplication({ module() }) {
