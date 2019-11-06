@@ -14,24 +14,24 @@ jobs:
       with:
         java-version: '11.x'
   - name: create docker tag
-      env:
-        DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/helse-spion
-      run: |
-        echo $DOCKER_IMAGE > .docker_image
-        echo $(echo $GITHUB_SHA | cut -c1-7) > .docker_tag
-      - name: test and build
-        run: ./gradlew test build
-        env:
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-      - name: build docker image
-        run: docker build . --pull -t $(cat .docker_image):$(cat .docker_tag)
-      - name: push docker image
-        run: |
-          echo "$GITHUB_ACCESS_TOKEN" | docker login --username "x-access-token" --password-stdin https://docker.pkg.github.com
-          docker push $(cat .docker_image):$(cat .docker_tag)
-        env:
-          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+    env:
+      DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/helse-spion
+    run: |
+      echo $DOCKER_IMAGE > .docker_image
+      echo $(echo $GITHUB_SHA | cut -c1-7) > .docker_tag
+  - name: test and build
+    run: ./gradlew test build
+    env:
+      ORG_GRADLE_PROJECT_githubUser: x-access-token
+      ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+  - name: build docker image
+    run: docker build . --pull -t $(cat .docker_image):$(cat .docker_tag)
+  - name: push docker image
+    run: |
+      echo "$GITHUB_ACCESS_TOKEN" | docker login --username "x-access-token" --password-stdin https://docker.pkg.github.com
+      docker push $(cat .docker_image):$(cat .docker_tag)
+    env:
+      GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
   - name: deploy to dev
       uses: navikt/deployment-cli/action@0.4.1
       env:
