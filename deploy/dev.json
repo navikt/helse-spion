@@ -10,12 +10,6 @@
   },
   "spec": {
     "cpuThresholdPercentage": 90,
-    "env": [
-      {
-        "name": "LOADBALANCER_FQDN",
-        "value": "helse-spion.nais.preprod.local"
-      }
-    ],
     "image": "repo.adeo.no:5443/helse-spion:RELEASE_VERSION",
     "istio": {
       "enabled": false
