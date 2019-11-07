@@ -21,7 +21,7 @@ spec:
     periodSeconds: 5
     failureThreshold: 3
   ingresses:
-    - http://helse-spion.nais.preprod.local
+    - https://helse-spion.nais.preprod.local
   replicas:
     max: 1
     min: 1
