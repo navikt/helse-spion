@@ -36,7 +36,7 @@ spec:
     enabled: true
   env:
   - name: DATABASE_HOST
-    value: A01DBVL010.adeo.no
+    value: a01dbvl010.adeo.no
   - name: DATABASE_PORT
     value: "5432"
   - name: DATABASE_NAME
