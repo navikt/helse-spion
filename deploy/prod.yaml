@@ -1,0 +1,45 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: helse-spion
+  namespace: default
+  labels:
+    team: {{team}}
+spec:
+  image: {{image}}:{{tag}}
+  port: 8080
+  team: arbeidsgiver
+  liveness:
+    path: isalive
+    initialDelay: 20
+    periodSeconds: 5
+    failureThreshold: 3
+  readiness:
+    path: isready
+    initialDelay: 20
+    timeout: 1
+    periodSeconds: 5
+    failureThreshold: 3
+  ingresses:
+    - https://helse-spion.nais.adeo.no
+  replicas:
+    max: 1
+    min: 1
+  resources:
+    limits:
+      cpu: 400m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 64Mi
+  vault:
+    enabled: true
+  env:
+  - name: DATABASE_HOST
+    value: A01DBVL010.adeo.no
+  - name: DATABASE_PORT
+    value: "5432"
+  - name: DATABASE_NAME
+    value: helse-spion
+  - name: VAULT_MOUNTPATH
+    value: postgresql/prod-fss/
