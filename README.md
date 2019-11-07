@@ -1,4 +1,4 @@
-Spion
+Spion [![Actions Status](https://github.com/navikt/helse-spion/workflows/Bygg%20og%20deploy/badge.svg)](https://github.com/navikt/helse-spleis/actions)
 ================
 
 Innsynsløning for arbeidsgivere i sykepenger
