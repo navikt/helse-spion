@@ -48,7 +48,7 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
     config = appConfig
 
     connector {
-        port = appConfig.property("server.port").getString().toInt()
+        port = 8080
     }
 
     module {
@@ -76,7 +76,5 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
 @KtorExperimentalAPI
 fun createConfigFromEnvironment(env: Map<String, String>) =
     MapApplicationConfig().apply {
-        put("server.port", env.getOrDefault("HTTP_PORT", "8080"))
-        put(ktorApplicationId, env.getOrDefault("KTOR_APPLICATION_ID", "spion-v1"))
     }
 
