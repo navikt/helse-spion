@@ -4,6 +4,9 @@ val ktorVersion = "1.2.4"
 val logback_version = "1.2.1"
 val jacksonVersion = "2.9.9"
 val prometheusVersion = "0.6.0"
+val flywayVersion = "6.0.8"
+val hikariVersion = "3.3.1"
+val vaultJdbcVersion = "1.3.1"
 
 val mainClass = "no.nav.helse.spion.web.AppKt"
 
@@ -32,6 +35,10 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
+    implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
 
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
