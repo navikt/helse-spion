@@ -10,12 +10,12 @@ spec:
   port: 8080
   team: arbeidsgiver
   liveness:
-    path: isAlive
+    path: isalive
     initialDelay: 20
     periodSeconds: 5
     failureThreshold: 3
   readiness:
-    path: isReady
+    path: isready
     initialDelay: 20
     timeout: 1
     periodSeconds: 5
