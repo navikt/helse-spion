@@ -1,8 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val ktor_version = "1.2.4"
+val ktorVersion = "1.2.4"
 val logback_version = "1.2.1"
 val jacksonVersion = "2.9.9"
+val micrometerRegistryPrometheusVersion = "1.1.5"
+
 
 val mainClass = "no.nav.helse.spion.web.AppKt"
 
@@ -18,12 +20,11 @@ buildscript {
 }
 
 dependencies {
-    implementation("io.ktor:ktor-server-netty:$ktor_version")
-    implementation("io.ktor:ktor-server-core:$ktor_version")
-    implementation("io.ktor:ktor-jackson:$ktor_version")
-    implementation("io.ktor:ktor-client-core:$ktor_version")
-    implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
-    implementation("io.ktor:ktor-client-apache:$ktor_version")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache:$ktorVersion")
 
     implementation(kotlin("stdlib"))
 
@@ -33,7 +34,10 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
-    testImplementation("io.ktor:ktor-server-tests:$ktor_version")
+    implementation("io.ktor:ktor-metrics-micrometer:$ktorVersion")
+    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
+
+    testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
     testImplementation("junit", "junit", "4.12")
 }
 
@@ -53,8 +57,8 @@ java {
 }
 
 repositories {
-    mavenCentral()
     jcenter()
+    mavenCentral()
     maven("https://kotlin.bintray.com/ktor")
 }
 
@@ -63,13 +67,13 @@ tasks.named<Jar>("jar") {
 
     manifest {
         attributes["Main-Class"] = mainClass
-        attributes["Class-Path"] = configurations["compile"].map {
+        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
             it.name
-        }.joinToString(separator = " ")
+        }
     }
 
     doLast {
-        configurations["compile"].forEach {
+        configurations.runtimeClasspath.get().forEach {
             val file = File("$buildDir/libs/${it.name}")
             if (!file.exists())
                 it.copyTo(file)
