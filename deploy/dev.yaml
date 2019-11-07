@@ -33,7 +33,7 @@ spec:
       cpu: 200m
       memory: 64Mi
   vault:
-    enabled: false
+    enabled: true
   env:
   - name: DATABASE_HOST
     value: b27dbvl008.preprod.local
@@ -43,4 +43,3 @@ spec:
     value: helse-spion
   - name: VAULT_MOUNTPATH
     value: postgresql/preprod-fss/
-
