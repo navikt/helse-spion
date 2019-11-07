@@ -1,4 +1,4 @@
-package no.nav.helse.nais
+package no.nav.helse.spion.nais
 
 import io.ktor.application.Application
 import io.ktor.application.call

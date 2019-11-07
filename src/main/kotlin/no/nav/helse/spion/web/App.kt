@@ -17,10 +17,10 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
-import no.nav.helse.nais.nais
 import no.nav.helse.spion.db.hikariConfig
 import no.nav.helse.spion.domene.saksinformasjon.repository.MockSaksinformasjonRepository
 import no.nav.helse.spion.domenetjenester.SpionService
+import no.nav.helse.spion.nais.nais
 import no.nav.helse.spion.web.api.spion
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
