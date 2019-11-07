@@ -29,8 +29,8 @@ spec:
     limits:
       cpu: 400m
       memory: 256Mi
-      requests:
-        cpu: 200m
-        memory: 64Mi
+    requests:
+      cpu: 200m
+      memory: 64Mi
   vault:
     enabled: false
