@@ -1,17 +1,14 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val ktor_version = "1.2.4"
-val kotlin_version = "1.3.50"
 val logback_version = "1.2.1"
 val jacksonVersion = "2.9.9"
 
 val mainClass = "no.nav.helse.spion.web.AppKt"
 
-
 plugins {
-    id("application")
-    id("org.jetbrains.kotlin.jvm") version "1.3.50"
-    java
+    kotlin("jvm") version "1.3.50"
+    `build-scan`
 }
 
 buildscript {
@@ -28,7 +25,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-client-apache:$ktor_version")
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
+    implementation(kotlin("stdlib"))
 
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
@@ -55,16 +52,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
-
-
 repositories {
     mavenCentral()
     jcenter()
     maven("https://kotlin.bintray.com/ktor")
-}
-
-application {
-    mainClassName = "App.kt"
 }
 
 tasks.named<Jar>("jar") {
@@ -84,4 +75,8 @@ tasks.named<Jar>("jar") {
                 it.copyTo(file)
         }
     }
+}
+
+tasks.withType<Wrapper> {
+    gradleVersion = "5.6.2"
 }
