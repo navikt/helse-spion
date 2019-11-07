@@ -14,6 +14,12 @@ plugins {
     java
 }
 
+buildscript {
+    dependencies {
+        classpath("org.junit.platform:junit-platform-gradle-plugin:1.2.0")
+    }
+}
+
 dependencies {
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("io.ktor:ktor-server-core:$ktor_version")
@@ -49,14 +55,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
-buildscript {
-    dependencies {
-        classpath("org.junit.platform:junit-platform-gradle-plugin:1.2.0")
-    }
-    repositories {
-        mavenCentral()
-    }
-}
+
 
 repositories {
     mavenCentral()
