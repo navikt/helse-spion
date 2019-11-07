@@ -67,7 +67,7 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
             }
         }
         nais()
-        val dataSource = hikariConfig() //TODO Brukes til å koble opp mot ekte repository senere
+        val dataSource = hikariConfig() //TODO vil brukes til å koble opp mot ekte repository senere
         val spionService = SpionService(MockSaksinformasjonRepository())
         routing {
             spion(spionService)
