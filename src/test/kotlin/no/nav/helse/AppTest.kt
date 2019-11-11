@@ -1,12 +1,12 @@
 package no.nav.helse
 
-import kotlin.test.Test
-import kotlin.test.assertTrue
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
 class AppTest {
     @Test
     fun testRoot() {
         //TODO
-        assertTrue(true)
+        assertThat(true).isTrue()
     }
 }

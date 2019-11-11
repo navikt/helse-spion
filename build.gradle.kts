@@ -9,6 +9,11 @@ val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
 
 val mainClass = "no.nav.helse.spion.web.AppKt"
+val junitJupiterVersion = "5.5.0-RC2"
+val assertJVersion = "3.12.2"
+val mockKVersion = "1.9.3"
+
+
 
 plugins {
     kotlin("jvm") version "1.3.50"
@@ -43,8 +48,13 @@ dependencies {
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
+    testCompile("io.mockk:mockk:$mockKVersion")
     testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
-    testImplementation("junit", "junit", "4.12")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
+    testImplementation("org.assertj:assertj-core:$assertJVersion")
+
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 }
 
 tasks.named<KotlinCompile>("compileKotlin")
@@ -84,6 +94,13 @@ tasks.named<Jar>("jar") {
             if (!file.exists())
                 it.copyTo(file)
         }
+    }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
     }
 }
 
