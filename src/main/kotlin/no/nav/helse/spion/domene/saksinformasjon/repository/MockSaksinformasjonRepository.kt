@@ -26,7 +26,9 @@ class MockSaksinformasjonRepository : SaksinformasjonRepository {
                     100,
                     "SYKEPENGER"
                 )
-            )
+            ),
+        aktørId = "AKTØRID",
+        arbeidsgiver = "NAV"
         )
     }
 }
