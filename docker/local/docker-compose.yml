@@ -1,0 +1,10 @@
+version: '3.4'
+services:
+    database:
+        build:
+            context: ./
+        ports:
+            - "54320:5432"
+volumes:
+    data:
+

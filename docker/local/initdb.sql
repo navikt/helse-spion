@@ -1,0 +1,3 @@
+CREATE DATABASE spion;
+CREATE USER spion with PASSWORD 'spion';
+GRANT ALL PRIVILEGES ON DATABASE spion TO spion;
