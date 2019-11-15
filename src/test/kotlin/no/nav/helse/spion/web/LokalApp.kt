@@ -30,7 +30,7 @@ fun main() {
 @KtorExperimentalAPI
 fun readDevProps() =
     MapApplicationConfig().apply {
-        object {}?.javaClass?.getResource("dev.props")?.readText()?.lines()?.map {
+        javaClass.classLoader.getResource("dev.props")?.readText()?.lines()?.map {
             Pair(it.split("=")[0], it.split("=")[1])
         }?.forEach { (k, v) -> put(k, v) }
     }
