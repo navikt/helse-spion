@@ -13,6 +13,7 @@ fun createHikariConfig(jdbcUrl: String, username: String? = null, password: Stri
         idleTimeout = 10001
         connectionTimeout = 1000
         maxLifetime = 30001
+        driverClassName = "org.postgresql.Driver"
         username?.let { this.username = it }
         password?.let { this.password = it }
     }
