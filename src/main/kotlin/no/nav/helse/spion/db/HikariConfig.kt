@@ -13,6 +13,7 @@ fun createHikariConfig(jdbcUrl: String, username: String? = null, password: Stri
         idleTimeout = 10001
         connectionTimeout = 1000
         maxLifetime = 30001
+        driverClassName = "org.postgresql.Driver"
         username?.let { this.username = it }
         password?.let { this.password = it }
     }
@@ -21,7 +22,7 @@ fun createHikariConfig(jdbcUrl: String, username: String? = null, password: Stri
 fun Application.createHikariConfigFromEnvironment() =
     createHikariConfig(
         jdbcUrl = environment.config.property("database.jdbc-url").getString(),
-        username = environment.config.propertyOrNull("database.user")?.getString(),
+        username = environment.config.propertyOrNull("database.username")?.getString(),
         password = environment.config.propertyOrNull("database.password")?.getString()
     )
 

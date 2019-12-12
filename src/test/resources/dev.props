@@ -1,0 +1,3 @@
+database.jdbc-url=jdbc:postgresql://localhost:5432/spion
+database.username=spion
+database.password=spion
