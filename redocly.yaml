@@ -1,0 +1,8 @@
+specFileName: spec/api-with-examples.yaml
+apiTitle: helse-spion
+splitSpec: true
+codeSamples: false
+swaggerUI: true
+travis: true
+repo: navikt/helse-spion
+oasVersion: 3.0.0
