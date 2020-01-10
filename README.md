@@ -13,25 +13,25 @@ Interne henvendelser kan sendes via Slack i kanalen #team-arbeidsgiver
 
 ## OpenAPI/Swagger-dokumentasjon
 
-- [Reference Documentation (ReDoc)](https://navikt.github.io/helse-spion/)
+- [ReDoc referansedokumentasjon](https://navikt.github.io/helse-spion/)
 - [SwaggerUI](https://navikt.github.io/helse-spion/swagger-ui/)
-- OpenAPI Raw Files: [JSON](https://navikt.github.io/helse-spion/openapi.json) [YAML](https://navikt.github.io/helse-spion/openapi.yaml)
+- OpenAPI Råfiler: [JSON](https://navikt.github.io/helse-spion/openapi.json) [YAML](https://navikt.github.io/helse-spion/openapi.yaml)
 
-### Install
+### Installasjon
 
-1. Install [Node JS](https://nodejs.org/)
-2. Clone repo and run `npm install` in the repo root
+1. Installer [Node JS](https://nodejs.org/)
+2. Clone repoet og kjør `npm install` i repo root
 
-### Usage
+### Bruk
 
 #### `npm start`
-Starts the development server.
+Starter lokal devserver for swagger/openAPI
 
 #### `npm run build`
-Bundles the spec and prepares web_deploy folder with static assets.
+Slår sammen spec-filene og oppdaterer web_deploy
 
 #### `npm test`
-Validates the spec.
+Validerer spec-filene
 
 #### `npm run gh-pages`
-Deploys docs to GitHub Pages.
+Deploy til GitHub Pages
