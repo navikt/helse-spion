@@ -11,9 +11,6 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 
 Interne henvendelser kan sendes via Slack i kanalen #team-arbeidsgiver
 
-
-
-
 ## OpenAPI/Swagger-dokumentasjon
 
 - [Reference Documentation (ReDoc)](https://navikt.github.io/helse-spion/)
