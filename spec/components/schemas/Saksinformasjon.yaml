@@ -1,0 +1,10 @@
+type: object
+required:
+  - person
+properties:
+  person:
+    $ref: '#/components/schemas/Person'
+  perioder:
+    type: array
+    items:
+      $ref: '#/components/schemas/Sykepengeperiode'

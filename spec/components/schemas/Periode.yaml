@@ -1,0 +1,12 @@
+type: object
+
+properties:
+  fom:
+    type: string
+    example: '1953-04-13'
+    description: Fra og med i datoformat YYYY-MM-dd
+
+  tom:
+    type: string
+    example: '1954-04-05'
+    description: Til og med i datoformat YYYY-MM-dd

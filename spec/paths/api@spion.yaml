@@ -1,0 +1,11 @@
+get:
+  summary: Hent saksinformasjon for en gitt person
+  responses:
+    '200':
+      description: |-
+        200 response
+      content:
+        application/json:
+          examples:
+            sak:
+              $ref: '#/components/examples/saksinformasjon-enkel'

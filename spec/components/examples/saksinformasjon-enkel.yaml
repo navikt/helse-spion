@@ -1,0 +1,26 @@
+summary: Sak med to perioder, hvor en er innvilget og den andre under behandling
+value:
+  person:
+    fornavn: Jason Charles
+    etternavn: Bourne
+    fødselsnummer: 12345678
+    virksomhetNr: 1
+    virksomhetNavn: Treadstone Seventy-One Corporation
+
+  perioder:
+    - sykepengePeriode:
+        periode:
+          fom: '2002-06-14'
+          tom: '2002-07-14'
+        refusjonsbeløp: 7500000.0
+        status: innvilget
+        grad: 100
+        ytelse: SP
+    - sykepengePeriode:
+        periode:
+          fom: '2004-07-23'
+          tom: '2004-09-01'
+          refusjonsbeløp: 200.0
+          status: under behandling
+          grad: 50
+          ytelse: SP
