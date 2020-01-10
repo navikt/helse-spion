@@ -1,5 +1,7 @@
 get:
   summary: Hent saksinformasjon for en gitt person
+  tags:
+    - Saksinformasjon
   responses:
     '200':
       description: |-

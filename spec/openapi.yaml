@@ -8,6 +8,6 @@ servers:
   - url: 'localhost:8080'
     description: Kjøre lokalt
 tags:
-  - name: Spion API
+  - name: Saksinformasjon
     description: Viser informasjon om perioder og vedtak
 
