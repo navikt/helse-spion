@@ -58,7 +58,7 @@ fun createApplicationEnvironment() = applicationEngineEnvironment {
     config = HoconApplicationConfig(ConfigFactory.load())
 
     connector {
-        port = 3000
+        port = 8080
     }
 
     module {
