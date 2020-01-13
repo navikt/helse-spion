@@ -49,7 +49,7 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
     config = appConfig
 
     connector {
-        port = 3000
+        port = 8080
     }
 
     module {
