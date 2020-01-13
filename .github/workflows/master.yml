@@ -39,7 +39,7 @@ jobs:
           AWAIT_SECONDS: 0
         with:
           cluster: dev-fss
-          team: arbeidsgiver
+          team: helsearbeidsgiver
           resources: deploy/dev.yaml
       - name: deploy to prod
         uses: navikt/deployment-cli/action@0.4.1
@@ -48,5 +48,5 @@ jobs:
           AWAIT_SECONDS: 0
         with:
           cluster: prod-fss
-          team: arbeidsgiver
+          team: helsearbeidsgiver
           resources: deploy/prod.yaml
