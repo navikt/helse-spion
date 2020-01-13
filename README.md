@@ -5,7 +5,7 @@ Innsynsløning for arbeidsgivere i sykepenger
 
 # Henvendelser
 
-Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
+Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub
 
 ## For NAV-ansatte
 
