@@ -8,7 +8,6 @@ metadata:
 spec:
   image: {{image}}:{{tag}}
   port: 8080
-  team: arbeidsgiver
   liveness:
     path: isalive
     initialDelay: 20
