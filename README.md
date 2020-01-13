@@ -25,7 +25,7 @@ Interne henvendelser kan sendes via Slack i kanalen #helse-arbeidsgiver
 ### Bruk
 
 #### `npm start`
-Starter lokal devserver for swagger/openAPI
+Starter lokal devserver for swagger/openAPI på port :3000
 
 #### `npm run build`
 Slår sammen spec-filene og oppdaterer web_deploy

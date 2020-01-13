@@ -2,9 +2,6 @@ openapi: 3.0.0
 info:
   title: Helse-spion-api
   version: 1.0.0
-servers:
-  - url: 'https://helse-spion.nais.preprod.local'
-    description: Test (bruker testdata)
 tags:
   - name: Saksinformasjon
     description: Viser informasjon om perioder og vedtak
