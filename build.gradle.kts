@@ -19,7 +19,7 @@ val mockKVersion = "1.9.3"
 
 plugins {
     kotlin("jvm") version "1.3.50"
-    `build-scan`
+
 }
 
 buildscript {
@@ -58,7 +58,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
     testImplementation("org.assertj:assertj-core:$assertJVersion")
 
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 }
 
 tasks.named<KotlinCompile>("compileKotlin")
@@ -109,5 +109,5 @@ tasks.withType<Test> {
 }
 
 tasks.withType<Wrapper> {
-    gradleVersion = "5.6.2"
+    gradleVersion = "6.0.1"
 }
