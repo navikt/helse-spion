@@ -14,6 +14,7 @@ val mainClass = "no.nav.helse.spion.web.AppKt"
 val junitJupiterVersion = "5.5.0-RC2"
 val assertJVersion = "3.12.2"
 val mockKVersion = "1.9.3"
+val tokenSupportVersion = "1.1.3"
 
 
 
@@ -32,8 +33,11 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-auth:$ktorVersion")
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
+
+    implementation("no.nav.security:token-validation-ktor:$tokenSupportVersion")
 
     implementation(kotlin("stdlib"))
 

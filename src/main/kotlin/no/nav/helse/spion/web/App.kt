@@ -6,11 +6,14 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.typesafe.config.ConfigFactory
 import io.ktor.application.install
 import io.ktor.config.ApplicationConfig
 import io.ktor.config.MapApplicationConfig
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
+import io.ktor.auth.Authentication
+import io.ktor.config.HoconApplicationConfig
 import io.ktor.routing.routing
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
@@ -22,6 +25,7 @@ import no.nav.helse.spion.domene.saksinformasjon.repository.MockSaksinformasjonR
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.nais.nais
 import no.nav.helse.spion.web.api.spion
+import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -33,7 +37,9 @@ fun main() {
         LoggerFactory.getLogger("main")
             .error("uncaught exception in thread ${thread.name}: ${err.message}", err)
     }
-    val config = createConfigFromEnvironment(System.getenv())
+    //val config = createConfigFromEnvironment(System.getenv())
+
+    val config = HoconApplicationConfig(ConfigFactory.load())
 
     embeddedServer(Netty, createApplicationEnvironment(config)).let { app ->
         app.start(wait = false)
@@ -53,6 +59,11 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
     }
 
     module {
+
+        install(Authentication) {
+            tokenValidationSupport(config = config)
+        }
+
         install(ContentNegotiation) {
             jackson() {
                 this.registerModule(KotlinModule())
@@ -74,29 +85,3 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
         }
     }
 }
-
-@KtorExperimentalAPI
-fun createConfigFromEnvironment(env: Map<String, String>) =
-    MapApplicationConfig().apply {
-        env["DATABASE_HOST"]?.let { put("database.host", it) }
-        env["DATABASE_PORT"]?.let { put("database.port", it) }
-        env["DATABASE_NAME"]?.let { put("database.name", it) }
-        env["DATABASE_USERNAME"]?.let { put("database.username", it) }
-        env["DATABASE_PASSWORD"]?.let { put("database.password", it) }
-
-        put("database.jdbc-url", env["DATABASE_JDBC_URL"]
-            ?: String.format(
-                "jdbc:postgresql://%s:%s/%s%s",
-                property("database.host").getString(),
-                property("database.port").getString(),
-                property("database.name").getString(),
-                propertyOrNull("database.username")?.getString()?.let {
-                    "?user=$it"
-                } ?: ""))
-
-        env["VAULT_MOUNTPATH"]?.let { put("database.vault.mountpath", it) }
-
-        put(ktorApplicationId, env.getOrDefault("KTOR_APPLICATION_ID", "helse-spion"))
-
-    }
-
