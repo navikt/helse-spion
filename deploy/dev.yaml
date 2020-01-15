@@ -10,15 +10,16 @@ spec:
   port: 8080
   liveness:
     path: isalive
-    initialDelay: 20
-    periodSeconds: 5
-    failureThreshold: 3
+    initialDelay: 10
+    timeout: 1
+    periodSeconds: 3
+    failureThreshold: 10
   readiness:
     path: isready
-    initialDelay: 20
+    initialDelay: 10
     timeout: 1
-    periodSeconds: 5
-    failureThreshold: 3
+    periodSeconds: 3
+    failureThreshold: 10
   ingresses:
     - https://helse-spion.nais.preprod.local
   replicas:
