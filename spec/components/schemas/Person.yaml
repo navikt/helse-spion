@@ -2,36 +2,14 @@ type: object
 required:
   - fornavn
   - etternavn
-  - fødselsnummer
-  - virksomhetNr
-
 properties:
-
   fornavn:
     type: string
     example: James
     description:
       Fornavn og evt. mellomnavn til personen
-
   etternavn:
     type: string
     example: Bond
     description: >-
       Etternavnet til personen
-
-  fødselsnummer:
-    type: string
-    example: "007"
-    description: Et gyldig fødselsnummer
-
-  virksomhetNr:
-    type: string
-    example: MI6
-    description: Nummeret til virksomheten
-
-  virksomhetNavn:
-    type: string
-    example: Secret Intelligence Service
-
-
-

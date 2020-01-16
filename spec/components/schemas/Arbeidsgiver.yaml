@@ -1,0 +1,17 @@
+type: object
+required:
+  - navn
+  #En av disse to er påkrevd
+  #- orgnr
+  #- personnummer
+properties:
+  navn:
+    type: string
+    example: Treadstone Seventy-One Corporation
+    description: Navnet til virksomheten eller personen registrert som arbeidsgiver
+  personnummer:
+    type: string
+    example: 12345678910
+  orgnr:
+    type: string
+    example: 123

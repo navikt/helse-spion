@@ -1,0 +1,17 @@
+type: object
+required:
+  - person
+  - ytelsesperioder
+  - oppsummering
+  - arbeidsgiver
+properties:
+  oppsummering:
+    $ref: '#/components/schemas/Oppsummering'
+  arbeidsgiver:
+    $ref: '#/components/schemas/Arbeidsgiver'
+  person:
+    $ref: '#/components/schemas/Person'
+  ytelsesperioder:
+    type: array
+    items:
+      $ref: '#/components/schemas/Ytelsesperiode'
