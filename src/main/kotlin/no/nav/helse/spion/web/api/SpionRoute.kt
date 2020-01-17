@@ -10,6 +10,6 @@ import no.nav.helse.spion.domenetjenester.SpionService
 
 fun Route.spion(service: SpionService) {
     post("api/v1/finnSakerForPerson") {
-        call.respond(service.hentSakerForPerson("TODO", "TODO"))
+        call.respond(service.hentSaksinformasjonForPerson("TODO", "TODO"))
     }
 }
