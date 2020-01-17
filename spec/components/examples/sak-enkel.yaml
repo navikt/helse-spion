@@ -1,21 +1,22 @@
 summary: En sak med to ytelsesperioder, hvor en er innvilget og den andre avslått
 value:
-   - sak:
+  arbeidsgiver:
+    navn: Treadstone Seventy-One Corporation
+    orgnr: 1
+  person:
+    fornavn: Jason Charles
+    etternavn: Bourne
+
+  saksliste:
+   -
       oppsummering:
         periode:
           fom: '2002-06-14'
           tom: '2004-09-01'
         maxdato: '2004-09-01'
         refusjonsbeløp: 750000.0
-      arbeidsgiver:
-        navn: Treadstone Seventy-One Corporation
-        orgnr: 1
-      person:
-        fornavn: Jason Charles
-        etternavn: Bourne
-
       ytelsesperioder:
-        - ytelsesperiode:
+        -
             periode:
               fom: '2002-06-14'
               tom: '2002-07-14'
@@ -24,7 +25,7 @@ value:
             grad: 100
             ytelse: SP
             merknad: Fritak AGP
-        - ytelsesperiode:
+        -
             periode:
               fom: '2004-07-23'
               tom: '2004-09-01'

@@ -9,11 +9,12 @@ post:
         schema:
           type: object
           required:
-            - personnummer
+            - identitetsnummer
             - securityToken
           properties:
-            fødselsnummer:
+            identitetsnummer:
               type: string
+              description: Norsk identitetsnummer, kan være fødselsnummer eller d-nummer
             securityToken:
               type: string
   responses:

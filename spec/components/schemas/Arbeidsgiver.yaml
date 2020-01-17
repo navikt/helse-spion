@@ -3,15 +3,16 @@ required:
   - navn
   #En av disse to er påkrevd
   #- orgnr
-  #- personnummer
+  #- identitetsnummer
 properties:
   navn:
     type: string
     example: Treadstone Seventy-One Corporation
     description: Navnet til virksomheten eller personen registrert som arbeidsgiver
-  personnummer:
+  identitetsnummer:
     type: string
     example: 12345678910
+    description: Norsk identitetsnummer, kan være fødselsnummer eller d-nummer
   orgnr:
     type: string
     example: 123
