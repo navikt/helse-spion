@@ -1,7 +1,7 @@
 package no.nav.helse.spion.domene.sak.repository
 
-import no.nav.helse.spion.domene.sak.Saksinformasjon
+import no.nav.helse.spion.domene.sak.Sak
 
 interface SaksinformasjonRepository {
-    fun hentSaksinformasjonForPerson(token: String, pnr: String) : Saksinformasjon
+    fun hentSakerForPerson(identitetsnummer: String, arbeidsgiverOrgnummer: String, arbeidsgiverIdentitetsnummer: String) : List<Sak>
 }

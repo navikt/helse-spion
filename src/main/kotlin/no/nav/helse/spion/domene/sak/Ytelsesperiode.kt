@@ -10,12 +10,13 @@ data class Ytelsesperiode(
         val grad: BigDecimal,
         val ytelse: Ytelse,
         val merknad: String
-)
-
-enum class Status{
-    INNVILGET, AVSLÅTT, UNDER_BEHANDLING
+) {
+    enum class Status {
+        INNVILGET, AVSLÅTT, UNDER_BEHANDLING
+    }
+    enum class Ytelse {
+        SP, FP, SVP, PP, OP, OM
+    }
 }
 
-enum class Ytelse{
-    SP, FP, SVP, PP, OP, OM
-}
+
