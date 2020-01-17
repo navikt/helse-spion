@@ -15,8 +15,8 @@ class MockSaksinformasjonRepository : SaksinformasjonRepository {
 
     val testPeriode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1))
 
-    override fun hentSakerForPerson(token: String, pnr: String): Sak {
-        return Sak(
+    override fun hentSakerForPerson(token: String, pnr: String): List<Sak> {
+        return listOf(Sak(
                 oppsummering = Oppsummering(
                         testPeriode,
                         BigDecimal.TEN,
@@ -39,6 +39,6 @@ class MockSaksinformasjonRepository : SaksinformasjonRepository {
                         )
                 )
 
-        )
+        ))
     }
 }
