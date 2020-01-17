@@ -18,5 +18,10 @@ fun Route.spion(service: SpionService) {
                 call.respond(service.hentSakerForPerson(oppslag.identitetsnummer, oppslag.arbeidsgiverOrgnr, oppslag.arbeidsgiverIdentitetsnummer))
             }
         }
+        route("/arbeidsgivere") {
+            post("/oppslag") {
+                call.respond(service.hentArbeidsgivere("TODO"))
+            }
+        }
     }
 }

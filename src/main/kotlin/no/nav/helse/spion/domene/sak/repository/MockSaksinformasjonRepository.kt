@@ -13,6 +13,13 @@ class MockSaksinformasjonRepository : SaksinformasjonRepository {
 
     val testPeriode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1))
 
+    override fun hentArbeidsgivere(identitetsnummer: String): List<Arbeidsgiver> {
+        return listOf(
+                Arbeidsgiver("Etterretningstjenesten", "1965", ""),
+                Arbeidsgiver("Secret Intelligence Service", "MI6", "")
+        )
+    }
+
     override fun hentSakerForPerson(identitetsnummer: String, arbeidsgiverOrgnummer: String, arbeidsgiverIdentitetsnummer: String): List<Sak> {
         return listOf(
                 Sak(
