@@ -2,6 +2,7 @@ type: object
 required:
   - fornavn
   - etternavn
+  - aktørid
 properties:
   fornavn:
     type: string

@@ -1,7 +1,9 @@
 type: object
 required:
-  - ytelsesperioder
   - oppsummering
+  - arbeidsgiver
+  - person
+  - ytelsesperioder
 properties:
   oppsummering:
     $ref: '#/components/schemas/Oppsummering'
