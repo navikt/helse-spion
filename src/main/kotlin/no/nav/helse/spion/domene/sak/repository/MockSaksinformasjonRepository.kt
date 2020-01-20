@@ -26,7 +26,7 @@ class MockSaksinformasjonRepository : SaksinformasjonRepository {
                         arbeidsgiver = Arbeidsgiver(
                                 navn = "CIA",
                                 orgnr = "1",
-                                personnummer = ""),
+                                identitetsnummer = ""),
                         person = Person(fornavn = "James", etternavn = "Bond", aktørId = "007"),
                         oppsummering = Oppsummering(
                                 testPeriode,
