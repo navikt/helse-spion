@@ -13,3 +13,6 @@ properties:
     example: Bond
     description: >-
       Etternavnet til personen
+  aktørid:
+    type: string
+    example: 007

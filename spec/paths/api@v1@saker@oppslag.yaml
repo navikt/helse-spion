@@ -2,7 +2,6 @@ post:
   summary: Hent saker med refusjon for gitt person
   tags:
     - Sak
-  #TODO skjul parameterblokken
   requestBody:
     content:
       application/json:
@@ -25,4 +24,4 @@ post:
         application/json:
           examples:
             sak:
-              $ref: '#/components/examples/sak-enkel'
+              $ref: '#/components/examples/sak-oppslag'

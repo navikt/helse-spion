@@ -4,5 +4,4 @@ info:
   version: 1.0.0
 tags:
   - name: Sak
-    description: Henter informasjon om ytelsessaker
-
+  - name: Arbeidsgiver
