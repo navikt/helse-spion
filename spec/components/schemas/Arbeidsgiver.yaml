@@ -1,0 +1,16 @@
+type: object
+required:
+  - navn
+description: Identitetsnummer eller organisasjonsnummer er påkrevd.
+properties:
+  navn:
+    type: string
+    example: Treadstone Seventy-One Corporation
+    description: Navnet til virksomheten eller personen registrert som arbeidsgiver.
+  identitetsnummer:
+    type: string
+    example: 12345678910
+    description: Norsk identitetsnummer, kan være fødselsnummer eller d-nummer. Brukes hvis arbeidsgiver er en privatperson.
+  orgnr:
+    type: string
+    example: 123
