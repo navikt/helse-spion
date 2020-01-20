@@ -18,7 +18,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.db.hikariConfig
-import no.nav.helse.spion.domene.saksinformasjon.repository.MockSaksinformasjonRepository
+import no.nav.helse.spion.domene.sak.repository.MockSaksinformasjonRepository
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.nais.nais
 import no.nav.helse.spion.web.api.spion
