@@ -3,6 +3,5 @@ info:
   title: Helse-spion-api
   version: 1.0.0
 tags:
-  - name: Saksinformasjon
-    description: Viser informasjon om perioder og vedtak
-
+  - name: Sak
+  - name: Arbeidsgiver

@@ -1,0 +1,27 @@
+post:
+  summary: Hent tilgjengelige arbeidsgiver-roller for person
+  tags:
+    - Arbeidsgiver
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - identitetsnummer
+            - orgnr
+          properties:
+            arbeidsgiverIdentitetsnummer:
+              type: string
+              description: Norsk identitetsnummer, kan være fødselsnummer eller d-nummer
+            arbeidsgiverOrgnr:
+              type: string
+  responses:
+    '200':
+      description: |-
+        200 response
+      content:
+        application/json:
+          examples:
+            arbeidsgiver:
+              $ref: '#/components/examples/arbeidsgiver-oppslag'
