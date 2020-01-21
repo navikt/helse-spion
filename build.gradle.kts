@@ -8,8 +8,6 @@ val flywayVersion = "6.0.8"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
 val kafkaVersion = "2.0.1"
-
-
 val mainClass = "no.nav.helse.spion.web.AppKt"
 val junitJupiterVersion = "5.5.0-RC2"
 val assertJVersion = "3.12.2"
@@ -56,8 +54,12 @@ dependencies {
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
+    testImplementation("com.github.tomakehurst:wiremock-standalone:2.25.1")
+    testRuntime("commons-logging:commons-logging:1.2") // Denne trengs av wiremock
+    testImplementation("no.nav.security:token-validation-test-support:$tokenSupportVersion")
     testImplementation("io.mockk:mockk:$mockKVersion")
     testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
     testImplementation("org.assertj:assertj-core:$assertJVersion")

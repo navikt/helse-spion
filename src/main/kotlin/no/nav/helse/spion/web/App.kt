@@ -7,13 +7,19 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.typesafe.config.ConfigFactory
+import io.ktor.application.Application
+import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.config.ApplicationConfig
 import io.ktor.config.MapApplicationConfig
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.auth.Authentication
+import io.ktor.auth.authenticate
 import io.ktor.config.HoconApplicationConfig
+import io.ktor.http.ContentType
+import io.ktor.response.respondText
+import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
@@ -29,19 +35,16 @@ import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
-val ktorApplicationId = "ktor.application.id"
-
 @KtorExperimentalAPI
 fun main() {
     Thread.currentThread().setUncaughtExceptionHandler { thread, err ->
         LoggerFactory.getLogger("main")
             .error("uncaught exception in thread ${thread.name}: ${err.message}", err)
     }
-    //val config = createConfigFromEnvironment(System.getenv())
-
     val config = HoconApplicationConfig(ConfigFactory.load())
 
-    embeddedServer(Netty, createApplicationEnvironment(config)).let { app ->
+    embeddedServer(Netty, createApplicationEnvironment()).let { app ->
+
         app.start(wait = false)
 
         Runtime.getRuntime().addShutdownHook(Thread {
@@ -51,37 +54,44 @@ fun main() {
 }
 
 @KtorExperimentalAPI
-fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngineEnvironment {
-    config = appConfig
+fun createApplicationEnvironment() = applicationEngineEnvironment {
+    config = HoconApplicationConfig(ConfigFactory.load())
 
     connector {
         port = 8080
     }
 
     module {
-
-        install(Authentication) {
-            tokenValidationSupport(config = config)
-        }
-
-        install(ContentNegotiation) {
-            jackson() {
-                this.registerModule(KotlinModule())
-                this.registerModule(Jdk8Module())
-                this.registerModule(JavaTimeModule())
-                this.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                configure(SerializationFeature.INDENT_OUTPUT, true)
-                setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
-                    indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
-                    indentObjectsWith(DefaultIndenter("  ", "\n"))
-                })
-            }
-        }
-        nais()
-        val dataSource = hikariConfig() //TODO vil brukes til å koble opp mot ekte repository senere
-        val spionService = SpionService(MockSaksinformasjonRepository())
-        routing {
-            spion(spionService)
-        }
+        spionModule(config)
     }
 }
+
+@KtorExperimentalAPI
+fun Application.spionModule(config : ApplicationConfig) {
+    install(Authentication) {
+        tokenValidationSupport(config = config)
+    }
+
+    install(ContentNegotiation) {
+        jackson() {
+            this.registerModule(KotlinModule())
+            this.registerModule(Jdk8Module())
+            this.registerModule(JavaTimeModule())
+            this.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            configure(SerializationFeature.INDENT_OUTPUT, true)
+            setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
+                indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+                indentObjectsWith(DefaultIndenter("  ", "\n"))
+            })
+        }
+    }
+
+    nais()
+
+    //val dataSource = hikariConfig() //TODO vil brukes til å koble opp mot ekte repository senere
+    val spionService = SpionService(MockSaksinformasjonRepository())
+    routing {
+        spion(spionService)
+    }
+}
+
