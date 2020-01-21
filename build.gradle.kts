@@ -55,7 +55,6 @@ dependencies {
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
     testImplementation("com.github.tomakehurst:wiremock-standalone:2.25.1")
-    testRuntime("commons-logging:commons-logging:1.2") // Denne trengs av wiremock
     testImplementation("no.nav.security:token-validation-test-support:$tokenSupportVersion")
     testImplementation("io.mockk:mockk:$mockKVersion")
     testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
