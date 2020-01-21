@@ -1,23 +1,29 @@
 package no.nav.helse.spion.web
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.ktor.application.Application
 import io.ktor.config.MapApplicationConfig
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.spion.web.dto.OppslagDto
 import no.nav.security.token.support.test.JwkGenerator
 import no.nav.security.token.support.test.JwtTokenGenerator
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
-class ApplicationTokenTest {
+class ApplicationAuthenticationTest {
     companion object {
         val server: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
         @BeforeAll
@@ -36,13 +42,13 @@ class ApplicationTokenTest {
     private val idTokenCookieName = "selvbetjening-idtoken"
 
     @Test
-    fun spion_withMissingJWTShouldGive_401_Unauthorized() {
+    fun saksOppslag_withMissingJWTShouldGive_401_Unauthorized() {
         withTestApplication({
             stubOIDCProvider()
             addMockLoginServiceConfig()
             spionModule(environment.config)
         }) {
-            handleRequest(HttpMethod.Get, "/api/spion") {
+            handleRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
             }.apply {
                 assertEquals(HttpStatusCode.Unauthorized, response.status())
             }
@@ -78,34 +84,34 @@ class ApplicationTokenTest {
     }
 
     @Test
-    fun spion_withValidJWTinHeaderShouldGive_200_OK() {
+    fun saksOppslag_withValidJWTinHeaderShouldNotGive_401_Unauthorized() {
         withTestApplication({
             stubOIDCProvider()
             addMockLoginServiceConfig()
             spionModule(environment.config)
         }) {
-            handleRequest(HttpMethod.Get, "/api/spion") {
+            handleRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
                 val jwt = JwtTokenGenerator.createSignedJWT("testuser")
                 addHeader("Authorization", "Bearer ${jwt.serialize()}")
             }.apply {
-                assertEquals(HttpStatusCode.OK, response.status())
+                assertNotEquals(HttpStatusCode.Unauthorized, response.status())
             }
         }
     }
 
     @Test
-    fun spion_withValidJWTinCookieShouldGive_200_OK() {
+    fun saksOppslag_withValidJWTinCookieShouldNotGive_401() {
         withTestApplication({
             stubOIDCProvider()
             addMockLoginServiceConfig()
             spionModule(environment.config)
 
         }) {
-            handleRequest(HttpMethod.Get, "/api/spion") {
+            handleRequest(HttpMethod.Get, "/api/v1/saker/oppslag") {
                 val jwt = JwtTokenGenerator.createSignedJWT("testuser")
-                addHeader("Cookie", "$idTokenCookieName=${jwt.serialize()}")
+                addHeader(HttpHeaders.Cookie, "$idTokenCookieName=${jwt.serialize()}")
             }.apply {
-                assertEquals(HttpStatusCode.OK, response.status())
+                assertNotEquals(HttpStatusCode.Unauthorized, response.status())
             }
         }
     }

@@ -7,7 +7,6 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import no.nav.helse.spion.domenetjenester.SpionService
 
-
 fun Route.spion(service: SpionService) {
     authenticate {
         get("api/spion") {
