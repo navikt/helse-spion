@@ -12,6 +12,8 @@ import java.time.LocalDate
 class MockSaksinformasjonRepository : SaksinformasjonRepository {
 
     val testPeriode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1))
+    val testPeriode2 = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 1))
+    val testPeriode3 = Periode(LocalDate.of(2019, 10, 12), LocalDate.of(2019, 11, 12))
 
     override fun hentArbeidsgivere(identitetsnummer: String): List<Arbeidsgiver> {
         return listOf(
@@ -41,7 +43,32 @@ class MockSaksinformasjonRepository : SaksinformasjonRepository {
                                         ytelse = Ytelsesperiode.Ytelse.SP,
                                         merknad = "Fritak AGP",
                                         grad = BigDecimal.ONE
+                                ),
+                                Ytelsesperiode(
+                                        periode = testPeriode,
+                                        refusjonsbeløp = BigDecimal(20000),
+                                        status = Ytelsesperiode.Status.AVSLÅTT,
+                                        ytelse = Ytelsesperiode.Ytelse.SP,
+                                        merknad = "",
+                                        grad = BigDecimal(50)
+                                ),
+                                Ytelsesperiode(
+                                        periode = testPeriode,
+                                        refusjonsbeløp = BigDecimal(10000),
+                                        status = Ytelsesperiode.Status.INNVILGET,
+                                        ytelse = Ytelsesperiode.Ytelse.SP,
+                                        merknad = "",
+                                        grad = BigDecimal(100)
+                                ),
+                                Ytelsesperiode(
+                                        periode = testPeriode,
+                                        refusjonsbeløp = BigDecimal(5),
+                                        status = Ytelsesperiode.Status.INNVILGET,
+                                        ytelse = Ytelsesperiode.Ytelse.SP,
+                                        merknad = "",
+                                        grad = BigDecimal(25)
                                 )
+
                         )
                 )
         )
