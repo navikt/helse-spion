@@ -43,3 +43,7 @@ spec:
     value: helse-spion
   - name: VAULT_MOUNTPATH
     value: postgresql/prod-fss/
+  - name: OIDC_DISCOVERY_URL
+    value: https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten
+  - name: OIDC_ACCEPTED_AUDIENCE
+    value: 45104d6a-f5bc-4e8c-b352-4bbfc9381f25
