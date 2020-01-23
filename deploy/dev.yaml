@@ -39,6 +39,7 @@ spec:
         mountPath: /var/run/secrets/nais.io/vault
       - kvPath: apikey/apigw/dev/eksternapp.altinn.serviceowner/helse-spion_q1
         mountPath: /apigw/altinn/x-nav-apiKey
+  webproxy: true
   env:
   - name: DATABASE_HOST
     value: b27dbvl008.preprod.local
