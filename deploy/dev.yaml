@@ -34,6 +34,7 @@ spec:
       memory: 64Mi
   vault:
     enabled: true
+  webproxy: true
   env:
   - name: DATABASE_HOST
     value: b27dbvl008.preprod.local
