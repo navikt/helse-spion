@@ -1,12 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+            <pattern>%d [%-5level] [%thread] %logger{5} - [%X{consumerId}, %X{callId}, %X{userId}, %X{prosess}] - %m%n</pattern>
         </encoder>
     </appender>
-    <root level="INFO">
-        <appender-ref ref="STDOUT"/>
+    <logger name="no.nav" level="${log.level.no.nav:-INFO}" />
+    <logger name="jdbc.sql" level="${log.level.jdbc.sql:-ERROR}" />
+    <logger name="org.hibernate.SQL" level="${log.level.org.hibernate.SQL:-WARN}" />
+    <logger name="com.zaxxer.hikari" level="${log.level.com.zaxxer.hikari:-WARN}" />
+    <logger name="org.hibernate.type" level="${log.level.org.hibernate.type:-WARN}" />
+    <logger name="org.hibernate" level="${log.level.org.hibernate:-WARN}" />
+    <logger name="ch.qos.logback" level="${log.level.ch.qos.logback:-WARN}" />
+    <logger name="org.flywaydb" level="${log.level.org.flywaydb:-INFO}" />
+    <root level="${log.level.root:-INFO}">
+        <appender-ref ref="STDOUT" />
     </root>
-    <logger name="org.eclipse.jetty" level="INFO"/>
-    <logger name="io.netty" level="INFO"/>
 </configuration>
