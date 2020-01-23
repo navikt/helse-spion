@@ -34,6 +34,11 @@ spec:
       memory: 64Mi
   vault:
     enabled: true
+    paths:
+      - kvPath: kv/preprod/fss/helse-spion/default
+        mountPath: /var/run/secrets/nais.io/vault
+      - kvPath: apikey/apigw/dev/eksternapp.altinn.serviceowner/helse-spion_q1
+        mountPath: /apigw/altinn/x-nav-apiKey
   env:
   - name: DATABASE_HOST
     value: b27dbvl008.preprod.local
