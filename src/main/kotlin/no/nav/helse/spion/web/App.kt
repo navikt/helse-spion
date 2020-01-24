@@ -91,9 +91,9 @@ fun Application.spionModule(config : ApplicationConfig) {
     //val dataSource = hikariConfig() //TODO vil brukes til å koble opp mot ekte repository senere
     val spionService = SpionService(MockSaksinformasjonRepository())
     routing {
-        authenticate {
-            spion(spionService)
-        }
+        spion(spionService)
+//        authenticate {
+//        }
     }
 }
 
