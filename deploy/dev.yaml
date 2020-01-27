@@ -51,3 +51,11 @@ spec:
     value: helse-spion
   - name: VAULT_MOUNTPATH
     value: postgresql/preprod-fss/
+  - name: KOIN_PROFILE
+    value: PREPROD
+  - name: OIDC_ISSUER_NAME
+    value: aadb2c
+  - name: OIDC_DISCOVERY_URL
+    value: "https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1"
+  - name: OIDC_ACCEPTED_AUDIENCE
+    value: 0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5

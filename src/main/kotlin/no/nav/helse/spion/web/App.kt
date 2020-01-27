@@ -1,37 +1,29 @@
 package no.nav.helse.spion.web
 
-import com.fasterxml.jackson.core.util.DefaultIndenter
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.typesafe.config.ConfigFactory
 import io.ktor.application.Application
-import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.config.ApplicationConfig
-import io.ktor.config.MapApplicationConfig
-import io.ktor.features.ContentNegotiation
-import io.ktor.jackson.jackson
 import io.ktor.auth.Authentication
 import io.ktor.auth.authenticate
+import io.ktor.config.ApplicationConfig
 import io.ktor.config.HoconApplicationConfig
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.DoubleReceive
 import io.ktor.http.ContentType
-import io.ktor.response.respondText
-import io.ktor.routing.get
+import io.ktor.jackson.JacksonConverter
 import io.ktor.routing.routing
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
-import no.nav.helse.spion.db.hikariConfig
-import no.nav.helse.spion.domene.sak.repository.MockSaksinformasjonRepository
-import no.nav.helse.spion.domenetjenester.SpionService
+import no.nav.helse.spion.auth.localCookieDispenser
 import no.nav.helse.spion.nais.nais
 import no.nav.helse.spion.web.api.spion
 import no.nav.security.token.support.ktor.tokenValidationSupport
+import org.koin.ktor.ext.Koin
+import org.koin.ktor.ext.get
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -41,12 +33,8 @@ fun main() {
         LoggerFactory.getLogger("main")
             .error("uncaught exception in thread ${thread.name}: ${err.message}", err)
     }
-    val config = HoconApplicationConfig(ConfigFactory.load())
-
     embeddedServer(Netty, createApplicationEnvironment()).let { app ->
-
         app.start(wait = false)
-
         Runtime.getRuntime().addShutdownHook(Thread {
             app.stop(1, 1, TimeUnit.SECONDS)
         })
@@ -67,33 +55,28 @@ fun createApplicationEnvironment() = applicationEngineEnvironment {
 }
 
 @KtorExperimentalAPI
-fun Application.spionModule(config : ApplicationConfig) {
+fun Application.spionModule(config : ApplicationConfig = environment.config) {
+    install(Koin) {
+        modules(selectModuleBasedOnProfile(config))
+    }
+
     install(Authentication) {
         tokenValidationSupport(config = config)
     }
 
+    install(DoubleReceive)
+
     install(ContentNegotiation) {
-        jackson() {
-            this.registerModule(KotlinModule())
-            this.registerModule(Jdk8Module())
-            this.registerModule(JavaTimeModule())
-            this.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            configure(SerializationFeature.INDENT_OUTPUT, true)
-            setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
-                indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
-                indentObjectsWith(DefaultIndenter("  ", "\n"))
-            })
-        }
+        val commonObjectMapper = get<ObjectMapper>()
+        register(ContentType.Application.Json, JacksonConverter(commonObjectMapper))
     }
 
     nais()
+    localCookieDispenser(config)
 
-    //val dataSource = hikariConfig() //TODO vil brukes til å koble opp mot ekte repository senere
-    val spionService = SpionService(MockSaksinformasjonRepository())
     routing {
-        spion(spionService)
-//        authenticate {
-//        }
+        authenticate {
+            spion(get(), get())
+        }
     }
 }
-
