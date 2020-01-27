@@ -1,9 +1,6 @@
-name: Bygg og deploy
+name: Pull request
 
-on:
-  push:
-    branches:
-      - master
+on: [pull_request]
 
 jobs:
   build:
