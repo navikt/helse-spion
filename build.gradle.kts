@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val ktorVersion = "1.2.4"
 val logback_version = "1.2.1"
+val logback_contrib_version  = "0.1.5"
 val jacksonVersion = "2.9.9"
 val prometheusVersion = "0.6.0"
 val flywayVersion = "6.0.8"
@@ -40,6 +41,10 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("ch.qos.logback.contrib:logback-jackson:$logback_contrib_version")
+    implementation("ch.qos.logback.contrib:logback-json-classic:$logback_contrib_version")
+    implementation("net.logstash.logback:logstash-logback-encoder:4.9")
+    implementation("org.codehaus.janino:janino:3.0.6")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")

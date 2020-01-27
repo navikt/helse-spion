@@ -41,6 +41,8 @@ spec:
         mountPath: /apigw/altinn/x-nav-apiKey
   webproxy: true
   env:
+  - name: ENVIRONMENT
+    value: "development"
   - name: DATABASE_HOST
     value: b27dbvl008.preprod.local
   - name: DATABASE_PORT
