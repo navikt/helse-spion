@@ -14,7 +14,7 @@ val junitJupiterVersion = "5.5.0-RC2"
 val assertJVersion = "3.12.2"
 val mockKVersion = "1.9.3"
 val tokenSupportVersion = "1.1.3"
-val koin_version = "2.0.1"
+val koinVersion = "2.0.1"
 
 
 
@@ -38,8 +38,8 @@ dependencies {
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
 
-    implementation("org.koin:koin-core:$koin_version")
-    implementation("org.koin:koin-ktor:$koin_version")
+    implementation("org.koin:koin-core:$koinVersion")
+    implementation("org.koin:koin-ktor:$koinVersion")
     implementation("no.nav.security:token-validation-ktor:$tokenSupportVersion")
     implementation("no.nav.security:token-validation-test-support:$tokenSupportVersion")
 
@@ -65,7 +65,7 @@ dependencies {
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
-    testImplementation("org.koin:koin-test:$koin_version")
+    testImplementation("org.koin:koin-test:$koinVersion")
     testImplementation("io.mockk:mockk:$mockKVersion")
     testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
