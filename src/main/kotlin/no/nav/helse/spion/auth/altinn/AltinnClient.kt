@@ -10,10 +10,12 @@ class AltinnClient(
         val altinnBaseUrl : String,
         val apiGwApiKey : String,
         val altinnApiKey : String,
-        val serviceCode : String) : AuthorizationsRepository {
+        val serviceCode : String,
+        val httpClient: HttpClient = HttpClient(Apache)) : AuthorizationsRepository {
 
-    val httpClient = HttpClient(Apache)
-
+    /**
+     * @return en liste over organisasjonsnummer og/eller identitetsnummere den angitte personen har rettigheten for
+     */
     override fun hentRettigheterForPerson(identitetsNummer: String): Set<String> {
         val url = "$altinnBaseUrl/reportees?ForceEIAuthentication&subject=$identitetsNummer&serviceCode=$serviceCode"
         val res = runBlocking {
@@ -23,6 +25,6 @@ class AltinnClient(
             }
         }
 
-        return res.map { it.organizationNumber }.toSet()
+        return res.mapNotNull { it.organizationNumber ?: it.socialSecurityNumber }.toSet()
     }
 }
