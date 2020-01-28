@@ -14,6 +14,7 @@ val junitJupiterVersion = "5.5.0-RC2"
 val assertJVersion = "3.12.2"
 val mockKVersion = "1.9.3"
 val tokenSupportVersion = "1.1.3"
+val koinVersion = "2.0.1"
 
 
 
@@ -35,8 +36,12 @@ dependencies {
     implementation("io.ktor:ktor-auth:$ktorVersion")
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache:$ktorVersion")
 
+    implementation("org.koin:koin-core:$koinVersion")
+    implementation("org.koin:koin-ktor:$koinVersion")
     implementation("no.nav.security:token-validation-ktor:$tokenSupportVersion")
+    implementation("no.nav.security:token-validation-test-support:$tokenSupportVersion")
 
     implementation(kotlin("stdlib"))
 
@@ -55,12 +60,12 @@ dependencies {
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
+    implementation("com.github.tomakehurst:wiremock-standalone:2.25.1")
 
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
-    testImplementation("com.github.tomakehurst:wiremock-standalone:2.25.1")
-    testImplementation("no.nav.security:token-validation-test-support:$tokenSupportVersion")
+    testImplementation("org.koin:koin-test:$koinVersion")
     testImplementation("io.mockk:mockk:$mockKVersion")
     testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
