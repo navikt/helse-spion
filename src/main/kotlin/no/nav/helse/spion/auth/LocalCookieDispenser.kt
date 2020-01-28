@@ -34,20 +34,33 @@ fun Application.localCookieDispenser(config: ApplicationConfig) {
     }
 }
 
-fun startLocalOIDCWireMock() {
-    fun stubOIDCProvider(server: WireMockServer) {
-        WireMock.stubFor(WireMock.any(WireMock.urlPathEqualTo("/.well-known/openid-configuration")).willReturn(
-                WireMock.okJson("{\"jwks_uri\": \"${server.baseUrl()}/keys\", " +
-                        "\"subject_types_supported\": [\"pairwise\"], " +
-                        "\"issuer\": \"${JwtTokenGenerator.ISS}\"}")))
 
-        WireMock.stubFor(WireMock.any(WireMock.urlPathEqualTo("/keys")).willReturn(
-                WireMock.okJson(JwkGenerator.getJWKSet().toPublicJWKSet().toString())))
+class LocalOIDCWireMock() {
+    companion object {
+        var started = false
+
+        fun start() {
+            if (started) return
+
+            fun stubOIDCProvider(server: WireMockServer) {
+                WireMock.stubFor(WireMock.any(WireMock.urlPathEqualTo("/.well-known/openid-configuration")).willReturn(
+                        WireMock.okJson("{\"jwks_uri\": \"${server.baseUrl()}/keys\", " +
+                                "\"subject_types_supported\": [\"pairwise\"], " +
+                                "\"issuer\": \"${JwtTokenGenerator.ISS}\"}")))
+
+                WireMock.stubFor(WireMock.any(WireMock.urlPathEqualTo("/keys")).willReturn(
+                        WireMock.okJson(JwkGenerator.getJWKSet().toPublicJWKSet().toString())))
+            }
+
+            val server = WireMockServer(WireMockConfiguration.options().port(6666))
+
+            server.start()
+            WireMock.configureFor(server.port())
+            stubOIDCProvider(server)
+            started = true
+        }
+
+
     }
-
-    val server = WireMockServer(WireMockConfiguration.options().port(6666))
-
-    server.start()
-    WireMock.configureFor(server.port())
-    stubOIDCProvider(server)
 }
+

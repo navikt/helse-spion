@@ -49,7 +49,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single {MockAuthRepo() as AuthorizationsRepository}
     single {DefaultAuthorizer(get()) as Authorizer }
 
-    startLocalOIDCWireMock()
+    LocalOIDCWireMock.start()
 }
 
 fun preprodConfig(config: ApplicationConfig) = module {
