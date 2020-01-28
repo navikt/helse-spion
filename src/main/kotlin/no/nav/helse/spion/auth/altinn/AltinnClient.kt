@@ -16,8 +16,8 @@ class AltinnClient(
     /**
      * @return en liste over organisasjonsnummer og/eller identitetsnummere den angitte personen har rettigheten for
      */
-    override fun hentRettigheterForPerson(identitetsNummer: String): Set<String> {
-        val url = "$altinnBaseUrl/reportees?ForceEIAuthentication&subject=$identitetsNummer&serviceCode=$serviceCode"
+    override fun hentRettigheterForPerson(identitetsnummer: String): Set<String> {
+        val url = "$altinnBaseUrl/reportees?ForceEIAuthentication&subject=$identitetsnummer&serviceCode=$serviceCode"
         val res = runBlocking {
             httpClient.get<List<AltinnOrganisasjon>>(url) {
                 headers.append("X-NAV-APIKEY", apiGwApiKey)
