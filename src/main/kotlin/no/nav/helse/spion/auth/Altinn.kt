@@ -4,31 +4,25 @@ package no.nav.helse.spion.auth
 // --- Authorizer interface used by KTor interceptor
 
 interface Authorizer {
-    fun hasAccess(identitetsnummer : String, orgNr : String) : Boolean
+    fun hasAccess(identitetsNummer : String, orgNr : String) : Boolean
 }
 
 class DefaultAuthorizer(private val authListRepo : AuthorizationsRepository) : Authorizer {
-    override fun hasAccess(identitetsnummer : String, orgNr: String): Boolean {
-        return authListRepo.hentRettigheterForPerson(identitetsnummer).contains(orgNr)
+    override fun hasAccess(identitetsNummer : String, orgNr: String): Boolean {
+        return authListRepo.hentRettigheterForPerson(identitetsNummer).contains(orgNr)
     }
 }
 
 // ---- Auth list repos
 
 interface AuthorizationsRepository {
-    fun hentRettigheterForPerson(identitetsnummer : String) : Set<String>
-}
-
-class AltinnClient : AuthorizationsRepository {
-    override fun hentRettigheterForPerson(identitetsnummer: String): Set<String> {
-        return setOf("987654321")
-    }
+    fun hentRettigheterForPerson(identitetsNummer : String) : Set<String>
 }
 
 class MockAuthRepo : AuthorizationsRepository {
     private var acl: Set<String> = setOf("1")
 
-    override fun hentRettigheterForPerson(identitetsnummer: String): Set<String> {
+    override fun hentRettigheterForPerson(identitetsNummer: String): Set<String> {
         return acl
     }
 
