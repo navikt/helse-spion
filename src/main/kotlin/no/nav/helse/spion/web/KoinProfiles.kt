@@ -2,11 +2,16 @@ package no.nav.helse.spion.web
 
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.auth.*
@@ -41,6 +46,14 @@ val common = module {
     })
 
     single { om }
+
+    val httpClient = HttpClient(Apache) {
+        install(JsonFeature) { serializer = JacksonSerializer {
+            configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+        } }
+    }
+
+    single { httpClient }
 }
 
 fun localDevConfig(config: ApplicationConfig) = module {
@@ -59,7 +72,8 @@ fun preprodConfig(config: ApplicationConfig) = module {
             config.getString("altinn.service_owner_api_url"),
             config.getString("altinn.gw_api_key"),
             config.getString("altinn.altinn_api_key"),
-            config.getString("altinn.service_id")
+            config.getString("altinn.service_id"),
+            get()
     ) as AuthorizationsRepository}
     single {DefaultAuthorizer(get()) as Authorizer }
 }

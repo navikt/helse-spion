@@ -1,5 +1,6 @@
 package no.nav.helse.spion.auth.altinn
 
+import com.fasterxml.jackson.databind.MapperFeature
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -12,7 +13,6 @@ import io.ktor.http.headersOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class AltinnClientTests {
 
@@ -22,16 +22,18 @@ class AltinnClientTests {
 
     val client = HttpClient(MockEngine) {
 
-        install(JsonFeature) { serializer = JacksonSerializer() }
+        install(JsonFeature) { serializer = JacksonSerializer {
+            configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+        } }
 
         engine {
             addHandler { request ->
                 when (request.url.toString()) {
-                    "http://juice/reportees?ForceEIAuthentication&subject=$identitetsnummer&serviceCode=$serviceCode" -> {
+                    "http://juice/reportees?ForceEIAuthentication&serviceCode=$serviceCode&subject=$identitetsnummer" -> {
                         val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(validAltinnResponse, headers = responseHeaders)
                     }
-                    "http://timeout/reportees?ForceEIAuthentication&subject=$identitetsnummer&serviceCode=$serviceCode" -> {
+                    "http://timeout/reportees?ForceEIAuthentication&serviceCode=$serviceCode&subject=$identitetsnummer" -> {
                         respond("Timed out", HttpStatusCode.GatewayTimeout)
                     }
                     else -> error("Unhandled ${request.url}")
