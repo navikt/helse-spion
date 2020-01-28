@@ -11,7 +11,7 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.auth.Authorizer
-import no.nav.helse.spion.auth.hentIdentitetsNummerFraLoginToken
+import no.nav.helse.spion.auth.hentIdentitetsnummerFraLoginToken
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.web.dto.OppslagDto
 
@@ -21,9 +21,9 @@ fun Route.spion(service: SpionService, authorizer: Authorizer) {
         route("/saker") {
             intercept(ApplicationCallPipeline.Call) {
                 val test = call.receive<OppslagDto>()
-                val identitetsNummer = hentIdentitetsNummerFraLoginToken(application.environment.config, call.request)
+                val identitetsnummer = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
 
-                if (!authorizer.hasAccess(identitetsNummer, test.arbeidsgiverOrgnr)) {
+                if (!authorizer.hasAccess(identitetsnummer, test.arbeidsgiverOrgnr)) {
                     call.respond(ForbiddenResponse())
                     finish()
                 }
