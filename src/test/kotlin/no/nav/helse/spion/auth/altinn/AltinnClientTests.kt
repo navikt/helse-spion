@@ -3,13 +3,16 @@ package no.nav.helse.spion.auth.altinn
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.features.ServerResponseException
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class AltinnClientTests {
 
@@ -47,6 +50,9 @@ class AltinnClientTests {
     @Test
     internal fun timeout_from_altinn_throws() {
         val altinnClient = AltinnClient("http://timeout", "api-gw-key", "altinn-key", serviceCode, client)
-        val authList = altinnClient.hentRettigheterForPerson(identitetsnummer)
+
+        assertThrows(ServerResponseException::class.java) {
+            altinnClient.hentRettigheterForPerson(identitetsnummer)
+        }
     }
 }
