@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <if condition='isDefined("ENVIRONMENT")'>
+    <if condition='isDefined("KOIN_PROFILE")'>
         <then>
             <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
@@ -27,4 +27,3 @@
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
-
