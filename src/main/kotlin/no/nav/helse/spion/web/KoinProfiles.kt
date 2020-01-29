@@ -20,11 +20,10 @@ import no.nav.helse.spion.domene.sak.repository.MockSaksinformasjonRepository
 import no.nav.helse.spion.domene.sak.repository.SaksinformasjonRepository
 import no.nav.helse.spion.domenetjenester.SpionService
 import org.koin.core.Koin
-import org.koin.core.KoinComponent
 import org.koin.core.definition.Kind
 import org.koin.core.module.Module
+import org.koin.dsl.bind
 import org.koin.dsl.module
-import kotlin.reflect.full.isSubclassOf
 
 @KtorExperimentalAPI
 fun selectModuleBasedOnProfile(config: ApplicationConfig) : List<Module> {
@@ -63,7 +62,7 @@ val common = module {
 fun localDevConfig(config: ApplicationConfig) = module {
     single {MockSaksinformasjonRepository() as SaksinformasjonRepository}
     single {SpionService(get())}
-    single {MockAuthRepo() as AuthorizationsRepository}
+    single {MockAuthRepo() as AuthorizationsRepository} bind MockAuthRepo::class
     single {DefaultAuthorizer(get()) as Authorizer }
 
     LocalOIDCWireMock.start()
