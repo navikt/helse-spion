@@ -36,6 +36,8 @@ spec:
     sidecar: true
   webproxy: true
   env:
+  - name: KOIN_PROFILE
+    value: PROD
   - name: DATABASE_HOST
     value: a01dbvl010.adeo.no
   - name: DATABASE_PORT
