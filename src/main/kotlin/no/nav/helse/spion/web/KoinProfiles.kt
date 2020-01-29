@@ -19,8 +19,12 @@ import no.nav.helse.spion.auth.altinn.AltinnClient
 import no.nav.helse.spion.domene.sak.repository.MockSaksinformasjonRepository
 import no.nav.helse.spion.domene.sak.repository.SaksinformasjonRepository
 import no.nav.helse.spion.domenetjenester.SpionService
+import org.koin.core.Koin
+import org.koin.core.KoinComponent
+import org.koin.core.definition.Kind
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import kotlin.reflect.full.isSubclassOf
 
 @KtorExperimentalAPI
 fun selectModuleBasedOnProfile(config: ApplicationConfig) : List<Module> {
@@ -83,7 +87,19 @@ fun prodConfig(config: ApplicationConfig) = module {
     preprodConfig(config)
 }
 
+
+// utils
+
 @KtorExperimentalAPI
 fun ApplicationConfig.getString(path : String): String {
     return this.property(path).toString()
 }
+
+inline fun <reified T : Any> Koin.getAllOfType(): Collection<T> =
+        let { koin ->
+            koin.rootScope.beanRegistry
+                    .getAllDefinitions()
+                    .filter { it.kind == Kind.Single }
+                    .map { koin.get<Any>(clazz = it.primaryType, qualifier = null, parameters = null) }
+                    .filterIsInstance<T>()
+        }
