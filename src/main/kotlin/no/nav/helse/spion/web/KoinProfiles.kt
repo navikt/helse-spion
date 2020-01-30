@@ -79,8 +79,8 @@ fun preprodConfig(config: ApplicationConfig) = module {
 }
 
 
-fun prodConfig(config: ApplicationConfig) = module {
-    preprodConfig(config)
+fun prodConfig(config: ApplicationConfig) = preprodConfig(config).apply {
+
 }
 
 @KtorExperimentalAPI
