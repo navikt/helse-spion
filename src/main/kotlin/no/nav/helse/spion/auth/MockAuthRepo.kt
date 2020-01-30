@@ -1,7 +1,13 @@
 package no.nav.helse.spion.auth
 
-class MockAuthRepo : AuthorizationsRepository {
+import no.nav.helse.spion.selfcheck.HealthCheck
+import no.nav.helse.spion.selfcheck.HealthCheckType
+
+class MockAuthRepo : AuthorizationsRepository, HealthCheck {
+    override val healthCheckType = HealthCheckType.READYNESS
+
     private var acl: Set<String> = setOf("1")
+    var failSelfCheck = false
 
     override fun hentRettigheterForPerson(identitetsnummer: String): Set<String> {
         return acl
@@ -10,4 +16,9 @@ class MockAuthRepo : AuthorizationsRepository {
     fun setAccessList(acl : Set<String>) {
         this.acl = acl
     }
+
+    override suspend fun doHealthCheck() {
+        if(failSelfCheck) throw Error("Feiler selfchecken")
+    }
+
 }

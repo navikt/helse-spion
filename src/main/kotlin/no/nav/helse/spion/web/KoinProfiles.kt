@@ -19,7 +19,10 @@ import no.nav.helse.spion.auth.altinn.AltinnClient
 import no.nav.helse.spion.domene.sak.repository.MockSaksinformasjonRepository
 import no.nav.helse.spion.domene.sak.repository.SaksinformasjonRepository
 import no.nav.helse.spion.domenetjenester.SpionService
+import org.koin.core.Koin
+import org.koin.core.definition.Kind
 import org.koin.core.module.Module
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 @KtorExperimentalAPI
@@ -59,7 +62,7 @@ val common = module {
 fun localDevConfig(config: ApplicationConfig) = module {
     single {MockSaksinformasjonRepository() as SaksinformasjonRepository}
     single {SpionService(get())}
-    single {MockAuthRepo() as AuthorizationsRepository}
+    single {MockAuthRepo() as AuthorizationsRepository} bind MockAuthRepo::class
     single {DefaultAuthorizer(get()) as Authorizer }
 
     LocalOIDCWireMock.start()
@@ -83,7 +86,19 @@ fun prodConfig(config: ApplicationConfig) = preprodConfig(config).apply {
 
 }
 
+
+// utils
+
 @KtorExperimentalAPI
 fun ApplicationConfig.getString(path : String): String {
     return this.property(path).toString()
 }
+
+inline fun <reified T : Any> Koin.getAllOfType(): Collection<T> =
+        let { koin ->
+            koin.rootScope.beanRegistry
+                    .getAllDefinitions()
+                    .filter { it.kind == Kind.Single }
+                    .map { koin.get<Any>(clazz = it.primaryType, qualifier = null, parameters = null) }
+                    .filterIsInstance<T>()
+        }
