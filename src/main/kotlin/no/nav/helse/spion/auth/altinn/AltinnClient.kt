@@ -2,6 +2,8 @@ package no.nav.helse.spion.auth.altinn
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.response.readText
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spion.auth.AuthorizationsRepository
 import no.nav.helse.spion.selfcheck.HealthCheck
@@ -32,7 +34,13 @@ class AltinnClient(
         return res.mapNotNull { it.organizationNumber ?: it.socialSecurityNumber }.toSet()
     }
 
-    override fun doHealthCheck() {
-        hentRettigheterForPerson("01065500791")
+    override suspend fun doHealthCheck() {
+        try {
+            hentRettigheterForPerson("01065500791")
+        } catch(ex : io.ktor.client.features.ClientRequestException) {
+            if (!(ex.response.status == HttpStatusCode.BadRequest && ex.response.readText().contains("Invalid social security number"))) {
+                throw ex
+            }
+        }
     }
 }

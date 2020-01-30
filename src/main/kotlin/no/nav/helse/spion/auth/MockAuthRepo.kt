@@ -17,7 +17,7 @@ class MockAuthRepo : AuthorizationsRepository, HealthCheck {
         this.acl = acl
     }
 
-    override fun doHealthCheck() {
+    override suspend fun doHealthCheck() {
         if(failSelfCheck) throw Error("Feiler selfchecken")
     }
 

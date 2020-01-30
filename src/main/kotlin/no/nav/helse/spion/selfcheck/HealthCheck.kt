@@ -20,7 +20,7 @@ interface HealthCheck {
      * Skal gi en exception hvis noe feiler.
      * En kjøring uten exception tolkes som OK.
      */
-    fun doHealthCheck()
+    suspend fun doHealthCheck()
 
     /**
      * Angir hvilken type helsesjekk denne komponenten utfører, mapper til kubernetes sine readyness og aliveness sjekker
