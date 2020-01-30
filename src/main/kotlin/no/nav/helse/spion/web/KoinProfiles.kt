@@ -82,13 +82,15 @@ fun preprodConfig(config: ApplicationConfig) = module {
 }
 
 
-fun prodConfig(config: ApplicationConfig) = preprodConfig(config).apply {
-
+fun prodConfig(config: ApplicationConfig) = module{
+    single {MockSaksinformasjonRepository() as SaksinformasjonRepository}
+    single {SpionService(get())}
+    single {MockAuthRepo() as AuthorizationsRepository} bind MockAuthRepo::class
+    single {DefaultAuthorizer(get()) as Authorizer }
 }
 
 
 // utils
-
 @KtorExperimentalAPI
 fun ApplicationConfig.getString(path : String): String {
     return this.property(path).toString()
