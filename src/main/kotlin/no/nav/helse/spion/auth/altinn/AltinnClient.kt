@@ -12,7 +12,7 @@ class AltinnClient(
         serviceCode : String,
         private val httpClient: HttpClient) : AuthorizationsRepository {
 
-    private val baseUrl = "$altinnBaseUrl/reportees?ForceEIAuthentication&serviceCode=$serviceCode&subject="
+    private val baseUrl = "$altinnBaseUrl/reportees?ForceEIAuthentication&serviceEdition=1&serviceCode=$serviceCode&subject="
 
     /**
      * @return en liste over organisasjonsnummer og/eller identitetsnummere den angitte personen har rettigheten for

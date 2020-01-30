@@ -29,11 +29,11 @@ class AltinnClientTests {
         engine {
             addHandler { request ->
                 when (request.url.toString()) {
-                    "http://juice/reportees?ForceEIAuthentication&serviceCode=$serviceCode&subject=$identitetsnummer" -> {
+                    "http://juice/reportees?ForceEIAuthentication&serviceEdition=1&serviceCode=$serviceCode&subject=$identitetsnummer" -> {
                         val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(validAltinnResponse, headers = responseHeaders)
                     }
-                    "http://timeout/reportees?ForceEIAuthentication&serviceCode=$serviceCode&subject=$identitetsnummer" -> {
+                    "http://timeout/reportees?ForceEIAuthentication&serviceEdition=1&serviceCode=$serviceCode&subject=$identitetsnummer" -> {
                         respond("Timed out", HttpStatusCode.GatewayTimeout)
                     }
                     else -> error("Unhandled ${request.url}")
