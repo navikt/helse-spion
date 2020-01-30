@@ -12,7 +12,7 @@ import org.koin.ktor.ext.get
 import kotlin.test.assertEquals
 
 @KtorExperimentalAPI
-class SelfCheckTests : ControllerIntegrationTestBase() {
+class HealthCheckTests : ControllerIntegrationTestBase() {
     @Test
     fun selfCheckEndpointShouldGive500WhenSelfCheckComponentsFail() {
         withTestApplication({
@@ -20,7 +20,7 @@ class SelfCheckTests : ControllerIntegrationTestBase() {
             get<MockAuthRepo>().failSelfCheck = true
 
         }) {
-            handleRequest(HttpMethod.Get, "/selfcheck") {
+            handleRequest(HttpMethod.Get, "/healthcheck") {
             }.apply {
                 assertEquals(HttpStatusCode.InternalServerError, response.status())
             }
@@ -34,7 +34,7 @@ class SelfCheckTests : ControllerIntegrationTestBase() {
             get<MockAuthRepo>().failSelfCheck = false
 
         }) {
-            handleRequest(HttpMethod.Get, "/selfcheck") {
+            handleRequest(HttpMethod.Get, "/healthcheck") {
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
             }

@@ -4,14 +4,16 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spion.auth.AuthorizationsRepository
-import no.nav.helse.spion.selfcheck.SelfCheck
+import no.nav.helse.spion.selfcheck.HealthCheck
+import no.nav.helse.spion.selfcheck.HealthCheckType
 
 class AltinnClient(
         altinnBaseUrl : String,
         private val apiGwApiKey : String,
         private val altinnApiKey : String,
         serviceCode : String,
-        private val httpClient: HttpClient) : AuthorizationsRepository, SelfCheck {
+        private val httpClient: HttpClient) : AuthorizationsRepository, HealthCheck {
+    override val healthCheckType = HealthCheckType.READYNESS
 
     private val baseUrl = "$altinnBaseUrl/reportees?ForceEIAuthentication&serviceCode=$serviceCode&subject="
 
@@ -30,7 +32,7 @@ class AltinnClient(
         return res.mapNotNull { it.organizationNumber ?: it.socialSecurityNumber }.toSet()
     }
 
-    override fun doSelfCheck() {
+    override fun doHealthCheck() {
         hentRettigheterForPerson("01065500791")
     }
 }
