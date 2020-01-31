@@ -1,0 +1,52 @@
+package no.nav.helse.spion.web.integration
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.request.receive
+import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.withTestApplication
+import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.spion.auth.MockAuthRepo
+import no.nav.helse.spion.domene.AltinnOrganisasjon
+import no.nav.helse.spion.web.spionModule
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
+import org.koin.core.get
+import org.koin.ktor.ext.get
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+
+@KtorExperimentalAPI
+class ArbeidsgiverApiTests : ControllerIntegrationTestBase() {
+
+    @Test
+    fun shouldGive401WhenNotLoggedIn() {
+        configuredTestApplication({
+            spionModule()
+        }) {
+            handleRequest(HttpMethod.Get, "/api/v1/arbeidsgivere") {
+            }.apply {
+                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            }
+        }
+    }
+
+    @Test
+    fun shouldReturnListOfOrganisationsWhenLoggedIn() {
+        configuredTestApplication({
+            spionModule()
+        }) {
+            doAuthenticatedRequest(HttpMethod.Get, "/api/v1/arbeidsgivere") {
+
+            }.apply {
+                val mapper = get<ObjectMapper>()
+                assertNotNull(response.content)
+                val responseObject = mapper.readValue<Set<AltinnOrganisasjon>>(response.content ?: "[]")
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertNotEquals(0, responseObject.size)
+            }
+        }
+    }
+}

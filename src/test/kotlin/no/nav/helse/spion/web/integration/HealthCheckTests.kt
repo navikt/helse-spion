@@ -15,8 +15,8 @@ import kotlin.test.assertEquals
 class HealthCheckTests : ControllerIntegrationTestBase() {
     @Test
     fun selfCheckEndpointShouldGive500WhenSelfCheckComponentsFail() {
-        withTestApplication({
-            spionModule(testConfig)
+        configuredTestApplication({
+            spionModule()
             get<MockAuthRepo>().failSelfCheck = true
 
         }) {
@@ -29,8 +29,8 @@ class HealthCheckTests : ControllerIntegrationTestBase() {
 
     @Test
     fun selfCheckEndpointShouldGive200WhenSelfCheckComponentsAreAllOk() {
-        withTestApplication({
-            spionModule(testConfig)
+        configuredTestApplication({
+            spionModule()
             get<MockAuthRepo>().failSelfCheck = false
 
         }) {

@@ -7,6 +7,7 @@ import io.ktor.auth.ForbiddenResponse
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.Route
+import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.util.KtorExperimentalAPI
@@ -35,8 +36,9 @@ fun Route.spion(service: SpionService, authorizer: Authorizer) {
             }
         }
         route("/arbeidsgivere") {
-            post("/oppslag") {
-                call.respond(service.hentArbeidsgivere("TODO"))
+            get("/") {
+                val id = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
+                call.respond(service.hentArbeidsgivere(id))
             }
         }
     }

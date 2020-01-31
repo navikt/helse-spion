@@ -43,6 +43,8 @@ val common = module {
     om.registerModule(JavaTimeModule())
     om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     om.configure(SerializationFeature.INDENT_OUTPUT, true)
+    om.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+
     om.setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
         indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
         indentObjectsWith(DefaultIndenter("  ", "\n"))
@@ -61,8 +63,9 @@ val common = module {
 
 fun localDevConfig(config: ApplicationConfig) = module {
     single {MockSaksinformasjonRepository() as SaksinformasjonRepository}
-    single {SpionService(get())}
-    single {MockAuthRepo() as AuthorizationsRepository} bind MockAuthRepo::class
+    single {MockAuthRepo(get()) as AuthorizationsRepository} bind MockAuthRepo::class
+
+    single {SpionService(get(), get())}
     single {DefaultAuthorizer(get()) as Authorizer }
 
     LocalOIDCWireMock.start()
@@ -70,7 +73,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
 
 fun preprodConfig(config: ApplicationConfig) = module {
     single {MockSaksinformasjonRepository() as SaksinformasjonRepository}
-    single {SpionService(get())}
+    single {SpionService(get(), get())}
     single {AltinnClient(
             config.getString("altinn.service_owner_api_url"),
             config.getString("altinn.gw_api_key"),
@@ -84,8 +87,8 @@ fun preprodConfig(config: ApplicationConfig) = module {
 
 fun prodConfig(config: ApplicationConfig) = module{
     single {MockSaksinformasjonRepository() as SaksinformasjonRepository}
-    single {SpionService(get())}
-    single {MockAuthRepo() as AuthorizationsRepository} bind MockAuthRepo::class
+    single {MockAuthRepo(get()) as AuthorizationsRepository} bind MockAuthRepo::class
+    single {SpionService(get(), get())}
     single {DefaultAuthorizer(get()) as Authorizer }
 }
 
