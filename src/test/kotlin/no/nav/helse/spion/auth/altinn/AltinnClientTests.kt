@@ -11,6 +11,7 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -30,12 +31,13 @@ class AltinnClientTests {
 
         engine {
             addHandler { request ->
-                when (request.url.toString()) {
-                    "http://juice/reportees?ForceEIAuthentication&serviceEdition=1&serviceCode=$serviceCode&subject=$identitetsnummer" -> {
+                val url = request.url.toString()
+                when {
+                    url.startsWith("http://juice") -> {
                         val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(validAltinnResponse, headers = responseHeaders)
                     }
-                    "http://timeout/reportees?ForceEIAuthentication&serviceEdition=1&serviceCode=$serviceCode&subject=$identitetsnummer" -> {
+                    url.startsWith("http://timeout") -> {
                         respond("Timed out", HttpStatusCode.GatewayTimeout)
                     }
                     else -> error("Unhandled ${request.url}")
@@ -51,6 +53,8 @@ class AltinnClientTests {
         assert(authList.size == 5)
         assertThat(authList.find { it.socialSecurityNumber ==  "01065500791"}).isNotNull
     }
+
+
     @Test
     internal fun `timeout from altinn throws exception`() {
         val altinnClient = AltinnClient("http://timeout", "api-gw-key", "altinn-key", serviceCode, client)
@@ -58,5 +62,20 @@ class AltinnClientTests {
         assertThrows(ServerResponseException::class.java) {
             altinnClient.hentOrgMedRettigheterForPerson(identitetsnummer)
         }
+    }
+
+    @Test
+    internal fun `timeout from altinn fails the health check`() {
+        val altinnClient = AltinnClient("http://timeout", "api-gw-key", "altinn-key", serviceCode, client)
+
+        assertThrows(ServerResponseException::class.java) {
+            runBlocking { altinnClient.doHealthCheck() }
+        }
+    }
+
+    @Test
+    internal suspend fun `healthcheck passes with valid response from altinn`() {
+        val altinnClient = AltinnClient("http://juice", "api-gw-key", "altinn-key", serviceCode, client)
+        altinnClient.doHealthCheck()
     }
 }
