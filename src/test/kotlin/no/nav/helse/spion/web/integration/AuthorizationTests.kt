@@ -27,7 +27,7 @@ class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
     val hasAccessToThisOrg  = OppslagDto("200150015432", "910020102", null)
 
     @Test
-    fun saksOppslag_loggedInButNoAccess_gives_403_forbidden() {
+    fun `saksOppslag when logged in but unauthorized for the given Virksomhet returns 403 Forbidden`() {
         configuredTestApplication( {
             spionModule()
         }) {
@@ -42,7 +42,7 @@ class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
     }
 
     @Test
-    fun saksOppslag_loggedIn_and_has_access_gives_200_OK() {
+    fun `saksOppslag when logged in and authorized for the given Virksomhet returns 200 OK`() {
         configuredTestApplication( {
             spionModule()
         }) {

@@ -9,7 +9,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 internal class DefaultAuthorizerTest {
-    var authorizer : DefaultAuthorizer? = null
+    lateinit var authorizer : DefaultAuthorizer
 
     private val subjectWithAccess = "02038509876"
     private val doesNotHaveAccess = "xxxxxxxxxx"
@@ -29,23 +29,22 @@ internal class DefaultAuthorizerTest {
     }
 
     @Test
-    internal fun accessIsGivenToOrgnumberInAccessList() {
-        assertTrue { authorizer!!.hasAccess(subjectWithAccess, "123") }
+    internal fun `access Is Given To Orgnumber In the Access List`() {
+        assertTrue { authorizer.hasAccess(subjectWithAccess, "123") }
     }
 
     @Test
-    internal fun orgNrNotInListIsDenied() {
-        assertFalse { authorizer!!.hasAccess(subjectWithAccess, "666") }
+    internal fun `org numbers Not In the List Is Denied`() {
+        assertFalse { authorizer.hasAccess(subjectWithAccess, "666") }
     }
 
     @Test
-    internal fun noAccessRightsAreDenied() {
-        assertFalse { authorizer!!.hasAccess(doesNotHaveAccess, "123") }
+    internal fun `no Access Rights Are Denied`() {
+        assertFalse { authorizer.hasAccess(doesNotHaveAccess, "123") }
     }
 
     @Test
-    internal fun canHaveAccessToAPerson() {
-        assertTrue { authorizer!!.hasAccess(subjectWithAccess, "01028454321") }
-
+    internal fun `It is valid to have access to an altinn socialSecurityNumber`() {
+        assertTrue { authorizer.hasAccess(subjectWithAccess, "01028454321") }
     }
 }

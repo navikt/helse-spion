@@ -20,7 +20,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
     val oppslag = OppslagDto("200150015432", "987654321", null)
 
     @Test
-    fun saksOppslag_withMissingJWTShouldGive_401_Unauthorized() {
+    fun `saksOppslag with Missing JWT returns 401 Unauthorized`() {
         configuredTestApplication({
             spionModule()
         }) {
@@ -34,7 +34,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
     }
 
     @Test
-    fun nais_isalive_endpoint_withMissingJWTShouldGive_200_OK() {
+    fun `nais isalive endpoint with no JWT returns 200 OK`() {
         configuredTestApplication({
             spionModule()
         }) {
@@ -46,7 +46,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
     }
 
     @Test
-    fun nais_isready_endpoint_withMissingJWTShouldGive_200_OK() {
+    fun `nais isready endpoint with no JWT returns 200 OK`() {
         configuredTestApplication({
             spionModule()
         }) {
@@ -58,7 +58,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
     }
 
     @Test
-    fun saksOppslag_withValidJWTinHeaderShouldNotGive_401_Unauthorized() {
+    fun `saksOppslag with Valid JWT in Header does not return 401 Unauthorized`() {
         configuredTestApplication( {
             spionModule()
         }) {
@@ -75,7 +75,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
     }
 
     @Test
-    fun saksOppslag_withValidJWTinCookieShouldNotGive_401() {
+    fun `saksOppslag with Valid JWT in Cookie does not return 401`() {
         configuredTestApplication({
             spionModule()
         }) {

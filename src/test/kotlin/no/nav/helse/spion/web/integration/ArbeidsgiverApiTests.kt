@@ -22,7 +22,7 @@ import kotlin.test.assertNotEquals
 class ArbeidsgiverApiTests : ControllerIntegrationTestBase() {
 
     @Test
-    fun shouldGive401WhenNotLoggedIn() {
+    fun `should Give 401 When Not Logged In`() {
         configuredTestApplication({
             spionModule()
         }) {
@@ -34,7 +34,7 @@ class ArbeidsgiverApiTests : ControllerIntegrationTestBase() {
     }
 
     @Test
-    fun shouldReturnListOfOrganisationsWhenLoggedIn() {
+    fun `should Return List Of Organisations When Logged In`() {
         configuredTestApplication({
             spionModule()
         }) {
