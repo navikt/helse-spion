@@ -27,7 +27,7 @@ fun Application.localCookieDispenser(config: ApplicationConfig) {
         get("/local/cookie-please") {
             if (config.property("koin.profile").getString() == "LOCAL") {
                 val cookieName = config.configList("no.nav.security.jwt.issuers")[0].property("cookie_name").getString()
-                call.response.cookies.append(Cookie(cookieName, JwtTokenGenerator.createSignedJWT(call.request.queryParameters["subject"]).serialize(), CookieEncoding.RAW))
+                call.response.cookies.append(Cookie(cookieName, JwtTokenGenerator.createSignedJWT(call.request.queryParameters["subject"]).serialize(), CookieEncoding.RAW, domain = "localhost", path ="/"))
             }
             call.respondText(":cookie:", ContentType.Text.Plain, HttpStatusCode.OK)
         }

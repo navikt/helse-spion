@@ -14,9 +14,9 @@ import kotlin.test.assertEquals
 @KtorExperimentalAPI
 class HealthCheckTests : ControllerIntegrationTestBase() {
     @Test
-    fun selfCheckEndpointShouldGive500WhenSelfCheckComponentsFail() {
-        withTestApplication({
-            spionModule(testConfig)
+    fun `HealthCheck Endpoint returns 500 When any HealthCheck Component Fail`() {
+        configuredTestApplication({
+            spionModule()
             get<MockAuthRepo>().failSelfCheck = true
 
         }) {
@@ -28,9 +28,9 @@ class HealthCheckTests : ControllerIntegrationTestBase() {
     }
 
     @Test
-    fun selfCheckEndpointShouldGive200WhenSelfCheckComponentsAreAllOk() {
-        withTestApplication({
-            spionModule(testConfig)
+    fun `HealthCheck Endpoint returns 200 When all HealthCheck Components are Ok`() {
+        configuredTestApplication({
+            spionModule()
             get<MockAuthRepo>().failSelfCheck = false
 
         }) {

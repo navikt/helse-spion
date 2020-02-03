@@ -1,10 +1,9 @@
 package no.nav.helse.spion.domene.sak.repository
 
-import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.Person
-import no.nav.helse.spion.domene.sak.Sak
 import no.nav.helse.spion.domene.sak.Oppsummering
+import no.nav.helse.spion.domene.sak.Sak
 import no.nav.helse.spion.domene.sak.Ytelsesperiode
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -19,20 +18,10 @@ class MockSaksinformasjonRepository : SaksinformasjonRepository {
     val testPeriode5 = Periode(LocalDate.of(2019, 12, 15), LocalDate.of(2020, 1, 10))
     val testPeriode6 = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 1))
     val testOppsummeringPeriode2 = Periode(LocalDate.of(2019, 8, 3), LocalDate.of(2020, 2, 1))
-    override fun hentArbeidsgivere(identitetsnummer: String): List<Arbeidsgiver> {
-        return listOf(
-                Arbeidsgiver("Etterretningstjenesten", "1965", ""),
-                Arbeidsgiver("Secret Intelligence Service", "MI6", "")
-        )
-    }
 
     override fun hentSakerForPerson(identitetsnummer: String, arbeidsgiverOrgnummer: String, arbeidsgiverIdentitetsnummer: String): List<Sak> {
         return listOf(
                 Sak(
-                        arbeidsgiver = Arbeidsgiver(
-                                navn = "CIA",
-                                orgnr = "1",
-                                identitetsnummer = ""),
                         person = Person(fornavn = "James", etternavn = "Bond", aktørId = "007"),
                         oppsummering = Oppsummering(
                                 testOppsummeringPeriode1,
@@ -68,10 +57,6 @@ class MockSaksinformasjonRepository : SaksinformasjonRepository {
                         )
                 ),
                 Sak(
-                        arbeidsgiver = Arbeidsgiver(
-                                navn = "CIA",
-                                orgnr = "1",
-                                identitetsnummer = ""),
                         person = Person(fornavn = "James", etternavn = "Bond", aktørId = "007"),
                         oppsummering = Oppsummering(
                                 testOppsummeringPeriode2,

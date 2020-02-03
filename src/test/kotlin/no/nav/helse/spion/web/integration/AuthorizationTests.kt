@@ -24,19 +24,15 @@ import kotlin.test.assertNotEquals
 class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
 
     val noAccessToThisOrg = OppslagDto("200150015432", "123456789", null)
-    val hasAccessToThisOrg  = OppslagDto("200150015432", "987654321", null)
+    val hasAccessToThisOrg  = OppslagDto("200150015432", "910020102", null)
 
     @Test
-    fun saksOppslag_loggedInButNoAccess_gives_403_forbidden() {
-        withTestApplication( {
-            addIntegrationTestConfigValues(config = environment.config as MapApplicationConfig)
+    fun `saksOppslag when logged in but unauthorized for the given Virksomhet returns 403 Forbidden`() {
+        configuredTestApplication( {
             spionModule()
         }) {
-            handleRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
-                val jwt = JwtTokenGenerator.createSignedJWT("010285295122")
+            doAuthenticatedRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
                 val objectMapper = get<ObjectMapper>()
-
-                addHeader("Authorization", "Bearer ${jwt.serialize()}")
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(objectMapper.writeValueAsString(noAccessToThisOrg))
             }.apply {
@@ -46,17 +42,12 @@ class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
     }
 
     @Test
-    fun saksOppslag_loggedIn_and_has_access_gives_200_OK() {
-        withTestApplication( {
-            addIntegrationTestConfigValues(config = environment.config as MapApplicationConfig)
+    fun `saksOppslag when logged in and authorized for the given Virksomhet returns 200 OK`() {
+        configuredTestApplication( {
             spionModule()
         }) {
-            handleRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
-                val jwt = JwtTokenGenerator.createSignedJWT("010285295122")
+            doAuthenticatedRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
                 val objectMapper = get<ObjectMapper>()
-                val mockAcl = get<AuthorizationsRepository>() as MockAuthRepo
-                mockAcl.setAccessList(setOf(hasAccessToThisOrg.arbeidsgiverOrgnr))
-                addHeader("Authorization", "Bearer ${jwt.serialize()}")
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(objectMapper.writeValueAsString(hasAccessToThisOrg))
             }.apply {

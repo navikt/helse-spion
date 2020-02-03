@@ -3,8 +3,13 @@ package no.nav.helse.spion.web.integration
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.nimbusds.jwt.SignedJWT
+import io.ktor.application.Application
 import io.ktor.config.ApplicationConfig
 import io.ktor.config.MapApplicationConfig
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.server.testing.*
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.security.token.support.test.JwkGenerator
 import no.nav.security.token.support.test.JwtTokenGenerator
@@ -15,7 +20,8 @@ import org.koin.test.KoinTest
 @KtorExperimentalAPI
 open class ControllerIntegrationTestBase : KoinTest {
 
-    val testConfig : ApplicationConfig
+    protected val defaultSubject = "010285295122"
+    private val testConfig : ApplicationConfig
     protected val idTokenCookieName = "selvbetjening-idtoken"
 
     init {
@@ -23,8 +29,30 @@ open class ControllerIntegrationTestBase : KoinTest {
         addIntegrationTestConfigValues(testConfig)
     }
 
+    fun <R> configuredTestApplication(moduleFunction: Application.() -> Unit, test: TestApplicationEngine.() -> R): R {
+        return withApplication(createTestEnvironment()) {
+            addIntegrationTestConfigValues(application.environment.config as MapApplicationConfig)
+            moduleFunction(application)
+            test()
+        }
+    }
+
+    fun TestApplicationEngine.doAuthenticatedRequest(
+            method: HttpMethod,
+            uri: String,
+            authenticatedSubject: String = defaultSubject,
+            setup: TestApplicationRequest.() -> Unit = {}
+    ): TestApplicationCall = handleRequest {
+        this.uri = uri
+        this.method = method
+        val token = JwtTokenGenerator.createSignedJWT(authenticatedSubject)
+        addHeader(HttpHeaders.Cookie, "$idTokenCookieName=${token.serialize()}")
+        setup()
+    }
+
+
     @KtorExperimentalAPI
-    fun addIntegrationTestConfigValues(config : MapApplicationConfig, acceptedIssuer:String = JwtTokenGenerator.ISS, acceptedAudience:String = JwtTokenGenerator.AUD) {
+    private fun addIntegrationTestConfigValues(config : MapApplicationConfig, acceptedIssuer:String = JwtTokenGenerator.ISS, acceptedAudience:String = JwtTokenGenerator.AUD) {
         config.apply {
             put("koin.profile", "LOCAL")
             put("no.nav.security.jwt.issuers.size", "1")
