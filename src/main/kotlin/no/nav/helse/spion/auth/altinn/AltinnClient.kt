@@ -18,7 +18,7 @@ class AltinnClient(
         private val httpClient: HttpClient) : AuthorizationsRepository, HealthCheck {
     override val healthCheckType = HealthCheckType.READYNESS
 
-    private val baseUrl = "$altinnBaseUrl/reportees?ForceEIAuthentication&serviceEdition=1&serviceCode=$serviceCode&subject="
+    private val baseUrl = "$altinnBaseUrl/reportees/?ForceEIAuthentication&serviceEdition=1&serviceCode=$serviceCode&subject="
 
     /**
      * @return en liste over organisasjoner og/eller personer den angitte personen har rettigheten for
