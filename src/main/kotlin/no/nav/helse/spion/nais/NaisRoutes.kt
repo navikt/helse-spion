@@ -6,7 +6,6 @@ import io.ktor.application.call
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
-import io.ktor.response.respondText
 import io.ktor.response.respondTextWriter
 import io.ktor.routing.Routing
 import io.ktor.routing.get
@@ -15,11 +14,12 @@ import io.ktor.util.pipeline.PipelineContext
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 import io.prometheus.client.hotspot.DefaultExports
-import no.nav.helse.spion.kafka.VedtakConsumer
-import no.nav.helse.spion.selfcheck.*
+import no.nav.helse.spion.selfcheck.HealthCheck
+import no.nav.helse.spion.selfcheck.HealthCheckState
+import no.nav.helse.spion.selfcheck.HealthCheckType
+import no.nav.helse.spion.selfcheck.runHealthChecks
 import no.nav.helse.spion.web.getAllOfType
 import org.koin.ktor.ext.getKoin
-import org.slf4j.LoggerFactory
 import java.util.*
 
 private val collectorRegistry = CollectorRegistry.defaultRegistry
@@ -62,7 +62,7 @@ private suspend fun returnResultOfChecks(routing: Routing, type: HealthCheckType
     val checkResults = runHealthChecks(allRegisteredSelfCheckComponents)
     val httpResult = if (checkResults.any { it.state == HealthCheckState.ERROR }) HttpStatusCode.InternalServerError else HttpStatusCode.OK
     checkResults.forEach { r ->
-        r.error?.let { pipelineContext.call.application.environment.log.error(r.toString())}
+        r.error?.let { pipelineContext.call.application.environment.log.error(r.toString()) }
     }
     pipelineContext.call.respond(httpResult, checkResults)
 }
