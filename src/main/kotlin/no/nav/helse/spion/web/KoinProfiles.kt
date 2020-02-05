@@ -16,8 +16,8 @@ import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.auth.altinn.AltinnClient
-import no.nav.helse.spion.domene.sak.repository.MockSaksinformasjonRepository
-import no.nav.helse.spion.domene.sak.repository.SaksinformasjonRepository
+import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
+import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
 import org.koin.core.Koin
 import org.koin.core.definition.Kind
@@ -62,19 +62,18 @@ val common = module {
 }
 
 fun localDevConfig(config: ApplicationConfig) = module {
-    single {MockSaksinformasjonRepository() as SaksinformasjonRepository}
-    single {MockAuthRepo(get()) as AuthorizationsRepository} bind MockAuthRepo::class
-
-    single {SpionService(get(), get())}
+    single {MockYtelsesperiodeRepository() as YtelsesperiodeRepository}
+    single {MockAuthRepo() as AuthorizationsRepository}
     single {DefaultAuthorizer(get()) as Authorizer }
+    single {SpionService(get(), get())}
 
     LocalOIDCWireMock.start()
 }
 
 @KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
-    single {MockSaksinformasjonRepository() as SaksinformasjonRepository}
-    single {SpionService(get(), get())}
+    single {MockYtelsesperiodeRepository() as YtelsesperiodeRepository}
+    single {SpionService(get())}
     single {AltinnClient(
             config.getString("altinn.service_owner_api_url"),
             config.getString("altinn.gw_api_key"),
