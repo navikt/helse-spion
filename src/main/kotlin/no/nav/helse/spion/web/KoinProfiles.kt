@@ -97,7 +97,7 @@ fun prodConfig(config: ApplicationConfig) = module{
 // utils
 @KtorExperimentalAPI
 fun ApplicationConfig.getString(path : String): String {
-    return this.property(path).toString()
+    return this.property(path).getString()
 }
 
 inline fun <reified T : Any> Koin.getAllOfType(): Collection<T> =
