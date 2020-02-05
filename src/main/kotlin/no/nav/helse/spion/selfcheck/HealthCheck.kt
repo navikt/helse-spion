@@ -9,10 +9,14 @@ enum class HealthCheckState {OK, ERROR}
 enum class HealthCheckType {READYNESS, ALIVENESS}
 
 data class HealthCheckResult(
-        val componentName : String,
-        val state : HealthCheckState,
-        val runTime : Long,
-        val error : Throwable? = null)
+        val componentName: String,
+        val state: HealthCheckState,
+        val runTime: Long,
+        val error: Throwable? = null) {
+    override fun toString(): String {
+        return "HealthCheckResult(componentName='$componentName', state=$state, runTime=$runTime, error=${error?.stackTrace})"
+    }
+}
 
 interface HealthCheck {
     /**
