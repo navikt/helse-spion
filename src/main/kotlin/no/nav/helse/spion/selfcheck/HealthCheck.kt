@@ -12,11 +12,7 @@ data class HealthCheckResult(
         val componentName: String,
         val state: HealthCheckState,
         val runTime: Long,
-        val error: Throwable? = null) {
-    override fun toString(): String {
-        return "HealthCheckResult(componentName='$componentName', state=$state, runTime=$runTime, error=${error?.stackTrace})"
-    }
-}
+        val error: Throwable? = null)
 
 interface HealthCheck {
     /**
