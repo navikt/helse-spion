@@ -71,6 +71,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
     LocalOIDCWireMock.start()
 }
 
+@KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
     single {MockSaksinformasjonRepository() as SaksinformasjonRepository}
     single {SpionService(get(), get())}
