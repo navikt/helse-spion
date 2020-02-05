@@ -25,9 +25,6 @@ class AltinnClient(
      * @return en liste over organisasjoner og/eller personer den angitte personen har rettigheten for
      */
     override fun hentOrgMedRettigheterForPerson(identitetsnummer: String): Set<AltinnOrganisasjon> {
-        log.info(baseUrl)
-        log.info(apiGwApiKey.substring(0, 3))
-        log.info(altinnApiKey.substring(0, 3))
         val url = baseUrl + identitetsnummer
         return runBlocking {
             httpClient.get<Set<AltinnOrganisasjon>>(url) {
