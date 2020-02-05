@@ -44,6 +44,8 @@ dependencies {
     implementation("no.nav.security:token-validation-ktor:$tokenSupportVersion")
     implementation("no.nav.security:token-validation-test-support:$tokenSupportVersion")
 
+    compile("me.lazmaid.kraph:kraph:0.6.0")
+
     implementation(kotlin("stdlib"))
 
     implementation("ch.qos.logback:logback-classic:$logback_version")
