@@ -62,7 +62,7 @@ private suspend fun returnResultOfChecks(routing: Routing, type: HealthCheckType
     val checkResults = runHealthChecks(allRegisteredSelfCheckComponents)
     val httpResult = if (checkResults.any { it.state == HealthCheckState.ERROR }) HttpStatusCode.InternalServerError else HttpStatusCode.OK
     checkResults.forEach { r ->
-        r.error?.toString()?.let(pipelineContext.call.application.environment.log::error)
+        r.error?.let { pipelineContext.call.application.environment.log.error(r.toString())}
     }
     pipelineContext.call.respond(httpResult, checkResults)
 }
