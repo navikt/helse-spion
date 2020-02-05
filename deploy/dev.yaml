@@ -37,6 +37,8 @@ spec:
     paths:
       - kvPath: kv/preprod/fss/helse-spion/default
         mountPath: /var/run/secrets/nais.io/vault
+      - mountPath: /var/run/secrets/nais.io/service_user
+        kvPath: /serviceuser/data/dev/srvhelsespion
       - kvPath: apikey/apigw/dev/eksternapp.altinn.serviceowner/helse-spion_q1
         mountPath: /apigw/altinn/x-nav-apiKey
   webproxy: true

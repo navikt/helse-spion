@@ -33,7 +33,11 @@ spec:
       memory: 64Mi
   vault:
     enabled: true
-    sidecar: true
+    paths:
+      - kvPath: kv/preprod/fss/helse-spion/default
+        mountPath: /var/run/secrets/nais.io/vault
+      - mountPath: /var/run/secrets/nais.io/service_user
+        kvPath: /serviceuser/data/dev/srvhelsespion
   webproxy: true
   env:
   - name: KOIN_PROFILE
