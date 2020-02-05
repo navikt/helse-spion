@@ -3,8 +3,6 @@ package no.nav.helse.spion.selfcheck
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import no.nav.helse.spion.kafka.VedtakConsumer
-import org.slf4j.LoggerFactory
 import kotlin.system.measureTimeMillis
 
 enum class HealthCheckState {OK, ERROR}
@@ -39,7 +37,6 @@ suspend fun runHealthChecks(checkableComponents: Collection<HealthCheck>) : List
             }
             HealthCheckResult(it.javaClass.canonicalName, HealthCheckState.OK, runTime)
         } catch (ex: Throwable) {
-            ex.stackTrace =  ex.stackTrace.take(5).toTypedArray()
             HealthCheckResult(it.javaClass.canonicalName, HealthCheckState.ERROR, runTime, ex)
         }
     }
