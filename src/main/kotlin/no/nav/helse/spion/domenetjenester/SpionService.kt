@@ -1,6 +1,5 @@
 package no.nav.helse.spion.domenetjenester
 
-import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.auth.AuthorizationsRepository
