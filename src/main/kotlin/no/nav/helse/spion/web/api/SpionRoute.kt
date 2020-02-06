@@ -19,7 +19,7 @@ import no.nav.helse.spion.web.dto.OppslagDto
 @KtorExperimentalAPI
 fun Route.spion(service: SpionService, authorizer: Authorizer) {
     route("api/v1") {
-        route("/saker") {
+        route("/ytelsesperioder") {
             intercept(ApplicationCallPipeline.Call) {
                 val test = call.receive<OppslagDto>()
                 val identitetsnummer = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
@@ -32,7 +32,7 @@ fun Route.spion(service: SpionService, authorizer: Authorizer) {
 
             post("/oppslag") {
                 val oppslag = call.receive<OppslagDto>()
-                call.respond(service.hentSakerForPerson(oppslag.identitetsnummer, oppslag.arbeidsgiverOrgnr, oppslag.arbeidsgiverIdentitetsnummer))
+                call.respond(service.hentYtelserForPerson(oppslag.identitetsnummer, oppslag.arbeidsgiverOrgnr, oppslag.arbeidsgiverIdentitetsnummer))
             }
         }
         route("/arbeidsgivere") {
