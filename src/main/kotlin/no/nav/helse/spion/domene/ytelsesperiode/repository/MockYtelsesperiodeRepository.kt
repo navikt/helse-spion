@@ -30,7 +30,7 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
     )
 
 
-    override fun hentYtelserForPerson(identitetsnummer: String, orgnr: String): List<Ytelsesperiode> {
+    override fun hentYtelserForPerson(identitetsnummer: String, orgnr: String?): List<Ytelsesperiode> {
         return listOf(testYtelsesPeriode)
     }
 

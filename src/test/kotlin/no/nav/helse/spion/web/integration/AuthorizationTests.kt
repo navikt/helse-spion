@@ -31,7 +31,7 @@ class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
         configuredTestApplication( {
             spionModule()
         }) {
-            doAuthenticatedRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
+            doAuthenticatedRequest(HttpMethod.Post, "/api/v1/ytelsesperioder/oppslag") {
                 val objectMapper = get<ObjectMapper>()
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(objectMapper.writeValueAsString(noAccessToThisOrg))
@@ -46,7 +46,7 @@ class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
         configuredTestApplication( {
             spionModule()
         }) {
-            doAuthenticatedRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
+            doAuthenticatedRequest(HttpMethod.Post, "/api/v1/ytelsesperioder/oppslag") {
                 val objectMapper = get<ObjectMapper>()
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(objectMapper.writeValueAsString(hasAccessToThisOrg))

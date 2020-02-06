@@ -5,6 +5,6 @@ import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 
 interface YtelsesperiodeRepository {
     fun hentArbeidsgivere(identitetsnummer: String) : List<Arbeidsgiver>
-    fun hentYtelserForPerson(identitetsnummer: String, orgnr: String) : List<Ytelsesperiode>
+    fun hentYtelserForPerson(identitetsnummer: String, orgnr: String?) : List<Ytelsesperiode>
 
 }

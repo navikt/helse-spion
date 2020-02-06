@@ -63,7 +63,7 @@ val common = module {
 
 fun localDevConfig(config: ApplicationConfig) = module {
     single {MockYtelsesperiodeRepository() as YtelsesperiodeRepository}
-    single {MockAuthRepo() as AuthorizationsRepository}
+    single {MockAuthRepo(get()) as AuthorizationsRepository} bind MockAuthRepo::class
     single {DefaultAuthorizer(get()) as Authorizer }
     single {SpionService(get(), get())}
 
@@ -73,7 +73,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
 @KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
     single {MockYtelsesperiodeRepository() as YtelsesperiodeRepository}
-    single {SpionService(get())}
+    single {SpionService(get(), get())}
     single {AltinnClient(
             config.getString("altinn.service_owner_api_url"),
             config.getString("altinn.gw_api_key"),
@@ -86,7 +86,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
 
 
 fun prodConfig(config: ApplicationConfig) = module{
-    single {MockSaksinformasjonRepository() as SaksinformasjonRepository}
+    single {MockYtelsesperiodeRepository() as YtelsesperiodeRepository}
     single {MockAuthRepo(get()) as AuthorizationsRepository} bind MockAuthRepo::class
     single {SpionService(get(), get())}
     single {DefaultAuthorizer(get()) as Authorizer }

@@ -25,7 +25,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
             spionModule()
         }) {
 
-            handleRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
+            handleRequest(HttpMethod.Post, "/api/v1/ytelsesperioder/oppslag") {
 
             }.apply {
                 assertEquals(HttpStatusCode.Unauthorized, response.status())
