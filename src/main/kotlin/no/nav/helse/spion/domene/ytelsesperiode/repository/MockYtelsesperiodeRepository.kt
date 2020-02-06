@@ -31,7 +31,16 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
 
 
     override fun hentYtelserForPerson(identitetsnummer: String, orgnr: String?): List<Ytelsesperiode> {
-        return listOf(testYtelsesPeriode)
+        val perioder = listOf(
+                Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
+                Periode(LocalDate.of(2019, 3, 10), LocalDate.of(2019, 3, 28)),
+                Periode(LocalDate.of(2019, 7, 24), LocalDate.of(2019, 9, 8)),
+                Periode(LocalDate.of(2019, 12, 13), LocalDate.of(2020, 1, 10)))
+        val ytelsesperioder = perioder.mapIndexed{
+            i: Int, it: Periode ->
+            testYtelsesPeriode.copy(periode = it, vedtaksId = i.toString(), status = if (i % 2 == 0)Ytelsesperiode.Status.INNVILGET else Ytelsesperiode.Status.AVSLÅTT)
+        }
+        return ytelsesperioder
     }
 
     override fun hentArbeidsgivere(identitetsnummer: String): List<Arbeidsgiver> {
