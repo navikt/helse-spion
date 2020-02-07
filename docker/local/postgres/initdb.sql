@@ -1,3 +1,4 @@
 CREATE DATABASE spion;
+CREATE TABLE json_data (data JSONB);
 CREATE USER spion with PASSWORD 'spion';
 GRANT ALL PRIVILEGES ON DATABASE spion TO spion;
