@@ -62,7 +62,9 @@ class YtelsesperiodeGenerator(
         maxUniqueArbeidsgivere: Int,
         maxUniquePersoner: Int,
         private val initDate: LocalDate = LocalDate.of(2020, 1, 1)
-) {
+) : Iterable<Ytelsesperiode>, Iterator<Ytelsesperiode>
+
+{
 
     private val arbeidsgiverGenerator = ArbeidsgiverGenerator(maxUniqueArbeidsgivere)
     private val personGenerator = PersonGenerator(maxUniquePersoner)
@@ -77,7 +79,7 @@ class YtelsesperiodeGenerator(
 
     private val sykemeldingsGrader = listOf(20, 30, 50, 80, 100)
 
-    fun nextYtelsesperiode() : Ytelsesperiode {
+    private fun nextYtelsesperiode() : Ytelsesperiode {
         val periode = randomPeriode()
         numGeneratedPerioder++
         return Ytelsesperiode(
@@ -99,8 +101,17 @@ class YtelsesperiodeGenerator(
         )
     }
 
+    override fun iterator(): Iterator<Ytelsesperiode> {
+        return this
+    }
 
-    val infinteSequence = generateSequence { nextYtelsesperiode() }
+    override fun hasNext(): Boolean {
+        return true
+    }
+
+    override fun next(): Ytelsesperiode {
+        return nextYtelsesperiode()
+    }
 }
 
 

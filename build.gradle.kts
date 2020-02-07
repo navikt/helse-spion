@@ -66,6 +66,7 @@ dependencies {
 
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    implementation("org.litote.kmongo:kmongo:3.12.0")
 
     testImplementation("org.koin:koin-test:$koinVersion")
     testImplementation("com.github.javafaker:javafaker:1.0.1")
