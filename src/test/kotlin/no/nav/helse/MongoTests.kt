@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
+import org.junit.Ignore
 import org.junit.jupiter.api.Test
 import org.litote.kmongo.*
 import kotlin.system.measureTimeMillis
@@ -12,6 +13,7 @@ class MongoTests {
 
 
     @Test
+    @Ignore
     internal fun insertDocuments() {
         val client = KMongo.createClient() //get com.mongodb.MongoClient new instance
         val database = client.getDatabase("test") //normal java driver usage
