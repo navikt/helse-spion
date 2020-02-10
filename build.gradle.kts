@@ -20,7 +20,17 @@ val koinVersion = "2.0.1"
 
 plugins {
     kotlin("jvm") version "1.3.50"
+    id("org.sonarqube") version "2.8"
 
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "navikt_helse-spion")
+        property("sonar.organization", "navit")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.login", System.getenv("SONAR_TOKEN") )
+    }
 }
 
 buildscript {
