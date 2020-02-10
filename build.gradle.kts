@@ -21,7 +21,7 @@ val koinVersion = "2.0.1"
 plugins {
     kotlin("jvm") version "1.3.50"
     id("org.sonarqube") version "2.8"
-
+    jacoco
 }
 
 sonarqube {
@@ -30,6 +30,12 @@ sonarqube {
         property("sonar.organization", "navit")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.login", System.getenv("SONAR_TOKEN") )
+    }
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.isEnabled = true
     }
 }
 
