@@ -23,7 +23,7 @@ Interne henvendelser kan sendes via Slack i kanalen #helse-arbeidsgiver
 2. Clone repoet og kjør `npm install` i repo root
 
 ### Bruk
-
+test
 #### `npm start`
 Starter lokal devserver for swagger/openAPI på port :4000
 
