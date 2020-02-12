@@ -25,19 +25,17 @@ data class VedtaksMelding(
 )
 
 
-
-
-
-
 internal abstract class SerDes<V>(protected val om: ObjectMapper) : Serializer<V>, Deserializer<V> {
     override fun serialize(topic: String?, data: V): ByteArray? {
         return data?.let {
             om.writeValueAsBytes(it)
         }
     }
+
     override fun configure(configs: MutableMap<String, *>?, isKey: Boolean) {}
     override fun close() {}
 }
+
 internal class VedtaksMeldingSerDes(om: ObjectMapper) : SerDes<VedtaksMelding>(om) {
     override fun deserialize(topic: String?, data: ByteArray?): VedtaksMelding? {
         return data?.let {

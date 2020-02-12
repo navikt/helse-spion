@@ -33,7 +33,6 @@ class SaksgangConsumer(props: Map<String, Any>, topicName: String, om: ObjectMap
     fun stop() = consumer.close()
 
     override fun getMessages(): List<ConsumerRecord<String, VedtaksMelding>> {
-        println("Asking for messages please")
         return consumer.poll(Duration.ofSeconds(10)).toList()
     }
 }
