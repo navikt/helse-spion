@@ -21,6 +21,7 @@ val koinVersion = "2.0.1"
 plugins {
     kotlin("jvm") version "1.3.50"
     id("org.sonarqube") version "2.8"
+    id("com.github.ben-manes.versions") version "0.27.0"
     jacoco
 }
 
