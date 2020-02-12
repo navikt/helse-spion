@@ -73,7 +73,9 @@ internal class SaksgangConsumerTest : KoinComponent {
                         SaksStatus.BEHANDLES,
                         LocalDate.now(),
                         LocalDate.now(),
-                        SaksgangsMelding.SaksYtelse.SP,
+                        SaksYtelse.SP,
+                        "Hans",
+                        "Ingenmann",
                         100,
                         938293.9
                 ))
