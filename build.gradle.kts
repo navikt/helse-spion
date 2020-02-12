@@ -74,7 +74,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
-    implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
+    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
 
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
@@ -140,6 +140,15 @@ tasks.withType<Test> {
     testLogging {
         events("passed", "skipped", "failed")
     }
+}
+
+tasks.named<Test>("test") {
+    include("no/nav/helse/**")
+    exclude("no/nav/helse/slowtests/**")
+}
+
+task<Test>("slowTests") {
+    include("no/nav/helse/slowtests/**")
 }
 
 tasks.withType<Wrapper> {

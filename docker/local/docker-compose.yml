@@ -2,9 +2,16 @@ version: '3.4'
 services:
     database:
         build:
-            context: ./
+            context: ./postgres
+            dockerfile: postgres.Dockerfile
         ports:
             - "5432:5432"
+    kafka:
+        build:
+            context: ./kafka
+            dockerfile: kafka.Dockerfile
+        ports:
+            - "2181:2181"
+            - "9092:9092"
 volumes:
     data:
-
