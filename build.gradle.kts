@@ -80,6 +80,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("com.github.tomakehurst:wiremock-standalone:2.25.1")
+    implementation("org.postgresql:postgresql:42.2.9")
 
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")

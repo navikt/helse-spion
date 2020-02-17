@@ -10,7 +10,9 @@ EOSQL
 
 psql -v ON_ERROR_STOP=1 --username "spion" --dbname "spion" <<-EOSQL
     CREATE TABLE spiondata (
-                           id integer NOT NULL,
-                           ytelsesperiode jsonb
+                           ytelsesperiode jsonb NOT NULL
     );
+    CREATE INDEX arbeidsgiver ON spiondata ((ytelsesperiode ->'arbeidsforhold'-> 'arbeidsgiver' ->> 'virksomhetsnummer'));
+    CREATE INDEX arbeidstaker ON spiondata ((ytelsesperiode ->'arbeidsforhold'-> 'arbeidstaker' ->> 'identitetsnummer'));
+
 EOSQL
