@@ -17,7 +17,7 @@ data class Ytelsesperiode(
         val ytelse: Ytelse,
         val merknad: String?,
         val sistEndret: LocalDate
-) {
+) : MutableCollection<Ytelsesperiode> {
     enum class Status {
         INNVILGET, AVSLÅTT, UNDER_BEHANDLING, HENLAGT
     }

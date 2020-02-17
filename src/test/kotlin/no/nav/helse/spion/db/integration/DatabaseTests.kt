@@ -94,7 +94,7 @@ class postgresTests {
         for (i in 0..numBulks) {
             val sql = "INSERT INTO spiondata(ytelsesperiode) VALUES(cast (? as json))"
             var stm = con.prepareStatement(sql)
-            val ytelsesperioder = generator.take(bulkSize)
+            var ytelsesperioder = generator.take(bulkSize)
 
             val time = measureTimeMillis {
                 ytelsesperioder.forEach{
@@ -110,6 +110,7 @@ class postgresTests {
 
         println("Done inserting " + numBulks * bulkSize + " items in $totalInsertTime ms")
     }
+
 
     @Test
     internal fun timeQueries() {
