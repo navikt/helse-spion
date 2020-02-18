@@ -40,8 +40,11 @@ internal abstract class SerDes<V>(protected val om: ObjectMapper) : Serializer<V
         }
     }
 
-    override fun configure(configs: MutableMap<String, *>?, isKey: Boolean) {}
-    override fun close() {}
+    override fun configure(configs: MutableMap<String, *>?, isKey: Boolean) { /* objectmapperen er allerde konfigurert*/
+    }
+
+    override fun close() { /* ikke nødvending for jackson */
+    }
 }
 
 internal class VedtaksMeldingSerDes(om: ObjectMapper) : SerDes<Vedtaksmelding>(om) {

@@ -143,6 +143,7 @@ fun prodConfig(config: ApplicationConfig) = module{
             }
 
             override fun confirmProcessingDone() {
+                println("KafkaMock: Comitta til kafka")
             }
         } as KafkaMessageProvider<Vedtaksmelding>
     }
