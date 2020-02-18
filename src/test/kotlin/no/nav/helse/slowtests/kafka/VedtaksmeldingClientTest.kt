@@ -32,6 +32,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
 
     val testProps = mapOf(
             "bootstrap.servers" to "localhost:9092",
+            "max.poll.interval.ms" to "30000",
             "group.id" to "juicey"
     )
 
