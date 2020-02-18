@@ -27,11 +27,11 @@ import java.util.concurrent.TimeUnit
  * docker-compose build
  * docker-compose up
  */
-internal class SaksgangConsumerTest : KoinComponent {
+internal class VedtaksmeldingClientTest : KoinComponent {
     val topicName = "topic"
 
     val testProps = mapOf(
-            "bootstrap.servers" to  "localhost:9092",
+            "bootstrap.servers" to "localhost:9092",
             "group.id" to "juicey"
     )
 
@@ -59,33 +59,32 @@ internal class SaksgangConsumerTest : KoinComponent {
     @Test
     fun getMessages() {
 
-        val consumer = SaksgangConsumer(testProps, topicName, get())
-        val noMessagesExpected = consumer.getMessages()
+        val client = VedtaksmeldingClient(testProps, topicName, get())
+        val noMessagesExpected = client.getMessagesToProcess()
 
         Assert.assertEquals(0, noMessagesExpected.size)
 
-        val producer = KafkaProducer<String, VedtaksMelding>(testProps, StringSerializer(), VedtaksMeldingSerDes(get()))
+        val producer = KafkaProducer<String, Vedtaksmelding>(testProps, StringSerializer(), VedtaksMeldingSerDes(get()))
 
         producer.send(
-                ProducerRecord(topicName, VedtaksMelding(
+                ProducerRecord(topicName, Vedtaksmelding(
                         "222323",
                         "323232323",
-                        SaksStatus.BEHANDLES,
+                        VedtaksmeldingsStatus.BEHANDLES,
                         LocalDate.now(),
                         LocalDate.now(),
-                        SaksYtelse.SP,
+                        VedtaksmeldingsYtelse.SP,
                         "Hans",
                         "Ingenmann",
                         100,
-                        938293.9
+                        938293.9,
+                        2387.0,
+                        maksDato = LocalDate.now().plusDays(10)
                 ))
         ).get(10, TimeUnit.SECONDS)
 
-        val oneMessageExpected = consumer.getMessages()
+        val oneMessageExpected = client.getMessagesToProcess()
 
         Assert.assertEquals(1, oneMessageExpected.size)
-
-
-
     }
 }
