@@ -4,7 +4,6 @@ import com.github.javafaker.Faker
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.Person
-import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import java.time.LocalDate
 import kotlin.random.Random
 import kotlin.random.Random.Default.nextDouble
@@ -49,10 +48,10 @@ private class PersonGenerator(private val maxUniquePersons: Int = 1000) {
 private val periodStateGenerator = {
     val rand = Random.Default.nextInt(0, 100)
     when {
-        rand < 5 -> Ytelsesperiode.Status.AVSLÅTT
-        rand < 25 -> Ytelsesperiode.Status.UNDER_BEHANDLING
-        rand < 30 -> Ytelsesperiode.Status.HENLAGT
-        else -> Ytelsesperiode.Status.INNVILGET
+        rand < 5 -> VedtaksmeldingsStatus.AVSLÅTT
+        rand < 25 -> VedtaksmeldingsStatus.BEHANDLES
+        rand < 30 -> VedtaksmeldingsStatus.HENLAGT
+        else -> VedtaksmeldingsStatus.INNVILGET
     }
 }
 
@@ -79,7 +78,7 @@ class VedtaksmeldingGenerator(
         val periode = randomPeriode()
         val person = personGenerator.getRandomPerson()
         numGeneratedVedtak++
-        val status = VedtaksmeldingsStatus.values().toList().pickRandom()
+        val status = periodStateGenerator()
 
         return Vedtaksmelding(
                 person.identitetsnummer,

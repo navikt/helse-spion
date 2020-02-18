@@ -11,7 +11,7 @@ enum class VedtaksmeldingsYtelse { SP, FP, SVP, PP, OP, OM }
 enum class VedtaksmeldingsStatus(val correspondingDomainStatus: Ytelsesperiode.Status) {
     BEHANDLES(Ytelsesperiode.Status.UNDER_BEHANDLING),
     INNVILGET(Ytelsesperiode.Status.INNVILGET),
-    AVLÅTT(Ytelsesperiode.Status.AVSLÅTT),
+    AVSLÅTT(Ytelsesperiode.Status.AVSLÅTT),
     HENLAGT(Ytelsesperiode.Status.HENLAGT)
 }
 
