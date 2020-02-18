@@ -30,14 +30,25 @@ sonarqube {
         property("sonar.projectKey", "navikt_helse-spion")
         property("sonar.organization", "navit")
         property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.login", System.getenv("SONAR_TOKEN") )
+        property("sonar.login", System.getenv("SONAR_TOKEN"))
+        property("sonar.exclusions", "**/Koin*")
     }
 }
 
 tasks.jacocoTestReport {
+    executionData("build/jacoco/test.exec", "build/jacoco/slowTests.exec")
     reports {
         xml.isEnabled = true
+        html.isEnabled = true
     }
+}
+
+tasks.withType<JacocoReport> {
+    classDirectories.setFrom(
+            sourceSets.main.get().output.asFileTree.matching {
+                exclude("**/Koin**", "**/AppKt**")
+            }
+    )
 }
 
 buildscript {
@@ -85,6 +96,8 @@ dependencies {
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
     testImplementation("org.koin:koin-test:$koinVersion")
+    implementation("com.github.javafaker:javafaker:1.0.1") // flytt denne til test når generatorene ikke er nødvendige i prod-koden lenger
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2")
     testImplementation("io.mockk:mockk:$mockKVersion")
     testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")

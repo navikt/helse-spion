@@ -2,6 +2,7 @@ package no.nav.helse.slowtests.kafka
 
 import no.nav.helse.spion.kafka.*
 import no.nav.helse.spion.web.common
+import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.KafkaAdminClient
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -27,11 +28,13 @@ import java.util.concurrent.TimeUnit
  * docker-compose build
  * docker-compose up
  */
-internal class SaksgangConsumerTest : KoinComponent {
+internal class VedtaksmeldingClientTest : KoinComponent {
+    private lateinit var adminClient: AdminClient
     val topicName = "topic"
 
     val testProps = mapOf(
-            "bootstrap.servers" to  "localhost:9092",
+            "bootstrap.servers" to "localhost:9092",
+            "max.poll.interval.ms" to "30000",
             "group.id" to "juicey"
     )
 
@@ -41,7 +44,7 @@ internal class SaksgangConsumerTest : KoinComponent {
             loadKoinModules(common)
         }
 
-        val adminClient = KafkaAdminClient.create(testProps)
+        adminClient = KafkaAdminClient.create(testProps)
 
         adminClient
                 .createTopics(mutableListOf(NewTopic(topicName, 1, 1)))
@@ -52,40 +55,41 @@ internal class SaksgangConsumerTest : KoinComponent {
     @AfterEach
     internal fun tearDown() {
         stopKoin()
-        val adminClient = KafkaAdminClient.create(testProps)
         adminClient.deleteTopics(mutableListOf(topicName))
+        adminClient.close()
     }
 
     @Test
     fun getMessages() {
 
-        val consumer = SaksgangConsumer(testProps, topicName, get())
-        val noMessagesExpected = consumer.getMessages()
+        val client = VedtaksmeldingClient(testProps, topicName, get())
+        val noMessagesExpected = client.getMessagesToProcess()
 
         Assert.assertEquals(0, noMessagesExpected.size)
 
-        val producer = KafkaProducer<String, VedtaksMelding>(testProps, StringSerializer(), VedtaksMeldingSerDes(get()))
+        val producer = KafkaProducer<String, Vedtaksmelding>(testProps, StringSerializer(), VedtaksMeldingSerDes(get()))
 
         producer.send(
-                ProducerRecord(topicName, VedtaksMelding(
+                ProducerRecord(topicName, Vedtaksmelding(
                         "222323",
                         "323232323",
-                        SaksStatus.BEHANDLES,
+                        VedtaksmeldingsStatus.BEHANDLES,
                         LocalDate.now(),
                         LocalDate.now(),
-                        SaksYtelse.SP,
+                        VedtaksmeldingsYtelse.SP,
                         "Hans",
                         "Ingenmann",
                         100,
-                        938293.9
+                        938293.9,
+                        2387.0,
+                        maksDato = LocalDate.now().plusDays(10)
                 ))
         ).get(10, TimeUnit.SECONDS)
 
-        val oneMessageExpected = consumer.getMessages()
+        val oneMessageExpected = client.getMessagesToProcess()
 
         Assert.assertEquals(1, oneMessageExpected.size)
 
-
-
+        client.stop()
     }
 }

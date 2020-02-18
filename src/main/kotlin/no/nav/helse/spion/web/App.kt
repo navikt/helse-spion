@@ -19,11 +19,13 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.auth.localCookieDispenser
+import no.nav.helse.spion.kafka.VedtaksmeldingProcessor
 import no.nav.helse.spion.nais.nais
 import no.nav.helse.spion.web.api.spion
 import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.get
+import org.koin.ktor.ext.getKoin
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -33,11 +35,15 @@ fun main() {
         LoggerFactory.getLogger("main")
             .error("uncaught exception in thread ${thread.name}: ${err.message}", err)
     }
+
     embeddedServer(Netty, createApplicationEnvironment()).let { app ->
         app.start(wait = false)
         Runtime.getRuntime().addShutdownHook(Thread {
             app.stop(1, 1, TimeUnit.SECONDS)
         })
+
+        val kafkaProcessor = app.application.getKoin().get<VedtaksmeldingProcessor>()
+        kafkaProcessor.startAsync()
     }
 }
 
