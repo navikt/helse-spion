@@ -2,6 +2,7 @@ package no.nav.helse.slowtests.kafka
 
 import no.nav.helse.spion.kafka.*
 import no.nav.helse.spion.web.common
+import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.KafkaAdminClient
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit
  * docker-compose up
  */
 internal class VedtaksmeldingClientTest : KoinComponent {
+    private lateinit var adminClient: AdminClient
     val topicName = "topic"
 
     val testProps = mapOf(
@@ -42,7 +44,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
             loadKoinModules(common)
         }
 
-        val adminClient = KafkaAdminClient.create(testProps)
+        adminClient = KafkaAdminClient.create(testProps)
 
         adminClient
                 .createTopics(mutableListOf(NewTopic(topicName, 1, 1)))
@@ -53,8 +55,8 @@ internal class VedtaksmeldingClientTest : KoinComponent {
     @AfterEach
     internal fun tearDown() {
         stopKoin()
-        val adminClient = KafkaAdminClient.create(testProps)
         adminClient.deleteTopics(mutableListOf(topicName))
+        adminClient.close()
     }
 
     @Test
@@ -87,5 +89,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         val oneMessageExpected = client.getMessagesToProcess()
 
         Assert.assertEquals(1, oneMessageExpected.size)
+
+        client.stop()
     }
 }
