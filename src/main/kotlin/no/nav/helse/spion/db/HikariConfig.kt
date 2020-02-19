@@ -18,20 +18,16 @@ fun createHikariConfig(jdbcUrl: String, username: String? = null, password: Stri
         password?.let { this.password = it }
     }
 
-@KtorExperimentalAPI
-fun Application.createHikariConfigFromEnvironment() =
-    createHikariConfig(
-        jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s%s",
-                environment.config.property("database.host").getString(),
-                environment.config.property("database.port").getString(),
-                environment.config.property("database.name").getString(),
-                environment.config.propertyOrNull("database.username")?.getString()?.let {"?user=$it"}),
-        username = environment.config.propertyOrNull("database.username")?.getString(),
-        password = environment.config.propertyOrNull("database.password")?.getString()
-    )
 
-@KtorExperimentalAPI
-fun Application.hikariConfig(): HikariDataSource? {
-    migrate(createHikariConfigFromEnvironment())
-    return getDataSource(createHikariConfigFromEnvironment())
-}
+fun createLocalHikariConfig() =
+        HikariConfig().apply {
+            this.jdbcUrl = "jdbc:postgresql://localhost:5432/spion"
+            maximumPoolSize = 3
+            minimumIdle = 1
+            idleTimeout = 10001
+            connectionTimeout = 1000
+            maxLifetime = 30001
+            driverClassName = "org.postgresql.Driver"
+            username = "spion"
+            password = "spion"
+        }

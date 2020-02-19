@@ -16,7 +16,11 @@ import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.auth.altinn.AltinnClient
+import no.nav.helse.spion.db.createHikariConfig
+import no.nav.helse.spion.db.createLocalHikariConfig
+import no.nav.helse.spion.db.getDataSource
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
+import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
 import org.koin.core.Koin
@@ -25,9 +29,10 @@ import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
+
 @KtorExperimentalAPI
-fun selectModuleBasedOnProfile(config: ApplicationConfig) : List<Module> {
-    val envModule =  when(config.property("koin.profile").getString()) {
+fun selectModuleBasedOnProfile(config: ApplicationConfig): List<Module> {
+    val envModule = when (config.property("koin.profile").getString()) {
         "LOCAL" -> localDevConfig(config)
         "PREPROD" -> preprodConfig(config)
         "PROD" -> prodConfig(config)
@@ -53,50 +58,77 @@ val common = module {
     single { om }
 
     val httpClient = HttpClient(Apache) {
-        install(JsonFeature) { serializer = JacksonSerializer {
-            configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
-        } }
+        install(JsonFeature) {
+            serializer = JacksonSerializer {
+                configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+            }
+        }
     }
 
     single { httpClient }
+
 }
 
 fun localDevConfig(config: ApplicationConfig) = module {
-    single {MockYtelsesperiodeRepository() as YtelsesperiodeRepository}
-    single {MockAuthRepo(get()) as AuthorizationsRepository} bind MockAuthRepo::class
-    single {DefaultAuthorizer(get()) as Authorizer }
-    single {SpionService(get(), get())}
+
+    single { PostgresRepository(getDataSource(createLocalHikariConfig(), "spion", null)) as YtelsesperiodeRepository }
+    single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
+    single { DefaultAuthorizer(get()) as Authorizer }
+    single { SpionService(get(), get()) }
 
     LocalOIDCWireMock.start()
 }
 
 @KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
-    single {MockYtelsesperiodeRepository() as YtelsesperiodeRepository}
-    single {SpionService(get(), get())}
-    single {AltinnClient(
-            config.getString("altinn.service_owner_api_url"),
-            config.getString("altinn.gw_api_key"),
-            config.getString("altinn.altinn_api_key"),
-            config.getString("altinn.service_id"),
-            get()
-    ) as AuthorizationsRepository}
-    single {DefaultAuthorizer(get()) as Authorizer }
+    single {
+        PostgresRepository(getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
+                config.getString("database.username"),
+                config.getString("database.password")),
+                config.getString("database.name"),
+                config.getString("database.vault.mountpath"))) as YtelsesperiodeRepository
+    }
+    single { SpionService(get(), get()) }
+    single {
+        AltinnClient(
+                config.getString("altinn.service_owner_api_url"),
+                config.getString("altinn.gw_api_key"),
+                config.getString("altinn.altinn_api_key"),
+                config.getString("altinn.service_id"),
+                get()
+        ) as AuthorizationsRepository
+    }
+    single { DefaultAuthorizer(get()) as Authorizer }
 }
 
 
-fun prodConfig(config: ApplicationConfig) = module{
-    single {MockYtelsesperiodeRepository() as YtelsesperiodeRepository}
-    single {MockAuthRepo(get()) as AuthorizationsRepository} bind MockAuthRepo::class
-    single {SpionService(get(), get())}
-    single {DefaultAuthorizer(get()) as Authorizer }
+fun prodConfig(config: ApplicationConfig) = module {
+    single {
+        PostgresRepository(getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
+                config.getString("database.username"),
+                config.getString("database.password")),
+                config.getString("database.name"),
+                config.getString("database.vault.mountpath"))) as YtelsesperiodeRepository
+    }
+    single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
+    single { SpionService(get(), get()) }
+    single { DefaultAuthorizer(get()) as Authorizer }
 }
 
 
 // utils
 @KtorExperimentalAPI
-fun ApplicationConfig.getString(path : String): String {
+fun ApplicationConfig.getString(path: String): String {
     return this.property(path).getString()
+}
+
+@KtorExperimentalAPI
+fun ApplicationConfig.getjdbcUrlFromProperties(): String {
+    return String.format("jdbc:postgresql://%s:%s/%s%s",
+            this.property("database.host").getString(),
+            this.property("database.name").getString(),
+            this.property("database.port").getString(),
+            this.propertyOrNull("database.username")?.getString()?.let { "?user=$it" })
 }
 
 inline fun <reified T : Any> Koin.getAllOfType(): Collection<T> =

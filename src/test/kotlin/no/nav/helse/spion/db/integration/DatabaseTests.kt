@@ -8,11 +8,15 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.ktor.config.ApplicationConfig
 import no.nav.helse.YtelsesperiodeGenerator
+import no.nav.helse.spion.db.PostgresYtelsesperiodeDao
+import no.nav.helse.spion.db.YtelsesperiodeDao
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.Person
 import no.nav.helse.spion.domene.ytelsesperiode.Arbeidsforhold
+import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresRepository
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import org.apache.commons.lang3.time.StopWatch
 import org.junit.jupiter.api.Test
@@ -61,23 +65,16 @@ class postgresTests {
     val dataSource =  HikariDataSource(config)
 
     @Test
-    fun `Lagrer en ytelsesperiode`() {
-        val con = dataSource.connection
-        con.prepareStatement("INSERT INTO spiondata (ytelsesperiode) VALUES ('$testJson')").executeUpdate()
+    fun `Lagrer en ytelsesperiode via repo`() {
 
-        val res = con.prepareStatement("SELECT ytelsesperiode::json from spiondata where ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'virksomhetsnummer' = '555555555';").executeQuery()
-        res.next()
-        val responsString = res.getString("ytelsesperiode")
+        val repo = PostgresRepository(dataSource)
+        repo.lagreYtelsesperiode(testYtelsesPeriode)
+        val p = repo.hentYtelserForPerson("10987654321", "555555555")
 
-        val yp: Ytelsesperiode = mapper.readValue(responsString)
-        assertEquals(testYtelsesPeriode, yp)
-        assertEquals(testYtelsesPeriode.arbeidsforhold.arbeidsforholdId, yp.arbeidsforhold.arbeidsforholdId)
+        assertEquals(testYtelsesPeriode, p.first())
 
-
-        //cleanup
-        con.prepareStatement("DELETE  FROM spiondata WHERE id = 1").executeUpdate()
-        con.close()
-
+        val dao = PostgresYtelsesperiodeDao(dataSource.connection)
+        dao.delete(testYtelsesPeriode.arbeidsforhold, testYtelsesPeriode.periode)
 
     }
 
@@ -112,7 +109,7 @@ class postgresTests {
     }
 
 
-    @Test
+
     internal fun timeQueries() {
         val con = dataSource.connection
 
