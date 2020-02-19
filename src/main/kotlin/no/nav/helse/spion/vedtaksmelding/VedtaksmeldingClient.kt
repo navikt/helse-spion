@@ -1,6 +1,5 @@
 package no.nav.helse.spion.vedtaksmelding
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.helse.spion.selfcheck.HealthCheck
 import no.nav.helse.spion.selfcheck.HealthCheckType
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -14,7 +13,7 @@ interface KafkaMessageProvider {
     fun confirmProcessingDone()
 }
 
-class VedtaksmeldingClient(props: Map<String, Any>, topicName: String, om: ObjectMapper) : KafkaMessageProvider, HealthCheck {
+class VedtaksmeldingClient(props: Map<String, Any>, topicName: String) : KafkaMessageProvider, HealthCheck {
     private val consumer = KafkaConsumer<String, String>(props.apply { }, StringDeserializer(), StringDeserializer())
     override val healthCheckType = HealthCheckType.ALIVENESS
 

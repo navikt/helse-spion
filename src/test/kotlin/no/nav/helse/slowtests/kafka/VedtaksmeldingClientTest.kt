@@ -1,6 +1,10 @@
 package no.nav.helse.slowtests.kafka
 
-import no.nav.helse.spion.vedtaksmelding.*
+import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.helse.spion.vedtaksmelding.Vedtaksmelding
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingClient
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingsStatus
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingsYtelse
 import no.nav.helse.spion.web.common
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.KafkaAdminClient
@@ -62,15 +66,16 @@ internal class VedtaksmeldingClientTest : KoinComponent {
     @Test
     fun getMessages() {
 
-        val client = VedtaksmeldingClient(testProps, topicName, get())
+        val client = VedtaksmeldingClient(testProps, topicName)
         val noMessagesExpected = client.getMessagesToProcess()
 
         Assert.assertEquals(0, noMessagesExpected.size)
 
-        val producer = KafkaProducer<String, Vedtaksmelding>(testProps, StringSerializer(), VedtaksMeldingSerDes(get()))
+        val producer = KafkaProducer<String, String>(testProps, StringSerializer(), StringSerializer())
+        val om = get<ObjectMapper>()
 
         producer.send(
-                ProducerRecord(topicName, Vedtaksmelding(
+                ProducerRecord(topicName, om.writeValueAsString(Vedtaksmelding(
                         "222323",
                         "323232323",
                         VedtaksmeldingsStatus.BEHANDLES,
@@ -83,7 +88,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
                         938293.9,
                         2387.0,
                         maksDato = LocalDate.now().plusDays(10)
-                ))
+                )))
         ).get(10, TimeUnit.SECONDS)
 
         val oneMessageExpected = client.getMessagesToProcess()

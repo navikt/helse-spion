@@ -1,10 +1,6 @@
 package no.nav.helse.spion.vedtaksmelding
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
-import org.apache.kafka.common.serialization.Deserializer
-import org.apache.kafka.common.serialization.Serializer
 import java.time.LocalDate
 
 enum class VedtaksmeldingsYtelse { SP, FP, SVP, PP, OP, OM }
@@ -32,25 +28,3 @@ data class Vedtaksmelding(
         val maksDato: LocalDate?
 
 )
-
-internal abstract class SerDes<V>(protected val om: ObjectMapper) : Serializer<V>, Deserializer<V> {
-    override fun serialize(topic: String?, data: V): ByteArray? {
-        return data?.let {
-            om.writeValueAsBytes(it)
-        }
-    }
-
-    override fun configure(configs: MutableMap<String, *>?, isKey: Boolean) { /* objectmapperen er allerde konfigurert*/
-    }
-
-    override fun close() { /* ikke nødvending for jackson */
-    }
-}
-
-internal class VedtaksMeldingSerDes(om: ObjectMapper) : SerDes<Vedtaksmelding>(om) {
-    override fun deserialize(topic: String?, data: ByteArray?): Vedtaksmelding? {
-        return data?.let {
-            om.readValue<Vedtaksmelding>(it)
-        }
-    }
-}
