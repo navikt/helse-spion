@@ -12,6 +12,7 @@ import io.ktor.config.ApplicationConfig
 import no.nav.helse.YtelsesperiodeGenerator
 import no.nav.helse.spion.db.PostgresYtelsesperiodeDao
 import no.nav.helse.spion.db.YtelsesperiodeDao
+import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.Person
@@ -28,17 +29,6 @@ import kotlin.test.assertEquals
 
 class postgresTests {
 
-    val config = HikariConfig().apply {
-        jdbcUrl = "jdbc:postgresql://localhost:5432/spion"
-        maximumPoolSize = 3
-        minimumIdle = 1
-        idleTimeout = 10001
-        connectionTimeout = 1000
-        maxLifetime = 30001
-        driverClassName = "org.postgresql.Driver"
-        username = "spion"
-        password = "spion"
-    }
 
     val testYtelsesPeriode = Ytelsesperiode(
             periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
@@ -60,9 +50,7 @@ class postgresTests {
     )
     val mapper = ObjectMapper().registerModule(KotlinModule()).registerModule(JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-    val testJson = mapper.writeValueAsString(testYtelsesPeriode)
-
-    val dataSource =  HikariDataSource(config)
+    val dataSource =  HikariDataSource(createLocalHikariConfig())
 
     @Test
     fun `Lagrer en ytelsesperiode via repo`() {
@@ -107,8 +95,6 @@ class postgresTests {
 
         println("Done inserting " + numBulks * bulkSize + " items in $totalInsertTime ms")
     }
-
-
 
     internal fun timeQueries() {
         val con = dataSource.connection
