@@ -16,9 +16,7 @@ import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import javax.sql.DataSource
 
 class PostgresRepository (ds: DataSource) : YtelsesperiodeRepository {
-
     val dataSource = ds
-
 
     override fun hentArbeidsgivere(identitetsnummer: String): List<Arbeidsgiver> {
         TODO("not implemented")

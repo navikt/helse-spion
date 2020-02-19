@@ -70,7 +70,6 @@ val common = module {
 }
 
 fun localDevConfig(config: ApplicationConfig) = module {
-
     single { PostgresRepository(getDataSource(createLocalHikariConfig(), "spion", null)) as YtelsesperiodeRepository }
     single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
     single { DefaultAuthorizer(get()) as Authorizer }
@@ -81,8 +80,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
 
 @KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
-    single {
-        PostgresRepository(getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
+    single { PostgresRepository(getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
                 config.getString("database.username"),
                 config.getString("database.password")),
                 config.getString("database.name"),

@@ -10,8 +10,6 @@ import java.time.LocalDate
 
 class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
 
-
-
     val testYtelsesPeriode = Ytelsesperiode(
             periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
             arbeidsforhold = Arbeidsforhold(
@@ -30,7 +28,6 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
             merknad = "Fritak fra AGP",
             sistEndret = LocalDate.now()
     )
-
 
     override fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
         val perioder = listOf(
