@@ -1,5 +1,6 @@
-package no.nav.helse.spion.kafka
+package no.nav.helse.spion.vedtaksmelding
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -11,10 +12,13 @@ import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.util.*
 
 class VedtaksmeldingProcessor(
-        val kafkaVedtaksProvider: KafkaMessageProvider<Vedtaksmelding>,
+        val kafkaVedtaksProvider: KafkaMessageProvider,
         val ypDao: YtelsesperiodeRepository,
+        val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
+        val om: ObjectMapper,
         val coroutineScope: CoroutineScope,
         val waitTimeWhenEmptyQueue: Long = 30000
 ) {
@@ -61,9 +65,18 @@ class VedtaksmeldingProcessor(
         return wasEmpty
     }
 
-    fun processOneMessage(melding: Vedtaksmelding) {
-        val mapped = mapVedtaksMeldingTilYtelsesPeriode(melding)
-        ypDao.save(mapped)
+    fun processOneMessage(melding: String) {
+        try {
+            val deserializedKafkaMessage = om.readValue(melding, Vedtaksmelding::class.java)
+            val mapped = mapVedtaksMeldingTilYtelsesPeriode(deserializedKafkaMessage)
+            ypDao.save(mapped)
+        } catch (t: Throwable) {
+            val errorId = UUID.randomUUID()
+            logger.error("Feilet vedtaksmelding, ID: $errorId", t)
+            failedVedtaksmeldingRepository.save(FailedVedtaksmelding(
+                    melding, t.message, errorId
+            ))
+        }
     }
 }
 

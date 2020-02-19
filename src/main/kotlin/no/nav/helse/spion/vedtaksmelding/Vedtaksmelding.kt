@@ -1,4 +1,4 @@
-package no.nav.helse.spion.kafka
+package no.nav.helse.spion.vedtaksmelding
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue

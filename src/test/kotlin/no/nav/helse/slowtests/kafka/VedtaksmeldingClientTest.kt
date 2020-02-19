@@ -1,6 +1,6 @@
 package no.nav.helse.slowtests.kafka
 
-import no.nav.helse.spion.kafka.*
+import no.nav.helse.spion.vedtaksmelding.*
 import no.nav.helse.spion.web.common
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.KafkaAdminClient
