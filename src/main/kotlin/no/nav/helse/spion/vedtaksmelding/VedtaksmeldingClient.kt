@@ -1,6 +1,5 @@
-package no.nav.helse.spion.kafka
+package no.nav.helse.spion.vedtaksmelding
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.helse.spion.selfcheck.HealthCheck
 import no.nav.helse.spion.selfcheck.HealthCheckType
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -9,19 +8,23 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 
-interface KafkaMessageProvider<T> {
-    fun getMessagesToProcess(): List<T>
+interface KafkaMessageProvider {
+    fun getMessagesToProcess(): List<String>
     fun confirmProcessingDone()
 }
 
-class VedtaksmeldingClient(props: Map<String, Any>, topicName: String, om: ObjectMapper) : KafkaMessageProvider<Vedtaksmelding>, HealthCheck {
-    private val serdes = VedtaksMeldingSerDes(om)
-    private val consumer = KafkaConsumer<String, Vedtaksmelding>(props, StringDeserializer(), serdes)
+class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String, pollWaitWhenEmpty: Int = 30000) : KafkaMessageProvider, HealthCheck {
+    private val consumer: KafkaConsumer<String, String>
     override val healthCheckType = HealthCheckType.ALIVENESS
 
     private val log = LoggerFactory.getLogger(VedtaksmeldingClient::class.java)
 
     init {
+        props.apply {
+            put("enable.auto.commit", false)
+        }
+
+        consumer = KafkaConsumer<String, String>(props.apply { }, StringDeserializer(), StringDeserializer())
         consumer.subscribe(Collections.singletonList(topicName));
 
         Runtime.getRuntime().addShutdownHook(Thread {
@@ -33,7 +36,7 @@ class VedtaksmeldingClient(props: Map<String, Any>, topicName: String, om: Objec
 
     fun stop() = consumer.close()
 
-    override fun getMessagesToProcess(): List<Vedtaksmelding> {
+    override fun getMessagesToProcess(): List<String> {
         return consumer.poll(Duration.ofSeconds(10)).map { it.value() }.toList()
     }
 

@@ -21,10 +21,7 @@ import no.nav.helse.spion.auth.altinn.AltinnClient
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
-import no.nav.helse.spion.kafka.KafkaMessageProvider
-import no.nav.helse.spion.kafka.Vedtaksmelding
-import no.nav.helse.spion.kafka.VedtaksmeldingGenerator
-import no.nav.helse.spion.kafka.VedtaksmeldingProcessor
+import no.nav.helse.spion.vedtaksmelding.*
 import org.koin.core.Koin
 import org.koin.core.definition.Kind
 import org.koin.core.module.Module
@@ -33,8 +30,8 @@ import org.koin.dsl.module
 import kotlin.random.Random
 
 @KtorExperimentalAPI
-fun selectModuleBasedOnProfile(config: ApplicationConfig) : List<Module> {
-    val envModule =  when(config.property("koin.profile").getString()) {
+fun selectModuleBasedOnProfile(config: ApplicationConfig): List<Module> {
+    val envModule = when (config.property("koin.profile").getString()) {
         "LOCAL" -> localDevConfig(config)
         "PREPROD" -> preprodConfig(config)
         "PROD" -> prodConfig(config)
@@ -60,9 +57,11 @@ val common = module {
     single { om }
 
     val httpClient = HttpClient(Apache) {
-        install(JsonFeature) { serializer = JacksonSerializer {
-            configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
-        } }
+        install(JsonFeature) {
+            serializer = JacksonSerializer {
+                configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+            }
+        }
     }
 
     single { httpClient }
@@ -74,22 +73,10 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
 
-    single {
-        object : KafkaMessageProvider<Vedtaksmelding> { // dum mock
-            val generator = VedtaksmeldingGenerator(100, 1000)
-            override fun getMessagesToProcess(): List<Vedtaksmelding> {
-                return if (Random.Default.nextDouble() < 0.1)
-                    generator.take(Random.Default.nextInt(2, 50))
-                else emptyList()
-            }
+    single { generateKafkaMock(get()) as KafkaMessageProvider }
 
-            override fun confirmProcessingDone() {
-                println("KafkaMock: Comitta til kafka")
-            }
-        } as KafkaMessageProvider<Vedtaksmelding>
-    }
-
-    single { VedtaksmeldingProcessor(get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
+    single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
+    single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
 
     LocalOIDCWireMock.start()
 }
@@ -109,52 +96,42 @@ fun preprodConfig(config: ApplicationConfig) = module {
     }
     single { DefaultAuthorizer(get()) as Authorizer }
 
+    single { generateKafkaMock(get()) as KafkaMessageProvider }
 
-    single {
-        object : KafkaMessageProvider<Vedtaksmelding> { // dum mock
-            val generator = VedtaksmeldingGenerator(100, 1000)
-            override fun getMessagesToProcess(): List<Vedtaksmelding> {
-                return if (Random.Default.nextDouble() < 0.1)
-                    generator.take(Random.Default.nextInt(2, 50))
-                else emptyList()
-            }
-
-            override fun confirmProcessingDone() {
-                println("KafkaMock: Comitta til kafka")
-            }
-        } as KafkaMessageProvider<Vedtaksmelding>
-    }
-
-    single { VedtaksmeldingProcessor(get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
-
+    single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
+    single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
 }
 
-fun prodConfig(config: ApplicationConfig) = module{
+fun prodConfig(config: ApplicationConfig) = module {
     single { MockYtelsesperiodeRepository() as YtelsesperiodeRepository }
     single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
+    single { generateKafkaMock(get()) as KafkaMessageProvider }
+    single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
 
-    single {
-        object : KafkaMessageProvider<Vedtaksmelding> { // tomt
-            override fun getMessagesToProcess(): List<Vedtaksmelding> {
-                return emptyList()
-            }
-
-            override fun confirmProcessingDone() {
-                println("KafkaMock: Comitta til kafka")
-            }
-        } as KafkaMessageProvider<Vedtaksmelding>
-    }
-
-    single { VedtaksmeldingProcessor(get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
+    single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
 }
 
+val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
+    return object : KafkaMessageProvider { // dum mock
+        val generator = VedtaksmeldingGenerator(100, 1000)
+        override fun getMessagesToProcess(): List<String> {
+            return if (Random.Default.nextDouble() < 0.1)
+                generator.take(Random.Default.nextInt(2, 50)).map { om.writeValueAsString(it) }
+            else emptyList()
+        }
+
+        override fun confirmProcessingDone() {
+            println("KafkaMock: Comitta til kafka")
+        }
+    }
+}
 
 // utils
 @KtorExperimentalAPI
-fun ApplicationConfig.getString(path : String): String {
+fun ApplicationConfig.getString(path: String): String {
     return this.property(path).getString()
 }
 

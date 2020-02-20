@@ -1,4 +1,4 @@
-package no.nav.helse.spion.kafka
+package no.nav.helse.spion.vedtaksmelding
 
 import com.github.javafaker.Faker
 import no.nav.helse.spion.domene.Arbeidsgiver

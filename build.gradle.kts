@@ -31,7 +31,7 @@ sonarqube {
         property("sonar.organization", "navit")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.login", System.getenv("SONAR_TOKEN"))
-        property("sonar.exclusions", "**/Koin*")
+        property("sonar.exclusions", "**/Koin*,**Mock**")
     }
 }
 
@@ -46,7 +46,7 @@ tasks.jacocoTestReport {
 tasks.withType<JacocoReport> {
     classDirectories.setFrom(
             sourceSets.main.get().output.asFileTree.matching {
-                exclude("**/Koin**", "**/AppKt**")
+                exclude("**/Koin**", "**/App**", "**Mock**")
             }
     )
 }
