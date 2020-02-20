@@ -55,19 +55,12 @@ internal class dbUnitTests : KoinComponent {
     internal fun setUp() {
         startKoin {
             loadKoinModules(common)
-
         }
-
-        val repo = PostgresRepository(dataSource, get())
-        repo.saveYtelsesperiode(testYtelsesPeriode)
     }
 
     @AfterEach
     internal fun tearDown() {
-        val repo = PostgresRepository(dataSource, get())
-        repo.deleteYtelsesperiode(testYtelsesPeriode)
         stopKoin()
-
     }
     @Test
     fun `Lukker connection etter bruk`() {
