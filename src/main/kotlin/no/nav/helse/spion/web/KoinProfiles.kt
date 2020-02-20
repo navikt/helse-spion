@@ -70,7 +70,7 @@ val common = module {
 }
 
 fun localDevConfig(config: ApplicationConfig) = module {
-    single { PostgresRepository(getDataSource(createLocalHikariConfig(), "spion", null)) as YtelsesperiodeRepository }
+    single { PostgresRepository(getDataSource(createLocalHikariConfig(), "spion", null), get()) as YtelsesperiodeRepository }
     single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
@@ -84,7 +84,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 config.getString("database.username"),
                 config.getString("database.password")),
                 config.getString("database.name"),
-                config.getString("database.vault.mountpath"))) as YtelsesperiodeRepository
+                config.getString("database.vault.mountpath")), get()) as YtelsesperiodeRepository
     }
     single { SpionService(get(), get()) }
     single {
@@ -106,7 +106,7 @@ fun prodConfig(config: ApplicationConfig) = module {
                 config.getString("database.username"),
                 config.getString("database.password")),
                 config.getString("database.name"),
-                config.getString("database.vault.mountpath"))) as YtelsesperiodeRepository
+                config.getString("database.vault.mountpath")), get()) as YtelsesperiodeRepository
     }
     single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
     single { SpionService(get(), get()) }
