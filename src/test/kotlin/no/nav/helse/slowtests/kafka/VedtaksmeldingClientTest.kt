@@ -1,6 +1,7 @@
 package no.nav.helse.slowtests.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.spion.vedtaksmelding.Vedtaksmelding
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingClient
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingsStatus
@@ -13,9 +14,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.Assert
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.koin.core.KoinComponent
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
@@ -32,17 +31,18 @@ import java.util.concurrent.TimeUnit
  * docker-compose build
  * docker-compose up
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksmeldingClientTest : KoinComponent {
     private lateinit var adminClient: AdminClient
     val topicName = "topic"
 
-    val testProps = mapOf(
+    val testProps = mutableMapOf<String, Any>(
             "bootstrap.servers" to "localhost:9092",
             "max.poll.interval.ms" to "30000",
             "group.id" to "juicey"
     )
 
-    @BeforeEach
+    @BeforeAll
     internal fun setUp() {
         startKoin {
             loadKoinModules(common)
@@ -56,11 +56,22 @@ internal class VedtaksmeldingClientTest : KoinComponent {
                 .get(20, TimeUnit.SECONDS)
     }
 
-    @AfterEach
+    @AfterAll
     internal fun tearDown() {
         stopKoin()
         adminClient.deleteTopics(mutableListOf(topicName))
         adminClient.close()
+    }
+
+    @Test
+    internal fun testHealthCheck() {
+        val client = VedtaksmeldingClient(testProps, topicName)
+
+        runBlocking { client.doHealthCheck() }
+
+        client.stop()
+
+        assertThrows<Exception> { runBlocking { client.doHealthCheck() } }
     }
 
     @Test
@@ -92,8 +103,12 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         ).get(10, TimeUnit.SECONDS)
 
         val oneMessageExpected = client.getMessagesToProcess()
-
         Assert.assertEquals(1, oneMessageExpected.size)
+
+        client.confirmProcessingDone()
+
+        val zeroMessagesExpected = client.getMessagesToProcess()
+        Assert.assertEquals(0, zeroMessagesExpected.size)
 
         client.stop()
     }

@@ -13,13 +13,18 @@ interface KafkaMessageProvider {
     fun confirmProcessingDone()
 }
 
-class VedtaksmeldingClient(props: Map<String, Any>, topicName: String) : KafkaMessageProvider, HealthCheck {
-    private val consumer = KafkaConsumer<String, String>(props.apply { }, StringDeserializer(), StringDeserializer())
+class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String, pollWaitWhenEmpty: Int = 30000) : KafkaMessageProvider, HealthCheck {
+    private val consumer: KafkaConsumer<String, String>
     override val healthCheckType = HealthCheckType.ALIVENESS
 
     private val log = LoggerFactory.getLogger(VedtaksmeldingClient::class.java)
 
     init {
+        props.apply {
+            put("enable.auto.commit", false)
+        }
+
+        consumer = KafkaConsumer<String, String>(props.apply { }, StringDeserializer(), StringDeserializer())
         consumer.subscribe(Collections.singletonList(topicName));
 
         Runtime.getRuntime().addShutdownHook(Thread {
