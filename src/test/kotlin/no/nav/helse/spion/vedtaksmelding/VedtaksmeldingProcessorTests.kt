@@ -75,7 +75,7 @@ open class VedtaksmeldingProcessorTests {
         assertThat(saveArg.isCaptured).isTrue()
         assertThat(saveArg.captured.errorMessage).isEqualTo(message)
         assertThat(saveArg.captured.id).isNotNull()
-        assertThat(saveArg.captured.melding).isEqualTo(messageList[0])
+        assertThat(saveArg.captured.messageData).isEqualTo(messageList[0])
     }
 
     @Test
