@@ -40,6 +40,7 @@ import kotlin.random.Random
 @KtorExperimentalAPI
 fun selectModuleBasedOnProfile(config: ApplicationConfig): List<Module> {
     val envModule = when (config.property("koin.profile").getString()) {
+        "TEST" -> buildAndTestConfig()
         "LOCAL" -> localDevConfig(config)
         "PREPROD" -> preprodConfig(config)
         "PROD" -> prodConfig(config)
@@ -74,6 +75,15 @@ val common = module {
 
     single { httpClient }
 
+}
+
+fun buildAndTestConfig() = module {
+    single { MockYtelsesperiodeRepository() as YtelsesperiodeRepository }
+    single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
+    single { DefaultAuthorizer(get()) as Authorizer }
+    single { SpionService(get(), get()) }
+
+    LocalOIDCWireMock.start()
 }
 
 fun localDevConfig(config: ApplicationConfig) = module {
