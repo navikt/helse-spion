@@ -2,7 +2,7 @@
 set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-    CREATE USER spion;
+    CREATE USER spion WITH PASSWORD 'spion';
     CREATE DATABASE spion;
     CREATE SCHEMA spion;
     GRANT ALL PRIVILEGES ON DATABASE spion TO spion;

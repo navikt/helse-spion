@@ -7,7 +7,8 @@ services:
         ports:
             - "5432:5432"
         environment:
-            - POSTGRES_PASSWORD:spion
+            - POSTGRES_USER=admin
+            - POSTGRES_PASSWORD=admin
     kafka:
         build:
             context: ./kafka
@@ -15,3 +16,5 @@ services:
         ports:
             - "2181:2181"
             - "9092:9092"
+volumes:
+    data:
