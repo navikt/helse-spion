@@ -161,6 +161,7 @@ tasks.named<Test>("test") {
 
 task<Test>("slowTests") {
     include("no/nav/helse/slowtests/**")
+    outputs.upToDateWhen { false }
 }
 
 tasks.withType<Wrapper> {
