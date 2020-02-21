@@ -52,7 +52,7 @@ internal class postgresTests : KoinComponent {
         }
 
         val repo = PostgresRepository(dataSource, get())
-        repo.saveYtelsesperiode(testYtelsesPeriode)
+        repo.save(testYtelsesPeriode)
     }
 
     @AfterEach
@@ -85,7 +85,7 @@ internal class postgresTests : KoinComponent {
     fun `sletter bare riktig ytelsesperiode`() {
         val repo = PostgresRepository(dataSource, get())
         val ypAnnenPeriode = testYtelsesPeriode.copy(periode = Periode(LocalDate.of(2020, 5, 5), LocalDate.of(2020, 8, 1)))
-        repo.saveYtelsesperiode(ypAnnenPeriode)
+        repo.save(ypAnnenPeriode)
 
         val deletedCount = repo.deleteYtelsesperiode(testYtelsesPeriode)
 
