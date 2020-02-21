@@ -18,8 +18,7 @@ private class ArbeidsgiverGenerator(private val maxUniqueArbeidsgivere: Int = 10
             val arbeidsGiver = Arbeidsgiver(
                     faker.funnyName().name(),
                     Random.Default.nextLong(111111111, 999999999).toString(),
-                    Random.Default.nextLong(111111111, 999999999).toString(),
-                    null
+                    Random.Default.nextLong(111111111, 999999999).toString()
             )
             arbeidsgivere.add(arbeidsGiver)
             arbeidsGiver
@@ -82,7 +81,7 @@ class VedtaksmeldingGenerator(
 
         return Vedtaksmelding(
                 person.identitetsnummer,
-                arbeidsgiverGenerator.getRandomArbeidsGiver().virksomhetsnummer!!,
+                arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!,
                 status,
                 periode.fom,
                 periode.tom,
