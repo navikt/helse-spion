@@ -23,7 +23,7 @@ jobs:
           echo $DOCKER_IMAGE > .docker_image
           echo $(echo $GITHUB_SHA | cut -c1-7) > .docker_tag
       - name: compose up
-        run: cd docker/local && docker-compose up && sleep 15
+        run: cd docker/local && docker-compose up -d && sleep 15
       - name: test and build
         run: ./gradlew --console=plain build test slowTests jacocoTestReport sonarqube
         env:

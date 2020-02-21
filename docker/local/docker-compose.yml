@@ -6,6 +6,8 @@ services:
             dockerfile: postgres.Dockerfile
         ports:
             - "5432:5432"
+        environment:
+            - POSTGRES_PASSWORD:spion
     kafka:
         build:
             context: ./kafka
