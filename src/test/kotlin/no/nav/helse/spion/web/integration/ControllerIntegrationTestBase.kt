@@ -3,7 +3,6 @@ package no.nav.helse.spion.web.integration
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.nimbusds.jwt.SignedJWT
 import io.ktor.application.Application
 import io.ktor.config.ApplicationConfig
 import io.ktor.config.MapApplicationConfig
@@ -54,7 +53,7 @@ open class ControllerIntegrationTestBase : KoinTest {
     @KtorExperimentalAPI
     private fun addIntegrationTestConfigValues(config : MapApplicationConfig, acceptedIssuer:String = JwtTokenGenerator.ISS, acceptedAudience:String = JwtTokenGenerator.AUD) {
         config.apply {
-            put("koin.profile", "LOCAL")
+            put("koin.profile", "TEST")
             put("no.nav.security.jwt.issuers.size", "1")
             put("no.nav.security.jwt.issuers.0.issuer_name", acceptedIssuer)
             put("no.nav.security.jwt.issuers.0.discoveryurl", server.baseUrl() + "/.well-known/openid-configuration")

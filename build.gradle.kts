@@ -5,7 +5,6 @@ val logback_version = "1.2.1"
 val logback_contrib_version  = "0.1.5"
 val jacksonVersion = "2.9.9"
 val prometheusVersion = "0.6.0"
-val flywayVersion = "6.0.8"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
 val kafkaVersion = "2.0.1"
@@ -87,10 +86,10 @@ dependencies {
 
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
 
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("com.github.tomakehurst:wiremock-standalone:2.25.1")
+    implementation("org.postgresql:postgresql:42.2.9")
 
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
@@ -152,6 +151,8 @@ tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {
         events("passed", "skipped", "failed")
+        showStackTraces = true
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
 }
 
@@ -162,6 +163,7 @@ tasks.named<Test>("test") {
 
 task<Test>("slowTests") {
     include("no/nav/helse/slowtests/**")
+    outputs.upToDateWhen { false }
 }
 
 tasks.withType<Wrapper> {

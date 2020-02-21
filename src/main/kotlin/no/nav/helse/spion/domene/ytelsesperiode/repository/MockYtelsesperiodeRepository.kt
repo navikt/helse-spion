@@ -29,8 +29,7 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
             sistEndret = LocalDate.now()
     )
 
-
-    override fun hentYtelserForPerson(identitetsnummer: String, orgnr: String?): List<Ytelsesperiode> {
+    override fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
         val perioder = listOf(
                 Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
                 Periode(LocalDate.of(2019, 3, 10), LocalDate.of(2019, 3, 28)),

@@ -23,9 +23,9 @@ jobs:
           echo $DOCKER_IMAGE > .docker_image
           echo $(echo $GITHUB_SHA | cut -c1-7) > .docker_tag
       - name: compose up
-        run: cd docker/local && docker-compose up -d && sleep 10
+        run: cd docker/local && docker-compose up -d && sleep 15
       - name: test and build
-        run: ./gradlew  --console=plain build test slowTests jacocoTestReport sonarqube
+        run: ./gradlew --console=plain build test slowTests jacocoTestReport sonarqube
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}

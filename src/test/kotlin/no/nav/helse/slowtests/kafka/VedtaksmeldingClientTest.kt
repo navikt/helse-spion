@@ -15,11 +15,8 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.Assert
 import org.junit.jupiter.api.*
+import org.koin.core.KoinApplication
 import org.koin.core.KoinComponent
-import org.koin.core.context.loadKoinModules
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.core.get
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -35,6 +32,7 @@ import java.util.concurrent.TimeUnit
 internal class VedtaksmeldingClientTest : KoinComponent {
     private lateinit var adminClient: AdminClient
     val topicName = "topic"
+    lateinit var koin: KoinApplication
 
     val testProps = mutableMapOf<String, Any>(
             "bootstrap.servers" to "localhost:9092",
@@ -44,9 +42,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
 
     @BeforeAll
     internal fun setUp() {
-        startKoin {
-            loadKoinModules(common)
-        }
+        koin = KoinApplication.create().modules(common)
 
         adminClient = KafkaAdminClient.create(testProps)
 
@@ -58,7 +54,6 @@ internal class VedtaksmeldingClientTest : KoinComponent {
 
     @AfterAll
     internal fun tearDown() {
-        stopKoin()
         adminClient.deleteTopics(mutableListOf(topicName))
         adminClient.close()
     }
@@ -83,7 +78,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         Assert.assertEquals(0, noMessagesExpected.size)
 
         val producer = KafkaProducer<String, String>(testProps, StringSerializer(), StringSerializer())
-        val om = get<ObjectMapper>()
+        val om = koin.koin.get<ObjectMapper>()
 
         producer.send(
                 ProducerRecord(topicName, om.writeValueAsString(Vedtaksmelding(
