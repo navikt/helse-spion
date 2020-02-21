@@ -16,7 +16,7 @@ class PostgresRepository(val ds: DataSource, val mapper: ObjectMapper) : Ytelses
         ds.connection.use { con ->
             val sql = """SELECT ytelsesperiode::json FROM spiondata 
             WHERE ytelsesperiode -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
-            AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'virksomhetsnummer' = ?;"""
+            AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?;"""
 
             val res = con.prepareStatement(sql).apply{
                 setString(1, identitetsnummer)
@@ -47,12 +47,12 @@ class PostgresRepository(val ds: DataSource, val mapper: ObjectMapper) : Ytelses
         ds.connection.use { con ->
             val sql = """DELETE  FROM spiondata 
          WHERE ytelsesperiode -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
-            AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'virksomhetsnummer' = ?
+            AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
             AND ytelsesperiode -> 'periode' ->> 'fom' = ?
             AND ytelsesperiode -> 'periode' ->> 'tom' = ?;"""
             val deletedCount = con.prepareStatement(sql).apply {
                 setString(1, periode.arbeidsforhold.arbeidstaker.identitetsnummer)
-                setString(2, periode.arbeidsforhold.arbeidsgiver.virksomhetsnummer)
+                setString(2, periode.arbeidsforhold.arbeidsgiver.arbeidsgiverId)
                 setString(3, periode.periode.fom.toString())
                 setString(4, periode.periode.tom.toString())
             }.executeUpdate()

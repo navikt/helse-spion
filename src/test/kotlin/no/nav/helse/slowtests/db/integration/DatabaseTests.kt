@@ -29,7 +29,7 @@ internal class postgresTests : KoinComponent {
             arbeidsforhold = Arbeidsforhold(
                     arbeidsforholdId = "1",
                     arbeidstaker = Person("Solan", "Gundersen", "10987654321"),
-                    arbeidsgiver = Arbeidsgiver("Flåklypa Verksted", "666666666", "555555555", null)
+                    arbeidsgiver = Arbeidsgiver("Flåklypa Verksted", "666666666", "555555555")
             ),
             vedtaksId = "1",
             refusjonsbeløp = BigDecimal(10000),

@@ -85,7 +85,7 @@ fun mapVedtaksMeldingTilYtelsesPeriode(vm: Vedtaksmelding): Ytelsesperiode {
             Periode(vm.fom, vm.tom),
             Arbeidsforhold("",
                     Person(vm.fornavn, vm.etternavn, vm.identitetsNummer),
-                    Arbeidsgiver("TODO?", "TODO?", vm.virksomhetsnummer, null)),
+                    Arbeidsgiver("TODO?", "TODO?", vm.virksomhetsnummer)),
             "UKJENT",
             vm.refusjonsbeløp?.toBigDecimal(),
             vm.status.correspondingDomainStatus,
