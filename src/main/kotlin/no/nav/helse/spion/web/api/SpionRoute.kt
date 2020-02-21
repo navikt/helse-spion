@@ -32,7 +32,7 @@ fun Route.spion(service: SpionService, authorizer: Authorizer) {
 
             post("/oppslag") {
                 val oppslag = call.receive<OppslagDto>()
-                call.respond(service.hentYtelserForPerson(oppslag.identitetsnummer, oppslag.arbeidsgiverOrgnr, oppslag.arbeidsgiverIdentitetsnummer))
+                call.respond(service.hentYtelserForPerson(oppslag.identitetsnummer, oppslag.arbeidsgiverId))
             }
         }
         route("/arbeidsgivere") {

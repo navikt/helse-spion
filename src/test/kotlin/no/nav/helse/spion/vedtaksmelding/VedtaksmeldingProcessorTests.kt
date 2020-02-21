@@ -121,7 +121,7 @@ class VedtaksmeldingMappingTests {
             assertEquals(melding.etternavn, yp.arbeidsforhold.arbeidstaker.etternavn)
             assertEquals(melding.identitetsNummer, yp.arbeidsforhold.arbeidstaker.identitetsnummer)
 
-            assertEquals(melding.virksomhetsnummer, yp.arbeidsforhold.arbeidsgiver.virksomhetsnummer)
+            assertEquals(melding.virksomhetsnummer, yp.arbeidsforhold.arbeidsgiver.arbeidsgiverId)
 
             assertEquals(melding.refusjonsbeløp?.toBigDecimal(), yp.refusjonsbeløp)
             assertEquals(melding.dagsats?.toBigDecimal(), yp.dagsats)

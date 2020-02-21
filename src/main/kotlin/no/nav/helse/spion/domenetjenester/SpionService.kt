@@ -7,7 +7,7 @@ import no.nav.helse.spion.domene.AltinnOrganisasjon
 
 class SpionService(private val sakRepo: YtelsesperiodeRepository, private val authRepo: AuthorizationsRepository) {
 
-    fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String, arbeidsgiverIdentitetsnummer: String?): List<Ytelsesperiode> {
+    fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
         return sakRepo.hentYtelserForPerson(identitetsnummer, virksomhetsnummer)
     }
     fun hentArbeidsgivere(identitet: String) : Set<AltinnOrganisasjon> {
