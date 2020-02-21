@@ -25,10 +25,15 @@ import no.nav.helse.spion.auth.altinn.AltinnClient
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.db.getDataSource
+import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
-import no.nav.helse.spion.vedtaksmelding.*
+import no.nav.helse.spion.vedtaksmelding.FailedVedtaksmeldingRepository
+import no.nav.helse.spion.vedtaksmelding.KafkaMessageProvider
+import no.nav.helse.spion.vedtaksmelding.MockFailedVedtaksmeldingsRepository
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingGenerator
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import org.koin.core.Koin
 import org.koin.core.definition.Kind
 import org.koin.core.module.Module
@@ -119,7 +124,9 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 get()
         ) as AuthorizationsRepository
 
-    }single { DefaultAuthorizer(get()) as Authorizer }single { generateKafkaMock(get()) as KafkaMessageProvider }
+    }
+    single { DefaultAuthorizer(get()) as Authorizer }
+    single { generateKafkaMock(get()) as KafkaMessageProvider }
 
     single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
@@ -135,7 +142,8 @@ fun prodConfig(config: ApplicationConfig) = module {
     }
     single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
     single { SpionService(get(), get()) }
-    single { DefaultAuthorizer(get()) as Authorizer }single { generateKafkaMock(get()) as KafkaMessageProvider }
+    single { DefaultAuthorizer(get()) as Authorizer }
+    single { generateKafkaMock(get()) as KafkaMessageProvider }
     single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
 
     single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
