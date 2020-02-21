@@ -31,7 +31,7 @@ class PostgresRepository(val ds: DataSource, val mapper: ObjectMapper) : Ytelses
         }
     }
 
-    fun saveYtelsesperiode(yp: Ytelsesperiode) {
+    override fun save(yp: Ytelsesperiode) {
         ds.connection.use { con ->
 
             val json = mapper.writeValueAsString(yp)
