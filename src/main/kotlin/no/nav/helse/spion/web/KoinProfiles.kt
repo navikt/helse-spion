@@ -14,6 +14,8 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.auth.altinn.AltinnClient
 import no.nav.helse.spion.db.createHikariConfig
@@ -23,11 +25,13 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRep
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
+import no.nav.helse.spion.vedtaksmelding.*
 import org.koin.core.Koin
 import org.koin.core.definition.Kind
 import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import kotlin.random.Random
 
 
 @KtorExperimentalAPI
@@ -75,17 +79,16 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
 
+    single { generateKafkaMock(get()) as KafkaMessageProvider }
+
+    single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
+    single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
+
     LocalOIDCWireMock.start()
 }
 
 @KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
-    single { PostgresRepository(getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
-                config.getString("database.username"),
-                config.getString("database.password")),
-                config.getString("database.name"),
-                config.getString("database.vault.mountpath")), get()) as YtelsesperiodeRepository
-    }
     single { SpionService(get(), get()) }
     single {
         AltinnClient(
@@ -97,10 +100,28 @@ fun preprodConfig(config: ApplicationConfig) = module {
         ) as AuthorizationsRepository
     }
     single { DefaultAuthorizer(get()) as Authorizer }
+
+    single { generateKafkaMock(get()) as KafkaMessageProvider }
+
+    single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
+    single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
+    single { PostgresRepository(getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
+                config.getString("database.username"),
+                config.getString("database.password")),
+                config.getString("database.name"),
+                config.getString("database.vault.mountpath")), get()) as YtelsesperiodeRepository
+    }
 }
 
-
 fun prodConfig(config: ApplicationConfig) = module {
+    single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
+    single { SpionService(get(), get()) }
+    single { DefaultAuthorizer(get()) as Authorizer }
+
+    single { generateKafkaMock(get()) as KafkaMessageProvider }
+    single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
+
+    single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
     single {
         PostgresRepository(getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
                 config.getString("database.username"),
@@ -108,11 +129,22 @@ fun prodConfig(config: ApplicationConfig) = module {
                 config.getString("database.name"),
                 config.getString("database.vault.mountpath")), get()) as YtelsesperiodeRepository
     }
-    single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
-    single { SpionService(get(), get()) }
-    single { DefaultAuthorizer(get()) as Authorizer }
 }
 
+val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
+    return object : KafkaMessageProvider { // dum mock
+        val generator = VedtaksmeldingGenerator(100, 1000)
+        override fun getMessagesToProcess(): List<String> {
+            return if (Random.Default.nextDouble() < 0.1)
+                generator.take(Random.Default.nextInt(2, 50)).map { om.writeValueAsString(it) }
+            else emptyList()
+        }
+
+        override fun confirmProcessingDone() {
+            println("KafkaMock: Comitta til kafka")
+        }
+    }
+}
 
 // utils
 @KtorExperimentalAPI
