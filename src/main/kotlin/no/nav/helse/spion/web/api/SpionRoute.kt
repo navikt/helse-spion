@@ -24,7 +24,7 @@ fun Route.spion(service: SpionService, authorizer: Authorizer) {
                 val test = call.receive<OppslagDto>()
                 val identitetsnummer = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
 
-                if (!authorizer.hasAccess(identitetsnummer, test.arbeidsgiverOrgnr)) {
+                if (!authorizer.hasAccess(identitetsnummer, test.arbeidsgiverId)) {
                     call.respond(ForbiddenResponse())
                     finish()
                 }

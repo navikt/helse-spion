@@ -1,34 +1,26 @@
 package no.nav.helse.spion.web.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.ktor.config.MapApplicationConfig
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
-import io.ktor.server.testing.withTestApplication
-import no.nav.helse.spion.auth.AuthorizationsRepository
-import no.nav.helse.spion.auth.MockAuthRepo
 import no.nav.helse.spion.web.dto.OppslagDto
 import no.nav.helse.spion.web.spionModule
-import no.nav.security.token.support.test.JwtTokenGenerator
 import org.junit.jupiter.api.Test
 import org.koin.core.get
-import org.mockito.Mock
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 
 class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
 
-    val noAccessToThisOrg = OppslagDto("200150015432", "123456789", "123456789")
-    val hasAccessToThisOrg  = OppslagDto("200150015432", "910020102", "123456789")
+    val noAccessToThisOrg = OppslagDto("200150015432", "123456789")
+    val hasAccessToThisOrg = OppslagDto("200150015432", "910020102")
 
     @Test
     fun `saksOppslag when logged in but unauthorized for the given Virksomhet returns 403 Forbidden`() {
-        configuredTestApplication( {
+        configuredTestApplication({
             spionModule()
         }) {
             doAuthenticatedRequest(HttpMethod.Post, "/api/v1/ytelsesperioder/oppslag") {

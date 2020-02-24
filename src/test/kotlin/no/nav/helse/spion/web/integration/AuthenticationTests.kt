@@ -17,7 +17,7 @@ import kotlin.test.assertNotEquals
 
 class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
 
-    val oppslag = OppslagDto("200150015432", "987654321", "987654321")
+    val oppslag = OppslagDto("200150015432", "987654321")
 
     @Test
     fun `saksOppslag with Missing JWT returns 401 Unauthorized`() {
