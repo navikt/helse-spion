@@ -16,4 +16,10 @@ psql -v ON_ERROR_STOP=1 --username "spion" --dbname "spion" <<-EOSQL
     CREATE INDEX arbeidstaker ON spiondata ((ytelsesperiode ->'arbeidsforhold'-> 'arbeidstaker' ->> 'identitetsnummer'));
     CREATE INDEX orgnr ON spiondata ((ytelsesperiode ->'arbeidsforhold'-> 'arbeidsgiver' ->> 'organisasjonsnummer'));
 
+    CREATE TABLE failedvedtaksmelding (
+        messageData jsonb NOT NULL,
+        errorMessage text,
+        id uuid NOT NULL
+    );
+
 EOSQL
