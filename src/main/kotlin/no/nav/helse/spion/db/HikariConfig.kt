@@ -1,9 +1,6 @@
 package no.nav.helse.spion.db
 
 import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
-import io.ktor.application.Application
-import io.ktor.util.KtorExperimentalAPI
 
 fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
     HikariConfig().apply {
@@ -20,14 +17,4 @@ fun createHikariConfig(jdbcUrl: String, username: String? = null, password: Stri
 
 
 fun createLocalHikariConfig() =
-        HikariConfig().apply {
-            this.jdbcUrl = "jdbc:postgresql://localhost:5432/spion"
-            maximumPoolSize = 3
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
-            driverClassName = "org.postgresql.Driver"
-            username = "spion"
-            password = "spion"
-        }
+        createHikariConfig("jdbc:postgresql://localhost:5432/spion", "spion", "spion")
