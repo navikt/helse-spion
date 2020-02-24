@@ -8,9 +8,16 @@ import java.time.LocalDate
 import kotlin.random.Random
 import kotlin.random.Random.Default.nextDouble
 
-private class ArbeidsgiverGenerator(private val maxUniqueArbeidsgivere: Int = 1000) {
+private class ArbeidsgiverGenerator(fixedList: MutableList<Arbeidsgiver>? = null, private var maxUniqueArbeidsgivere: Int = 1000) {
     private val faker = Faker()
-    private val arbeidsgivere = mutableListOf<Arbeidsgiver>()
+    private val arbeidsgivere = fixedList ?: mutableListOf()
+
+    init {
+        if (fixedList != null) {
+            maxUniqueArbeidsgivere = fixedList.size
+        }
+    }
+
     fun getRandomArbeidsGiver(): Arbeidsgiver {
         return if (arbeidsgivere.size >= maxUniqueArbeidsgivere) {
             arbeidsgivere.pickRandom()
@@ -55,12 +62,13 @@ private val periodStateGenerator = {
 }
 
 class VedtaksmeldingGenerator(
-        maxUniqueArbeidsgivere: Int,
-        maxUniquePersoner: Int,
+        fixedListArbeidsgivere: MutableList<Arbeidsgiver>? = null,
+        maxUniqueArbeidsgivere: Int = 10,
+        maxUniquePersoner: Int = 100,
         private val initDate: LocalDate = LocalDate.of(2020, 1, 1)
 ) : Iterable<Vedtaksmelding>, Iterator<Vedtaksmelding> {
 
-    private val arbeidsgiverGenerator = ArbeidsgiverGenerator(maxUniqueArbeidsgivere)
+    private val arbeidsgiverGenerator = ArbeidsgiverGenerator(fixedListArbeidsgivere, maxUniqueArbeidsgivere)
     private val personGenerator = PersonGenerator(maxUniquePersoner)
     private var numGeneratedVedtak = 0
     private val maxPeriodeLength = 31L;

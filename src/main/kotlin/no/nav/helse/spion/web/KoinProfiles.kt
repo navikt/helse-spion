@@ -21,6 +21,7 @@ import no.nav.helse.spion.auth.altinn.AltinnClient
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.db.getDataSource
+import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
@@ -154,7 +155,12 @@ fun prodConfig(config: ApplicationConfig) = module {
 
 val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
     return object : KafkaMessageProvider { // dum mock
-        val generator = VedtaksmeldingGenerator(100, 1000)
+        val arbeidsgivere = mutableListOf(
+                Arbeidsgiver("Eltrode AS", "917346380", "917404437"),
+                Arbeidsgiver("JØA OG SEL", "911366940", "910098896")
+        )
+
+        val generator = VedtaksmeldingGenerator(arbeidsgivere)
         override fun getMessagesToProcess(): List<String> {
             return if (Random.Default.nextDouble() < 0.1)
                 generator.take(Random.Default.nextInt(2, 50)).map { om.writeValueAsString(it) }

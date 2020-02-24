@@ -28,7 +28,7 @@ open class VedtaksmeldingProcessorTests {
 
     val omMock = mockk<ObjectMapper>()
 
-    val meldingsGenerator = VedtaksmeldingGenerator(10, 10)
+    val meldingsGenerator = VedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
@@ -108,7 +108,7 @@ open class VedtaksmeldingProcessorTests {
 class VedtaksmeldingMappingTests {
     @Test
     internal fun mappingShouldBeCorrect() {
-        val generator = VedtaksmeldingGenerator(10, 10)
+        val generator = VedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
         for (i in 0..100) {
             val melding = generator.next()
