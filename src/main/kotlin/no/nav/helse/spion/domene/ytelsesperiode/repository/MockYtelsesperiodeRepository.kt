@@ -44,11 +44,4 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
     override fun save(yp: Ytelsesperiode) {
         println("saving $yp")
     }
-
-    override fun hentArbeidsgivere(identitetsnummer: String): List<Arbeidsgiver> {
-        return listOf(
-                Arbeidsgiver("Etterretningstjenesten", "1965", "0", null),
-                Arbeidsgiver("Secret Intelligence Service", "MI6", "1", null)
-        )
-    }
 }

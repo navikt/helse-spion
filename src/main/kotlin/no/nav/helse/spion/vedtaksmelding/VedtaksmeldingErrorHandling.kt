@@ -18,9 +18,9 @@ interface FailedVedtaksmeldingRepository {
 class PostgresFailedVedtaksmeldingRepository(val dataSource: DataSource) : FailedVedtaksmeldingRepository {
     private val tableName = "failedvedaksmelding"
 
-    private val insertStatement = "INSERT INTO $tableName(messageData, errorMessage, id) VALUES(?, ?, ?)"
+    private val insertStatement = "INSERT INTO $tableName(messageData, errorMessage, id) VALUES(?::json, ?, ?::uuid)"
     private val getStatement = "SELECT * FROM $tableName"
-    private val deleteStatement = "DELETE FROM $tableName WHERE id = ?"
+    private val deleteStatement = "DELETE FROM $tableName WHERE id = ?::uuid"
 
     override fun save(message: FailedVedtaksmelding) {
         dataSource.connection.use {

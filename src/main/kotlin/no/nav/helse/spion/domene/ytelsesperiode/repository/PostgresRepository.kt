@@ -2,15 +2,10 @@ package no.nav.helse.spion.domene.ytelsesperiode.repository
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import javax.sql.DataSource
 
 class PostgresRepository(val ds: DataSource, val mapper: ObjectMapper) : YtelsesperiodeRepository {
-
-    override fun hentArbeidsgivere(identitetsnummer: String): List<Arbeidsgiver> {
-        TODO("not implemented")
-    }
 
     override fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
         ds.connection.use { con ->

@@ -31,6 +31,7 @@ import org.koin.core.definition.Kind
 import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import javax.sql.DataSource
 import kotlin.random.Random
 
 
@@ -84,14 +85,16 @@ fun buildAndTestConfig() = module {
 }
 
 fun localDevConfig(config: ApplicationConfig) = module {
-    single { PostgresRepository(getDataSource(createLocalHikariConfig(), "spion", null), get()) as YtelsesperiodeRepository }
+    single { getDataSource(createLocalHikariConfig(), "spion", null) as DataSource }
+
+    single { PostgresRepository(get(), get()) as YtelsesperiodeRepository }
     single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
 
     single { generateKafkaMock(get()) as KafkaMessageProvider }
 
-    single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
+    single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
 
     LocalOIDCWireMock.start()
@@ -99,6 +102,14 @@ fun localDevConfig(config: ApplicationConfig) = module {
 
 @KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
+    single {
+        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
+                config.getString("database.username"),
+                config.getString("database.password")),
+                config.getString("database.name"),
+                config.getString("database.vault.mountpath")) as DataSource
+    }
+
     single { SpionService(get(), get()) }
     single {
         AltinnClient(
@@ -113,32 +124,31 @@ fun preprodConfig(config: ApplicationConfig) = module {
 
     single { generateKafkaMock(get()) as KafkaMessageProvider }
 
-    single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
+    single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
-    single { PostgresRepository(getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
-                config.getString("database.username"),
-                config.getString("database.password")),
-                config.getString("database.name"),
-                config.getString("database.vault.mountpath")), get()) as YtelsesperiodeRepository
+    single {
+        PostgresRepository(get(), get()) as YtelsesperiodeRepository
     }
 }
 
 fun prodConfig(config: ApplicationConfig) = module {
+    single {
+        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
+                config.getString("database.username"),
+                config.getString("database.password")),
+                config.getString("database.name"),
+                config.getString("database.vault.mountpath")) as DataSource
+    }
+
     single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
     single { generateKafkaMock(get()) as KafkaMessageProvider }
-    single { MockFailedVedtaksmeldingsRepository() as FailedVedtaksmeldingRepository }
+    single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
 
     single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
-    single {
-        PostgresRepository(getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
-                config.getString("database.username"),
-                config.getString("database.password")),
-                config.getString("database.name"),
-                config.getString("database.vault.mountpath")), get()) as YtelsesperiodeRepository
-    }
+    single { PostgresRepository(get(), get()) as YtelsesperiodeRepository }
 }
 
 val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
