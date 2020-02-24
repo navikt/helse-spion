@@ -103,14 +103,14 @@ fun localDevConfig(config: ApplicationConfig) = module {
 @KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
     single {
-        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
+        val hikariConfig = createHikariConfig(
+                config.getjdbcUrlFromProperties(),
                 config.getString("database.username"),
-                config.getString("database.password")),
-                config.getString("database.name"),
-                config.getString("database.vault.mountpath")) as DataSource
+                config.getString("database.password")
+        )
+        getDataSource(hikariConfig, config.getString("database.name"), config.getString("database.vault.mountpath")) as DataSource
     }
 
-    single { SpionService(get(), get()) }
     single {
         AltinnClient(
                 config.getString("altinn.service_owner_api_url"),
@@ -129,6 +129,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single {
         PostgresRepository(get(), get()) as YtelsesperiodeRepository
     }
+    single { SpionService(get(), get()) as SpionService }
 }
 
 fun prodConfig(config: ApplicationConfig) = module {
@@ -176,8 +177,8 @@ fun ApplicationConfig.getString(path: String): String {
 fun ApplicationConfig.getjdbcUrlFromProperties(): String {
     return String.format("jdbc:postgresql://%s:%s/%s%s",
             this.property("database.host").getString(),
-            this.property("database.name").getString(),
             this.property("database.port").getString(),
+            this.property("database.name").getString(),
             this.propertyOrNull("database.username")?.getString()?.let { "?user=$it" })
 }
 
