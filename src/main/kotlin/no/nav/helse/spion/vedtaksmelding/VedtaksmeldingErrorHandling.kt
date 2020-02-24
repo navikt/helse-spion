@@ -16,7 +16,7 @@ interface FailedVedtaksmeldingRepository {
 }
 
 class PostgresFailedVedtaksmeldingRepository(val dataSource: DataSource) : FailedVedtaksmeldingRepository {
-    private val tableName = "failedvedaksmelding"
+    private val tableName = "failedvedtaksmelding"
 
     private val insertStatement = "INSERT INTO $tableName(messageData, errorMessage, id) VALUES(?::json, ?, ?::uuid)"
     private val getStatement = "SELECT * FROM $tableName"
