@@ -112,7 +112,7 @@ class VedtaksmeldingMappingTests {
 
         for (i in 0..100) {
             val melding = generator.next()
-            val yp = mapVedtaksMeldingTilYtelsesPeriode(melding, melding.løpenummer)
+            val yp = mapVedtaksMeldingTilYtelsesPeriode(melding, i.toLong())
 
             assertEquals(melding.fom, yp.periode.fom)
             assertEquals(melding.tom, yp.periode.tom)
