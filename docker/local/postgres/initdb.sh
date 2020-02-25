@@ -9,12 +9,12 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 EOSQL
 
 psql -v ON_ERROR_STOP=1 --username "spion" --dbname "spion" <<-EOSQL
-    CREATE TABLE spiondata (
-                           ytelsesperiode jsonb NOT NULL
+    CREATE TABLE ytelsesperiode (
+                           data jsonb NOT NULL
     );
-    CREATE INDEX virksomhetsnummer ON spiondata ((ytelsesperiode ->'arbeidsforhold'-> 'arbeidsgiver' ->> 'virksomhetsnummer'));
-    CREATE INDEX arbeidstaker ON spiondata ((ytelsesperiode ->'arbeidsforhold'-> 'arbeidstaker' ->> 'identitetsnummer'));
-    CREATE INDEX orgnr ON spiondata ((ytelsesperiode ->'arbeidsforhold'-> 'arbeidsgiver' ->> 'organisasjonsnummer'));
+    CREATE INDEX virksomhetsnummer ON ytelsesperiode ((data ->'arbeidsforhold'-> 'arbeidsgiver' ->> 'virksomhetsnummer'));
+    CREATE INDEX arbeidstaker ON ytelsesperiode ((data ->'arbeidsforhold'-> 'arbeidstaker' ->> 'identitetsnummer'));
+    CREATE INDEX orgnr ON ytelsesperiode ((data ->'arbeidsforhold'-> 'arbeidsgiver' ->> 'organisasjonsnummer'));
 
     CREATE TABLE failedvedtaksmelding (
         messageData jsonb NOT NULL,

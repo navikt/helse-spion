@@ -7,25 +7,26 @@ import java.sql.Connection
 import javax.sql.DataSource
 
 class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMapper) : YtelsesperiodeRepository {
-    private val getByPersonAndArbeidsgiverStatement = """SELECT ytelsesperiode::json FROM spiondata 
-            WHERE ytelsesperiode -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
-            AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?;"""
+    private val tableName = "ytelsesperiode"
+    private val getByPersonAndArbeidsgiverStatement = """SELECT data::json FROM $tableName 
+            WHERE data -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
+            AND data -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?;"""
 
-    private val saveStatement = "INSERT INTO spiondata (ytelsesperiode) VALUES (?::json);"
+    private val saveStatement = "INSERT INTO $tableName (data) VALUES (?::json);"
 
-    private val deleteStatement = """DELETE  FROM spiondata 
-         WHERE ytelsesperiode -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
-            AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
-            AND ytelsesperiode ->> 'ytelse' = ?
-            AND ytelsesperiode -> 'periode' ->> 'fom' = ?
-            AND ytelsesperiode -> 'periode' ->> 'tom' = ?;"""
+    private val deleteStatement = """DELETE  FROM $tableName 
+         WHERE data -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
+            AND data -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
+            AND data ->> 'ytelse' = ?
+            AND data -> 'periode' ->> 'fom' = ?
+            AND data -> 'periode' ->> 'tom' = ?;"""
 
-    private val getStatement = """SELECT ytelsesperiode::json FROM spiondata 
-         WHERE ytelsesperiode -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
-            AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
-            AND ytelsesperiode ->> 'ytelse' = ?
-            AND ytelsesperiode -> 'periode' ->> 'fom' = ?
-            AND ytelsesperiode -> 'periode' ->> 'tom' = ?;"""
+    private val getStatement = """SELECT data::json FROM $tableName 
+         WHERE data -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
+            AND data -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
+            AND data ->> 'ytelse' = ?
+            AND data -> 'periode' ->> 'fom' = ?
+            AND data -> 'periode' ->> 'tom' = ?;"""
 
 
     override fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
@@ -38,7 +39,7 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
             val resultatListe = ArrayList<Ytelsesperiode>()
 
             while (res.next()) {
-                resultatListe.add(mapper.readValue(res.getString("ytelsesperiode")))
+                resultatListe.add(mapper.readValue(res.getString("data")))
             }
             return resultatListe
         }
@@ -75,7 +76,7 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
         }.executeQuery()
 
         while (res.next()) {
-            eksisterendeYpListe.add(mapper.readValue(res.getString("ytelsesperiode")))
+            eksisterendeYpListe.add(mapper.readValue(res.getString("data")))
         }
         return if (eksisterendeYpListe.isNotEmpty()) {
             eksisterendeYpListe.first()
