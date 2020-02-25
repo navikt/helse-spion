@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariDataSource
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresRepository
+import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.web.common
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -40,7 +40,7 @@ internal class dbUnitTests : KoinComponent {
 
         every { dsMock.connection } returns conMock
 
-        val repo = PostgresRepository(dsMock, get())
+        val repo = PostgresYtelsesperiodeRepository(dsMock, get())
         repo.hentYtelserForPerson("10987654321", "555555555")
 
         verify(exactly = 1) { dsMock.connection }
@@ -58,7 +58,7 @@ internal class dbUnitTests : KoinComponent {
         every { rsMock.next() } returns true
         every { rsMock.getString("ytelsesperiode") } returns """ {"svaret" : 42 } """
 
-        val repo = PostgresRepository(dsMock, get())
+        val repo = PostgresYtelsesperiodeRepository(dsMock, get())
         assertThrows<Exception> {
             repo.hentYtelserForPerson("10987654321", "555555555")
         }

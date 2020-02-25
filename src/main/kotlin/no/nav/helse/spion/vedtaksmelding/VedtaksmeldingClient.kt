@@ -9,7 +9,7 @@ import java.time.Duration
 import java.util.*
 
 interface KafkaMessageProvider {
-    fun getMessagesToProcess(): List<String>
+    fun getMessagesToProcess(): List<Pair<String, Long>>
     fun confirmProcessingDone()
 }
 
@@ -36,8 +36,8 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String, po
 
     fun stop() = consumer.close()
 
-    override fun getMessagesToProcess(): List<String> {
-        return consumer.poll(Duration.ofSeconds(10)).map { it.value() }.toList()
+    override fun getMessagesToProcess(): List<Pair<String, Long>> {
+        return consumer.poll(Duration.ofSeconds(10)).map {Pair(it.value(), it.offset())}.toList()
     }
 
     override fun confirmProcessingDone() {

@@ -15,6 +15,7 @@ data class Vedtaksmelding(
         val identitetsNummer: String,
         val virksomhetsnummer: String,
         val status: VedtaksmeldingsStatus,
+        val løpenummer: Long,
         val fom: LocalDate,
         val tom: LocalDate,
         val ytelse: VedtaksmeldingsYtelse = VedtaksmeldingsYtelse.SP,

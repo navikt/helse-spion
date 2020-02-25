@@ -6,7 +6,7 @@ import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.Person
 import no.nav.helse.spion.domene.ytelsesperiode.Arbeidsforhold
-import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresRepository
+import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import no.nav.helse.spion.web.common
 import org.junit.jupiter.api.AfterEach
@@ -26,6 +26,7 @@ internal class postgresTests : KoinComponent {
 
     val testYtelsesPeriode = Ytelsesperiode(
             periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
+            løpenummer = 2,
             arbeidsforhold = Arbeidsforhold(
                     arbeidsforholdId = "1",
                     arbeidstaker = Person("Solan", "Gundersen", "10987654321"),
@@ -33,7 +34,7 @@ internal class postgresTests : KoinComponent {
             ),
             vedtaksId = "1",
             refusjonsbeløp = BigDecimal(10000),
-            status = Ytelsesperiode.Status.INNVILGET,
+            status = Ytelsesperiode.Status.UNDER_BEHANDLING,
             grad = BigDecimal(50),
             dagsats = BigDecimal(200),
             maxdato = LocalDate.of(2019, 1, 1),
@@ -51,13 +52,13 @@ internal class postgresTests : KoinComponent {
 
         }
 
-        val repo = PostgresRepository(dataSource, get())
-        repo.save(testYtelsesPeriode)
+        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
+        repo.upsert(testYtelsesPeriode)
     }
 
     @AfterEach
     internal fun tearDown() {
-        val repo = PostgresRepository(dataSource, get())
+        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
         repo.deleteYtelsesperiode(testYtelsesPeriode)
         stopKoin()
 
@@ -65,7 +66,7 @@ internal class postgresTests : KoinComponent {
 
     @Test
     fun `Henter en ytelsesperiode fra repo`() {
-        val repo = PostgresRepository(dataSource, get())
+        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
 
         val p = repo.hentYtelserForPerson("10987654321", "555555555")
 
@@ -75,7 +76,7 @@ internal class postgresTests : KoinComponent {
 
     @Test
     fun `Sletter en ytelsesperiode`() {
-        val repo = PostgresRepository(dataSource, get())
+        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
         val deletedCount = repo.deleteYtelsesperiode(testYtelsesPeriode)
 
         assertEquals(1, deletedCount)
@@ -83,9 +84,9 @@ internal class postgresTests : KoinComponent {
 
     @Test
     fun `sletter bare riktig ytelsesperiode`() {
-        val repo = PostgresRepository(dataSource, get())
+        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
         val ypAnnenPeriode = testYtelsesPeriode.copy(periode = Periode(LocalDate.of(2020, 5, 5), LocalDate.of(2020, 8, 1)))
-        repo.save(ypAnnenPeriode)
+        repo.upsert(ypAnnenPeriode)
 
         val deletedCount = repo.deleteYtelsesperiode(testYtelsesPeriode)
 
@@ -95,6 +96,22 @@ internal class postgresTests : KoinComponent {
         assertEquals(ypAnnenPeriode, ypLagret)
 
         repo.deleteYtelsesperiode(ypAnnenPeriode)
+
+    }
+
+    @Test
+    fun `lagrer ytelsesperiode kun hvis den har høyere løpenummer enn en eksisterende versjon`() {
+        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
+        val ypNyere = testYtelsesPeriode.copy(løpenummer = 3, status = Ytelsesperiode.Status.INNVILGET)
+        val ypEldre = testYtelsesPeriode.copy(løpenummer = 1, status = Ytelsesperiode.Status.HENLAGT)
+
+        repo.upsert(ypNyere)
+        repo.upsert(ypEldre)
+
+        val savedYpList = repo.hentYtelserForPerson("10987654321", "555555555")
+
+        assertEquals(1, savedYpList.size)
+        assertEquals(ypNyere, savedYpList.first())
 
     }
 

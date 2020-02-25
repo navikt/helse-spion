@@ -85,6 +85,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
                         "222323",
                         "323232323",
                         VedtaksmeldingsStatus.BEHANDLES,
+                        1,
                         LocalDate.now(),
                         LocalDate.now(),
                         VedtaksmeldingsYtelse.SP,

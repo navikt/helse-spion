@@ -65,24 +65,25 @@ class VedtaksmeldingProcessor(
         return wasEmpty
     }
 
-    fun processOneMessage(melding: String) {
+    fun processOneMessage(melding: Pair<String, Long>) {
         try {
-            val deserializedKafkaMessage = om.readValue(melding, Vedtaksmelding::class.java)
-            val mapped = mapVedtaksMeldingTilYtelsesPeriode(deserializedKafkaMessage)
-            ypDao.save(mapped)
+            val deserializedKafkaMessage = om.readValue(melding.first, Vedtaksmelding::class.java)
+            val mapped = mapVedtaksMeldingTilYtelsesPeriode(deserializedKafkaMessage, melding.second)
+            ypDao.upsert(mapped)
         } catch (t: Throwable) {
             val errorId = UUID.randomUUID()
             logger.error("Feilet vedtaksmelding, ID: $errorId", t)
             failedVedtaksmeldingRepository.save(FailedVedtaksmelding(
-                    melding, t.message, errorId
+                    melding.first, melding.second,  t.message, errorId
             ))
         }
     }
 }
 
-fun mapVedtaksMeldingTilYtelsesPeriode(vm: Vedtaksmelding): Ytelsesperiode {
+fun mapVedtaksMeldingTilYtelsesPeriode(vm: Vedtaksmelding, løpenummer: Long): Ytelsesperiode {
     return Ytelsesperiode(
             Periode(vm.fom, vm.tom),
+            løpenummer,
             Arbeidsforhold("",
                     Person(vm.fornavn, vm.etternavn, vm.identitetsNummer),
                     Arbeidsgiver("TODO?", "TODO?", vm.virksomhetsnummer)),

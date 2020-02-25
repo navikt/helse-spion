@@ -3,17 +3,35 @@ package no.nav.helse.spion.domene.ytelsesperiode.repository
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
+import java.sql.Connection
 import javax.sql.DataSource
 
-class PostgresRepository(val ds: DataSource, val mapper: ObjectMapper) : YtelsesperiodeRepository {
-
-    override fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
-        ds.connection.use { con ->
-            val sql = """SELECT ytelsesperiode::json FROM spiondata 
+class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMapper) : YtelsesperiodeRepository {
+    private val getByPersonAndArbeidsgiverStatement = """SELECT ytelsesperiode::json FROM spiondata 
             WHERE ytelsesperiode -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
             AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?;"""
 
-            val res = con.prepareStatement(sql).apply{
+    private val saveStatement = "INSERT INTO spiondata (ytelsesperiode) VALUES (?::json);"
+
+    private val deleteStatement = """DELETE  FROM spiondata 
+         WHERE ytelsesperiode -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
+            AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
+            AND ytelsesperiode ->> 'ytelse' = ?
+            AND ytelsesperiode -> 'periode' ->> 'fom' = ?
+            AND ytelsesperiode -> 'periode' ->> 'tom' = ?;"""
+
+    private val getStatement = """SELECT ytelsesperiode::json FROM spiondata 
+         WHERE ytelsesperiode -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
+            AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
+            AND ytelsesperiode ->> 'ytelse' = ?
+            AND ytelsesperiode -> 'periode' ->> 'fom' = ?
+            AND ytelsesperiode -> 'periode' ->> 'tom' = ?;"""
+
+
+    override fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
+        ds.connection.use { con ->
+
+            val res = con.prepareStatement(getByPersonAndArbeidsgiverStatement).apply {
                 setString(1, identitetsnummer)
                 setString(2, virksomhetsnummer)
             }.executeQuery()
@@ -26,30 +44,52 @@ class PostgresRepository(val ds: DataSource, val mapper: ObjectMapper) : Ytelses
         }
     }
 
-    override fun save(yp: Ytelsesperiode) {
+    /** Lagrer eller erstatter ytelseperiode med mindre det allerede eksisterer en med høyere løpenummer. */
+    override fun upsert(yp: Ytelsesperiode) {
         ds.connection.use { con ->
-
-            val json = mapper.writeValueAsString(yp)
-            con.prepareStatement("INSERT INTO spiondata (ytelsesperiode) VALUES (?::json)").apply{
-                setString(1, json)
-            }.executeUpdate()
+            val eksisterendeYtelsesperiode = finnEksisterendeYtelsesperiode(con, yp)
+            eksisterendeYtelsesperiode?.let {
+                if (eksisterendeYtelsesperiode.løpenummer > yp.løpenummer)
+                    return
+                deleteYtelsesperiode(eksisterendeYtelsesperiode)
+            }
+            executeSave(yp, con)
         }
     }
 
+    private fun executeSave(yp: Ytelsesperiode, con: Connection): Int {
+        val json = mapper.writeValueAsString(yp)
+        return con.prepareStatement(saveStatement).apply {
+            setString(1, json)
+        }.executeUpdate()
+    }
 
+    private fun finnEksisterendeYtelsesperiode(con: Connection, yp: Ytelsesperiode): Ytelsesperiode? {
+        val eksisterendeYpListe = ArrayList<Ytelsesperiode>()
+        val res = con.prepareStatement(getStatement).apply {
+            setString(1, yp.arbeidsforhold.arbeidstaker.identitetsnummer)
+            setString(2, yp.arbeidsforhold.arbeidsgiver.arbeidsgiverId)
+            setString(3, yp.ytelse.toString())
+            setString(4, yp.periode.fom.toString())
+            setString(5, yp.periode.tom.toString())
+        }.executeQuery()
+
+        while (res.next()) {
+            eksisterendeYpListe.add(mapper.readValue(res.getString("ytelsesperiode")))
+        }
+        return if (eksisterendeYpListe.isNotEmpty()) {
+            eksisterendeYpListe.first()
+        } else null
+    }
 
     fun deleteYtelsesperiode(periode: Ytelsesperiode): Int {
         ds.connection.use { con ->
-            val sql = """DELETE  FROM spiondata 
-         WHERE ytelsesperiode -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
-            AND ytelsesperiode -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
-            AND ytelsesperiode -> 'periode' ->> 'fom' = ?
-            AND ytelsesperiode -> 'periode' ->> 'tom' = ?;"""
-            val deletedCount = con.prepareStatement(sql).apply {
+            val deletedCount = con.prepareStatement(deleteStatement).apply {
                 setString(1, periode.arbeidsforhold.arbeidstaker.identitetsnummer)
                 setString(2, periode.arbeidsforhold.arbeidsgiver.arbeidsgiverId)
-                setString(3, periode.periode.fom.toString())
-                setString(4, periode.periode.tom.toString())
+                setString(3, periode.ytelse.toString())
+                setString(4, periode.periode.fom.toString())
+                setString(5, periode.periode.tom.toString())
             }.executeUpdate()
             return deletedCount
         }

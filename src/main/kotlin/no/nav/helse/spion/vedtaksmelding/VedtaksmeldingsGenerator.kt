@@ -91,6 +91,7 @@ class VedtaksmeldingGenerator(
                 person.identitetsnummer,
                 arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!,
                 status,
+                numGeneratedVedtak.toLong(),
                 periode.fom,
                 periode.tom,
                 VedtaksmeldingsYtelse.SP,

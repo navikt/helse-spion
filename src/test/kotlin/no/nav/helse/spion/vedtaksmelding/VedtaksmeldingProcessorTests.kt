@@ -36,13 +36,13 @@ open class VedtaksmeldingProcessorTests {
             kafkaMock, ypDaoMock, failedMessageDaoMock, omMock, CoroutineScope(testCoroutineDispatcher)
     )
 
-    private lateinit var messageList: List<String>
+    private lateinit var messageList: List<Pair<String, Long>>
 
     @BeforeEach
     internal fun setUp() {
-        messageList = listOf(
-                mapper.writeValueAsString(meldingsGenerator.next()),
-                mapper.writeValueAsString(meldingsGenerator.next())
+        messageList = listOf<Pair<String, Long>>(
+                Pair(mapper.writeValueAsString(meldingsGenerator.next()), 1),
+                Pair(mapper.writeValueAsString(meldingsGenerator.next()), 2)
         )
 
         every { omMock.readValue<Vedtaksmelding>(any<String>(), Vedtaksmelding::class.java) } answers { mapper.readValue<Vedtaksmelding>(it.invocation.args[0] as String) }
@@ -54,7 +54,7 @@ open class VedtaksmeldingProcessorTests {
         val queueWasEmpty = processor.processOneBatch()
         assertFalse { queueWasEmpty }
         verify(exactly = 1) { kafkaMock.getMessagesToProcess() }
-        verify(exactly = 2) { ypDaoMock.save(any()) }
+        verify(exactly = 2) { ypDaoMock.upsert(any()) }
         verify(exactly = 1) { kafkaMock.confirmProcessingDone() }
     }
 
@@ -63,29 +63,29 @@ open class VedtaksmeldingProcessorTests {
         val message = "Error message"
         val saveArg = slot<FailedVedtaksmelding>()
 
-        every { omMock.readValue<Vedtaksmelding>(messageList[0], Vedtaksmelding::class.java) } throws JsonParseException(null, message)
+        every { omMock.readValue<Vedtaksmelding>(messageList[0].first, Vedtaksmelding::class.java) } throws JsonParseException(null, message)
         every { failedMessageDaoMock.save(capture(saveArg)) } just Runs
 
         processor.processOneBatch()
 
-        verify(exactly = 1) { ypDaoMock.save(any()) }
+        verify(exactly = 1) { ypDaoMock.upsert(any()) }
         verify(exactly = 1) { failedMessageDaoMock.save(any()) }
         verify(exactly = 1) { kafkaMock.confirmProcessingDone() }
 
         assertThat(saveArg.isCaptured).isTrue()
         assertThat(saveArg.captured.errorMessage).isEqualTo(message)
         assertThat(saveArg.captured.id).isNotNull()
-        assertThat(saveArg.captured.messageData).isEqualTo(messageList[0])
+        assertThat(saveArg.captured.messageData).isEqualTo(messageList[0].first)
     }
 
     @Test
     internal fun `If processing fails and saving the fail fails, throw and do not commit to kafka`() {
-        every { omMock.readValue<Vedtaksmelding>(messageList[0], Vedtaksmelding::class.java) } throws JsonParseException(null, "message")
+        every { omMock.readValue<Vedtaksmelding>(messageList[0].first, Vedtaksmelding::class.java) } throws JsonParseException(null, "message")
         every { failedMessageDaoMock.save(any()) } throws IOException("DATABSE DOWN")
 
         assertThrows<IOException> { processor.processOneBatch() }
 
-        verify(exactly = 0) { ypDaoMock.save(any()) }
+        verify(exactly = 0) { ypDaoMock.upsert(any()) }
         verify(exactly = 1) { failedMessageDaoMock.save(any()) }
         verify(exactly = 0) { kafkaMock.confirmProcessingDone() }
     }
@@ -100,7 +100,7 @@ open class VedtaksmeldingProcessorTests {
         testCoroutineDispatcher.runCurrent()
 
         verify(exactly = 2) { kafkaMock.getMessagesToProcess() }
-        verify(exactly = 2) { ypDaoMock.save(any()) }
+        verify(exactly = 2) { ypDaoMock.upsert(any()) }
         verify(exactly = 1) { kafkaMock.confirmProcessingDone() }
     }
 }
@@ -112,7 +112,7 @@ class VedtaksmeldingMappingTests {
 
         for (i in 0..100) {
             val melding = generator.next()
-            val yp = mapVedtaksMeldingTilYtelsesPeriode(melding)
+            val yp = mapVedtaksMeldingTilYtelsesPeriode(melding, melding.løpenummer)
 
             assertEquals(melding.fom, yp.periode.fom)
             assertEquals(melding.tom, yp.periode.tom)
