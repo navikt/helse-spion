@@ -22,8 +22,6 @@ fun getDataSource(hikariConfig: HikariConfig, dbName: String, vaultMountpath: St
 
 @KtorExperimentalAPI
 fun dataSourceFromVault(hikariConfig: HikariConfig, dbName: String, vaultMountpath: String, role: Role) {
-    hikariConfig.password = null
-    hikariConfig.username = null
     HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(
             hikariConfig,
             vaultMountpath,

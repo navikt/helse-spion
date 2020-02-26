@@ -104,12 +104,9 @@ fun localDevConfig(config: ApplicationConfig) = module {
 @KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
     single {
-        val hikariConfig = createHikariConfig(
-                config.getjdbcUrlFromProperties(),
-                config.getString("database.username"),
-                config.getString("database.password")
-        )
-        getDataSource(hikariConfig, config.getString("database.name"), config.getString("database.vault.mountpath")) as DataSource
+        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties()),
+                config.getString("database.name"),
+                config.getString("database.vault.mountpath")) as DataSource
     }
 
     single {
@@ -135,9 +132,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
 
 fun prodConfig(config: ApplicationConfig) = module {
     single {
-        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
-                config.getString("database.username"),
-                config.getString("database.password")),
+        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties()),
                 config.getString("database.name"),
                 config.getString("database.vault.mountpath")) as DataSource
     }
