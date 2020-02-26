@@ -12,16 +12,19 @@ import no.nav.helse.spion.web.common
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.koin.core.KoinComponent
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.get
+import org.postgresql.util.PSQLException
+import java.lang.Exception
 import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
-internal class postgresYtelsesperiodeRepositoryTests : KoinComponent {
+internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
 
     val testYtelsesPeriode = Ytelsesperiode(
@@ -59,7 +62,7 @@ internal class postgresYtelsesperiodeRepositoryTests : KoinComponent {
     @AfterEach
     internal fun tearDown() {
         val repo = PostgresYtelsesperiodeRepository(dataSource, get())
-        repo.deleteYtelsesperiode(testYtelsesPeriode)
+        repo.delete(testYtelsesPeriode)
         stopKoin()
 
     }
@@ -68,7 +71,7 @@ internal class postgresYtelsesperiodeRepositoryTests : KoinComponent {
     fun `Henter en ytelsesperiode fra repo`() {
         val repo = PostgresYtelsesperiodeRepository(dataSource, get())
 
-        val p = repo.hentYtelserForPerson("10987654321", "555555555")
+        val p = repo.getYtelserForPerson("10987654321", "555555555")
 
         assertEquals(testYtelsesPeriode, p.first())
         assertEquals(1, p.size)
@@ -77,7 +80,7 @@ internal class postgresYtelsesperiodeRepositoryTests : KoinComponent {
     @Test
     fun `Sletter en ytelsesperiode`() {
         val repo = PostgresYtelsesperiodeRepository(dataSource, get())
-        val deletedCount = repo.deleteYtelsesperiode(testYtelsesPeriode)
+        val deletedCount = repo.delete(testYtelsesPeriode)
 
         assertEquals(1, deletedCount)
     }
@@ -88,32 +91,54 @@ internal class postgresYtelsesperiodeRepositoryTests : KoinComponent {
         val ypAnnenPeriode = testYtelsesPeriode.copy(periode = Periode(LocalDate.of(2020, 5, 5), LocalDate.of(2020, 8, 1)))
         repo.upsert(ypAnnenPeriode)
 
-        val deletedCount = repo.deleteYtelsesperiode(testYtelsesPeriode)
+        val deletedCount = repo.delete(testYtelsesPeriode)
 
-        val ypLagret = repo.hentYtelserForPerson("10987654321", "555555555").first()
+        val ypLagret = repo.getYtelserForPerson("10987654321", "555555555").first()
 
         assertEquals(1, deletedCount)
         assertEquals(ypAnnenPeriode, ypLagret)
 
-        repo.deleteYtelsesperiode(ypAnnenPeriode)
+        repo.delete(ypAnnenPeriode)
+
+    }
+
+    @Test
+    fun `lagrer en nyere ytelsesperiode`() {
+        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
+        val ypNewer = testYtelsesPeriode.copy(kafkaOffset = 5, status = Ytelsesperiode.Status.INNVILGET)
+
+        repo.upsert(ypNewer)
+
+        val savedYpList = repo.getYtelserForPerson("10987654321", "555555555")
+
+        assertEquals(savedYpList.size, 1)
+        assertEquals(savedYpList.first(), ypNewer)
 
     }
 
     @Test
     fun `lagrer ytelsesperiode kun hvis den har høyere offset enn en eksisterende versjon`() {
         val repo = PostgresYtelsesperiodeRepository(dataSource, get())
-        val ypNyere = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
-        val ypEldre = testYtelsesPeriode.copy(kafkaOffset = 1, status = Ytelsesperiode.Status.HENLAGT)
+        val ypNewer = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
+        val ypOlder = testYtelsesPeriode.copy(kafkaOffset = 1, status = Ytelsesperiode.Status.HENLAGT)
 
-        repo.upsert(ypNyere)
-        repo.upsert(ypEldre)
+        repo.upsert(ypNewer)
+        repo.upsert(ypOlder)
 
-        val savedYpList = repo.hentYtelserForPerson("10987654321", "555555555")
+        val savedYpList = repo.getYtelserForPerson("10987654321", "555555555")
 
         assertEquals(1, savedYpList.size)
-        assertEquals(ypNyere, savedYpList.first())
-        //TODO Constraints
-
+        assertEquals(ypNewer, savedYpList.first())
     }
 
+    @Test
+    fun `lagrer aldri to ytelsesperioder med samme primærnøkkel`() {
+        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
+
+        val yp = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
+
+        assertThrows<PSQLException> {
+            repo.executeSave(yp, dataSource.connection)
+        }
+    }
 }

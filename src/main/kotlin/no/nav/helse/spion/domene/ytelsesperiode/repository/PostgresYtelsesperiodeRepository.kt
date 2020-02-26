@@ -29,45 +29,46 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
             AND data -> 'periode' ->> 'tom' = ?;"""
 
 
-    override fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
+    override fun getYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
         ds.connection.use { con ->
 
             val res = con.prepareStatement(getByPersonAndArbeidsgiverStatement).apply {
                 setString(1, identitetsnummer)
                 setString(2, virksomhetsnummer)
             }.executeQuery()
-            val resultatListe = ArrayList<Ytelsesperiode>()
+            val resultList = ArrayList<Ytelsesperiode>()
 
             while (res.next()) {
-                resultatListe.add(mapper.readValue(res.getString("data")))
+                resultList.add(mapper.readValue(res.getString("data")))
             }
-            return resultatListe
+            return resultList
         }
     }
 
     /** Lagrer eller erstatter ytelseperiode med mindre det allerede eksisterer en med høyere offset. */
     override fun upsert(yp: Ytelsesperiode) {
         ds.connection.use { con ->
-            //TODO Transaction
-            val eksisterendeYtelsesperiode = finnEksisterendeYtelsesperiode(con, yp)
-            eksisterendeYtelsesperiode?.let {
-                if (eksisterendeYtelsesperiode.kafkaOffset > yp.kafkaOffset)
+            con.autoCommit = false
+            val existingYp = getExistingYtelsesperiode(con, yp)
+            existingYp?.let {
+                if (existingYp.kafkaOffset > yp.kafkaOffset)
                     return
-                deleteYtelsesperiode(eksisterendeYtelsesperiode)
+                delete(existingYp)
             }
             executeSave(yp, con)
+            con.commit()
         }
     }
 
-    private fun executeSave(yp: Ytelsesperiode, con: Connection): Int {
+     fun executeSave(yp: Ytelsesperiode, con: Connection): Int {
         val json = mapper.writeValueAsString(yp)
         return con.prepareStatement(saveStatement).apply {
             setString(1, json)
         }.executeUpdate()
     }
 
-    private fun finnEksisterendeYtelsesperiode(con: Connection, yp: Ytelsesperiode): Ytelsesperiode? {
-        val eksisterendeYpListe = ArrayList<Ytelsesperiode>()
+    private fun getExistingYtelsesperiode(con: Connection, yp: Ytelsesperiode): Ytelsesperiode? {
+        val existingYpList = ArrayList<Ytelsesperiode>()
         val res = con.prepareStatement(getStatement).apply {
             setString(1, yp.arbeidsforhold.arbeidstaker.identitetsnummer)
             setString(2, yp.arbeidsforhold.arbeidsgiver.arbeidsgiverId)
@@ -77,21 +78,21 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
         }.executeQuery()
 
         while (res.next()) {
-            eksisterendeYpListe.add(mapper.readValue(res.getString("data")))
+            existingYpList.add(mapper.readValue(res.getString("data")))
         }
-        return if (eksisterendeYpListe.isNotEmpty()) {
-            eksisterendeYpListe.first()
+        return if (existingYpList.isNotEmpty()) {
+            existingYpList.first()
         } else null
     }
 
-    fun deleteYtelsesperiode(periode: Ytelsesperiode): Int {
+    fun delete(yp: Ytelsesperiode): Int {
         ds.connection.use { con ->
             val deletedCount = con.prepareStatement(deleteStatement).apply {
-                setString(1, periode.arbeidsforhold.arbeidstaker.identitetsnummer)
-                setString(2, periode.arbeidsforhold.arbeidsgiver.arbeidsgiverId)
-                setString(3, periode.ytelse.toString())
-                setString(4, periode.periode.fom.toString())
-                setString(5, periode.periode.tom.toString())
+                setString(1, yp.arbeidsforhold.arbeidstaker.identitetsnummer)
+                setString(2, yp.arbeidsforhold.arbeidsgiver.arbeidsgiverId)
+                setString(3, yp.ytelse.toString())
+                setString(4, yp.periode.fom.toString())
+                setString(5, yp.periode.tom.toString())
             }.executeUpdate()
             return deletedCount
         }

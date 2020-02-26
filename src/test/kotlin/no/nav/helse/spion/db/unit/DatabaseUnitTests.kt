@@ -41,7 +41,7 @@ internal class dbUnitTests : KoinComponent {
         every { dsMock.connection } returns conMock
 
         val repo = PostgresYtelsesperiodeRepository(dsMock, get())
-        repo.hentYtelserForPerson("10987654321", "555555555")
+        repo.getYtelserForPerson("10987654321", "555555555")
 
         verify(exactly = 1) { dsMock.connection }
         verify(exactly = 1) { conMock.close() }
@@ -60,7 +60,7 @@ internal class dbUnitTests : KoinComponent {
 
         val repo = PostgresYtelsesperiodeRepository(dsMock, get())
         assertThrows<Exception> {
-            repo.hentYtelserForPerson("10987654321", "555555555")
+            repo.getYtelserForPerson("10987654321", "555555555")
         }
         verify(exactly = 1) { dsMock.connection }
         verify(exactly = 1) { conMock.close() }
