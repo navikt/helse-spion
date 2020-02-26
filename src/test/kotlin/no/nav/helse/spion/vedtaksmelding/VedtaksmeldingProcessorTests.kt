@@ -36,13 +36,13 @@ open class VedtaksmeldingProcessorTests {
             kafkaMock, ypDaoMock, failedMessageDaoMock, omMock, CoroutineScope(testCoroutineDispatcher)
     )
 
-    private lateinit var messageList: List<Pair<String, Long>>
+    private lateinit var messageList: List<MessageWithOffset>
 
     @BeforeEach
     internal fun setUp() {
-        messageList = listOf<Pair<String, Long>>(
-                Pair(mapper.writeValueAsString(meldingsGenerator.next()), 1),
-                Pair(mapper.writeValueAsString(meldingsGenerator.next()), 2)
+        messageList = listOf<MessageWithOffset>(
+                Pair(1, mapper.writeValueAsString(meldingsGenerator.next())),
+                Pair(2, mapper.writeValueAsString(meldingsGenerator.next()))
         )
 
         every { omMock.readValue<Vedtaksmelding>(any<String>(), Vedtaksmelding::class.java) } answers { mapper.readValue<Vedtaksmelding>(it.invocation.args[0] as String) }
@@ -63,7 +63,7 @@ open class VedtaksmeldingProcessorTests {
         val message = "Error message"
         val saveArg = slot<FailedVedtaksmelding>()
 
-        every { omMock.readValue<Vedtaksmelding>(messageList[0].first, Vedtaksmelding::class.java) } throws JsonParseException(null, message)
+        every { omMock.readValue<Vedtaksmelding>(messageList[0].second, Vedtaksmelding::class.java) } throws JsonParseException(null, message)
         every { failedMessageDaoMock.save(capture(saveArg)) } just Runs
 
         processor.processOneBatch()
@@ -75,12 +75,12 @@ open class VedtaksmeldingProcessorTests {
         assertThat(saveArg.isCaptured).isTrue()
         assertThat(saveArg.captured.errorMessage).isEqualTo(message)
         assertThat(saveArg.captured.id).isNotNull()
-        assertThat(saveArg.captured.messageData).isEqualTo(messageList[0].first)
+        assertThat(saveArg.captured.messageData).isEqualTo(messageList[0].second)
     }
 
     @Test
     internal fun `If processing fails and saving the fail fails, throw and do not commit to kafka`() {
-        every { omMock.readValue<Vedtaksmelding>(messageList[0].first, Vedtaksmelding::class.java) } throws JsonParseException(null, "message")
+        every { omMock.readValue<Vedtaksmelding>(messageList[0].second, Vedtaksmelding::class.java) } throws JsonParseException(null, "message")
         every { failedMessageDaoMock.save(any()) } throws IOException("DATABSE DOWN")
 
         assertThrows<IOException> { processor.processOneBatch() }

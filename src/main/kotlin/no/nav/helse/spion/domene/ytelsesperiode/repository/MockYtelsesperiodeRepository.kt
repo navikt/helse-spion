@@ -27,7 +27,7 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
             ytelse = Ytelsesperiode.Ytelse.SP,
             merknad = "Fritak fra AGP",
             sistEndret = LocalDate.now(),
-            løpenummer = 1
+            kafkaOffset = 1
     )
 
     override fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {

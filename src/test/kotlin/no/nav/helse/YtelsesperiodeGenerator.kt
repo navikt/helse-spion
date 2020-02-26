@@ -69,7 +69,7 @@ class YtelsesperiodeGenerator(
     private val personGenerator = PersonGenerator(maxUniquePersoner)
     private var numGeneratedPerioder = 0
     private val maxPeriodeLength = 31L;
-    private var løpenummer = 0.toLong()
+    private var offset = 0.toLong()
 
     private fun randomPeriode(): Periode {
         val fom = initDate.plusDays(Random.Default.nextLong(0, (numGeneratedPerioder % 2000 + 1).toLong()))
@@ -84,7 +84,7 @@ class YtelsesperiodeGenerator(
         numGeneratedPerioder++
         return Ytelsesperiode(
                 periode,
-                løpenummer++,
+                offset++,
                 Arbeidsforhold("",
                         personGenerator.getRandomPerson(),
                         arbeidsgiverGenerator.getRandomArbeidsGiver()

@@ -8,8 +8,11 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 
+typealias MessageWithOffset = Pair<Long, String>
+
 interface KafkaMessageProvider {
-    fun getMessagesToProcess(): List<Pair<String, Long>>
+
+    fun getMessagesToProcess(): List<MessageWithOffset>
     fun confirmProcessingDone()
 }
 
@@ -36,8 +39,8 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String, po
 
     fun stop() = consumer.close()
 
-    override fun getMessagesToProcess(): List<Pair<String, Long>> {
-        return consumer.poll(Duration.ofSeconds(10)).map {Pair(it.value(), it.offset())}.toList()
+    override fun getMessagesToProcess(): List<MessageWithOffset> {
+        return consumer.poll(Duration.ofSeconds(10)).map {MessageWithOffset(it.offset(), it.value())}.toList()
     }
 
     override fun confirmProcessingDone() {

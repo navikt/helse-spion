@@ -45,12 +45,13 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
         }
     }
 
-    /** Lagrer eller erstatter ytelseperiode med mindre det allerede eksisterer en med høyere løpenummer. */
+    /** Lagrer eller erstatter ytelseperiode med mindre det allerede eksisterer en med høyere offset. */
     override fun upsert(yp: Ytelsesperiode) {
         ds.connection.use { con ->
+            //TODO Transaction
             val eksisterendeYtelsesperiode = finnEksisterendeYtelsesperiode(con, yp)
             eksisterendeYtelsesperiode?.let {
-                if (eksisterendeYtelsesperiode.løpenummer > yp.løpenummer)
+                if (eksisterendeYtelsesperiode.kafkaOffset > yp.kafkaOffset)
                     return
                 deleteYtelsesperiode(eksisterendeYtelsesperiode)
             }

@@ -21,12 +21,12 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
-internal class postgresTests : KoinComponent {
+internal class postgresYtelsesperiodeRepositoryTests : KoinComponent {
 
 
     val testYtelsesPeriode = Ytelsesperiode(
             periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
-            løpenummer = 2,
+            kafkaOffset = 2,
             arbeidsforhold = Arbeidsforhold(
                     arbeidsforholdId = "1",
                     arbeidstaker = Person("Solan", "Gundersen", "10987654321"),
@@ -100,10 +100,10 @@ internal class postgresTests : KoinComponent {
     }
 
     @Test
-    fun `lagrer ytelsesperiode kun hvis den har høyere løpenummer enn en eksisterende versjon`() {
+    fun `lagrer ytelsesperiode kun hvis den har høyere offset enn en eksisterende versjon`() {
         val repo = PostgresYtelsesperiodeRepository(dataSource, get())
-        val ypNyere = testYtelsesPeriode.copy(løpenummer = 3, status = Ytelsesperiode.Status.INNVILGET)
-        val ypEldre = testYtelsesPeriode.copy(løpenummer = 1, status = Ytelsesperiode.Status.HENLAGT)
+        val ypNyere = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
+        val ypEldre = testYtelsesPeriode.copy(kafkaOffset = 1, status = Ytelsesperiode.Status.HENLAGT)
 
         repo.upsert(ypNyere)
         repo.upsert(ypEldre)
@@ -112,6 +112,7 @@ internal class postgresTests : KoinComponent {
 
         assertEquals(1, savedYpList.size)
         assertEquals(ypNyere, savedYpList.first())
+        //TODO Constraints
 
     }
 

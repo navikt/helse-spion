@@ -161,10 +161,10 @@ val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
         )
 
         val generator = VedtaksmeldingGenerator(arbeidsgivere)
-        override fun getMessagesToProcess(): List <Pair<String, Long>> {
-            var løpenummer = 0.toLong()
+        override fun getMessagesToProcess(): List <MessageWithOffset> {
+            var offset = 0.toLong()
             return if (Random.Default.nextDouble() < 0.1)
-                generator.take(Random.Default.nextInt(2, 50)).map { Pair(om.writeValueAsString(it), løpenummer++)}
+                generator.take(Random.Default.nextInt(2, 50)).map { Pair(offset++, om.writeValueAsString(it))}
             else emptyList()
         }
 

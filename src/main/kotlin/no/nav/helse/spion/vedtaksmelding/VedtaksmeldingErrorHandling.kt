@@ -5,7 +5,7 @@ import javax.sql.DataSource
 
 data class FailedVedtaksmelding(
         val messageData: String,
-        val løpenummer: Long,
+        val kafkaOffset: Long,
         val errorMessage: String?,
         val id: UUID = UUID.randomUUID()
 )
@@ -19,7 +19,7 @@ interface FailedVedtaksmeldingRepository {
 class PostgresFailedVedtaksmeldingRepository(val dataSource: DataSource) : FailedVedtaksmeldingRepository {
     private val tableName = "failedvedtaksmelding"
 
-    private val insertStatement = "INSERT INTO $tableName(messageData, loepenummer, errorMessage, id) VALUES(?::json, ?, ?, ?::uuid)"
+    private val insertStatement = "INSERT INTO $tableName(messageData, kafkaOffset, errorMessage, id) VALUES(?::json, ?, ?, ?::uuid)"
     private val getStatement = "SELECT * FROM $tableName"
     private val deleteStatement = "DELETE FROM $tableName WHERE id = ?::uuid"
 
@@ -27,7 +27,7 @@ class PostgresFailedVedtaksmeldingRepository(val dataSource: DataSource) : Faile
         dataSource.connection.use {
             it.prepareStatement(insertStatement).apply {
                 setString(1, message.messageData)
-                setLong(2, message.løpenummer)
+                setLong(2, message.kafkaOffset)
                 setString(3, message.errorMessage)
                 setString(4, message.id.toString())
             }.executeUpdate()
@@ -44,7 +44,7 @@ class PostgresFailedVedtaksmeldingRepository(val dataSource: DataSource) : Faile
             while (res.next()) {
                 resultatListe.add(FailedVedtaksmelding(
                         res.getString("messageData"),
-                        res.getLong("loepenummer"),
+                        res.getLong("kafkaOffset"),
                         res.getString("errorMessage"),
                         UUID.fromString(res.getString("id"))
                 ))
