@@ -2,14 +2,12 @@ package no.nav.helse.spion.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.application.Application
-import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 
 
 enum class Role {
-    Admin, User, ReadOnly;
+    admin, user, readonly;
 
     override fun toString() = name.toLowerCase()
 }
