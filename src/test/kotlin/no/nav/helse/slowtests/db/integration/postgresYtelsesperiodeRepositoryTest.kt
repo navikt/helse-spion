@@ -1,6 +1,10 @@
 package no.nav.helse.slowtests.db.integration
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.zaxxer.hikari.HikariDataSource
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.Periode
@@ -19,7 +23,6 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.get
 import org.postgresql.util.PSQLException
-import java.lang.Exception
 import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.assertEquals
@@ -132,13 +135,26 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
     }
 
     @Test
-    fun `lagrer aldri to ytelsesperioder med samme primærnøkkel`() {
+    fun `lagrer ikke to ytelsesperioder med samme primærnøkkel`() {
         val repo = PostgresYtelsesperiodeRepository(dataSource, get())
 
         val yp = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
 
         assertThrows<PSQLException> {
             repo.executeSave(yp, dataSource.connection)
+        }
+    }
+
+    @Test
+    fun `lagrer ikke en ytelsesperiode som mangler del av primærnøkkel`() {
+        val mapperMock = mockk<ObjectMapper>()
+        val validJsonMissingIdentitetsnummer = "{  \"periode\" : {    \"fom\" : \"2019-01-01\",    \"tom\" : \"2019-02-01\"  },  \"kafkaOffset\" : 2,  \"arbeidsforhold\" : {    \"arbeidsforholdId\" : \"1\",    \"arbeidstaker\" : {      \"fornavn\" : \"Solan\",      \"etternavn\" : \"Gundersen\"   },    \"arbeidsgiver\" : {      \"navn\" : \"Flåklypa Verksted\",      \"organisasjonsnummer\" : \"666666666\",      \"arbeidsgiverId\" : \"555555555\"    }  },  \"vedtaksId\" : \"1\",  \"refusjonsbeløp\" : 10000,  \"status\" : \"UNDER_BEHANDLING\",  \"grad\" : 50,  \"dagsats\" : 200,  \"maxdato\" : \"2019-01-01\",  \"ferieperioder\" : [ ],  \"ytelse\" : \"SP\",  \"merknad\" : \"Fritak fra AGP\",  \"sistEndret\" : \"2020-02-26\"}"
+        every {mapperMock.writeValueAsString(any())} returns validJsonMissingIdentitetsnummer
+
+        val repo = PostgresYtelsesperiodeRepository(dataSource, mapperMock)
+
+        assertThrows<PSQLException> {
+            repo.executeSave(testYtelsesPeriode, dataSource.connection)
         }
     }
 }
