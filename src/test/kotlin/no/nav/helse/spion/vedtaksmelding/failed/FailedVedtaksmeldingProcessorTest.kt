@@ -1,4 +1,4 @@
-package no.nav.helse.spion.vedtaksmelding
+package no.nav.helse.spion.vedtaksmelding.failed
 
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -7,16 +7,16 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmelding
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.helse.spion.vedtaksmelding.KafkaMessageProvider
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingGenerator
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.io.IOException
 
-open class VedtaksmeldingProcessorTests {
-
+internal class FailedVedtaksmeldingProcessorTest {
     val kafkaMock = mockk<KafkaMessageProvider>(relaxed = true)
     val serviceMock = mockk<VedtaksmeldingService>(relaxed = true)
     val failedMessageDaoMock = mockk<FailedVedtaksmeldingRepository>(relaxed = true)
@@ -67,10 +67,10 @@ open class VedtaksmeldingProcessorTests {
         verify(exactly = 1) { failedMessageDaoMock.save(any()) }
         verify(exactly = 1) { kafkaMock.confirmProcessingDone() }
 
-        assertThat(saveArg.isCaptured).isTrue()
-        assertThat(saveArg.captured.errorMessage).isEqualTo(message)
-        assertThat(saveArg.captured.id).isNotNull()
-        assertThat(saveArg.captured.messageData).isEqualTo(messageList[0])
+        Assertions.assertThat(saveArg.isCaptured).isTrue()
+        Assertions.assertThat(saveArg.captured.errorMessage).isEqualTo(message)
+        Assertions.assertThat(saveArg.captured.id).isNotNull()
+        Assertions.assertThat(saveArg.captured.messageData).isEqualTo(messageList[0])
     }
 
     @Test
@@ -78,7 +78,7 @@ open class VedtaksmeldingProcessorTests {
         every { serviceMock.processAndSaveMessage(messageList[0]) } throws JsonParseException(null, "WRONG")
         every { failedMessageDaoMock.save(any()) } throws IOException("DATABSE DOWN")
 
-        assertThrows<IOException> { processor.doJob() }
+        org.junit.jupiter.api.assertThrows<IOException> { processor.doJob() }
 
         verify(exactly = 1) { serviceMock.processAndSaveMessage(messageList[0]) }
         verify(exactly = 1) { failedMessageDaoMock.save(any()) }
@@ -86,4 +86,3 @@ open class VedtaksmeldingProcessorTests {
     }
 
 }
-
