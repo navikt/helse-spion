@@ -180,8 +180,7 @@ fun ApplicationConfig.getjdbcUrlFromProperties(): String {
     return String.format("jdbc:postgresql://%s:%s/%s%s",
             this.property("database.host").getString(),
             this.property("database.port").getString(),
-            this.property("database.name").getString(),
-            this.propertyOrNull("database.username")?.getString()?.let { "?user=$it" })
+            this.property("database.name").getString())
 }
 
 inline fun <reified T : Any> Koin.getAllOfType(): Collection<T> =
