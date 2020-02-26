@@ -130,6 +130,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) as SpionService }
 }
 
+@KtorExperimentalAPI
 fun prodConfig(config: ApplicationConfig) = module {
     single {
         getDataSource(createHikariConfig(config.getjdbcUrlFromProperties()),
