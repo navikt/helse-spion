@@ -15,7 +15,7 @@ enum class Role {
 
 fun getDataSource(hikariConfig: HikariConfig, dbName: String, vaultMountpath: String?) =
         if (!vaultMountpath.isNullOrEmpty()) {
-            dataSourceFromVault(hikariConfig, dbName, vaultMountpath, Role.User)
+            dataSourceFromVault(hikariConfig, dbName, vaultMountpath, Role.user)
         } else {
             HikariDataSource(hikariConfig)
         }
