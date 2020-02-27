@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.IOException
+import java.time.Duration
 
 open class VedtaksmeldingProcessorTests {
 
@@ -29,7 +30,7 @@ open class VedtaksmeldingProcessorTests {
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
     val processor = VedtaksmeldingProcessor(
-            kafkaMock, serviceMock, failedMessageDaoMock, CoroutineScope(testCoroutineDispatcher)
+            kafkaMock, serviceMock, failedMessageDaoMock, CoroutineScope(testCoroutineDispatcher), Duration.ofMillis(100)
     )
 
     private lateinit var messageList: List<String>
