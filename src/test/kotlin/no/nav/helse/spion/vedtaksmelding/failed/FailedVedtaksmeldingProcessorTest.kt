@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.IOException
-import java.time.Duration
 
 internal class FailedVedtaksmeldingProcessorTest {
 
@@ -22,7 +21,7 @@ internal class FailedVedtaksmeldingProcessorTest {
     val testCoroutineDispatcher = TestCoroutineDispatcher()
 
     val processor = FailedVedtaksmeldingProcessor(
-            failedMessageDaoMock, serviceMock, CoroutineScope(testCoroutineDispatcher), Duration.ofMillis(100)
+            failedMessageDaoMock, serviceMock, CoroutineScope(testCoroutineDispatcher)
     )
 
     private lateinit var msg: List<FailedVedtaksmelding>

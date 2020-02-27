@@ -10,8 +10,8 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeReposit
 import java.time.LocalDate
 
 class VedtaksmeldingService(
-        val ypRepo: YtelsesperiodeRepository,
-        val om: ObjectMapper
+        private val ypRepo: YtelsesperiodeRepository,
+        private val om: ObjectMapper
 ) {
 
     fun processAndSaveMessage(melding: String) {

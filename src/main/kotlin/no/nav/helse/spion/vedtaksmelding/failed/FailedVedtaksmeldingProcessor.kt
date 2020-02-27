@@ -6,8 +6,8 @@ import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
 import java.time.Duration
 
 class FailedVedtaksmeldingProcessor(
-        val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
-        val vedtaksmeldingService: VedtaksmeldingService,
+        private val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
+        private val vedtaksmeldingService: VedtaksmeldingService,
         coroutineScope: CoroutineScope,
         waitTimeWhenEmpty: Duration = Duration.ofHours(3)
 ) : RecurringJob(coroutineScope, waitTimeWhenEmpty) {

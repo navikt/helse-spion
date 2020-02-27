@@ -7,9 +7,9 @@ import java.time.Duration
 import java.util.*
 
 class VedtaksmeldingProcessor(
-        val kafkaVedtaksProvider: KafkaMessageProvider,
-        val service: VedtaksmeldingService,
-        val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
+        private val kafkaVedtaksProvider: KafkaMessageProvider,
+        private val service: VedtaksmeldingService,
+        private val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
         coroutineScope: CoroutineScope,
         waitTimeWhenEmptyQueue: Duration = Duration.ofSeconds(30)
 ) : RecurringJob(coroutineScope, waitTimeWhenEmptyQueue) {

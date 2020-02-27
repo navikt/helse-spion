@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 
 abstract class RecurringJob(
-        val coroutineScope: CoroutineScope,
-        val waitTimeBetweenRuns: Duration) {
+        private val coroutineScope: CoroutineScope,
+        private val waitTimeBetweenRuns: Duration) {
 
     protected val logger = LoggerFactory.getLogger(this::class.java)
 
