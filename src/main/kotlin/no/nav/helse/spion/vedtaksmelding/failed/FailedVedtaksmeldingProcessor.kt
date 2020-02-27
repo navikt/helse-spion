@@ -1,6 +1,7 @@
 package no.nav.helse.spion.vedtaksmelding.failed
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import no.nav.helse.spion.vedtaksmelding.RecurringJob
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
 import java.time.Duration
@@ -8,7 +9,7 @@ import java.time.Duration
 class FailedVedtaksmeldingProcessor(
         private val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
         private val vedtaksmeldingService: VedtaksmeldingService,
-        coroutineScope: CoroutineScope,
+        coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
         waitTimeWhenEmpty: Duration = Duration.ofHours(3)
 ) : RecurringJob(coroutineScope, waitTimeWhenEmpty) {
 

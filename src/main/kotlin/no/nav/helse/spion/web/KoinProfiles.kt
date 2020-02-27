@@ -14,8 +14,6 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.auth.altinn.AltinnClient
 import no.nav.helse.spion.db.createHikariConfig
@@ -104,8 +102,8 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
 
     single { VedtaksmeldingService(get(), get()) }
-    single { VedtaksmeldingProcessor(get(), get(), get(), CoroutineScope(Dispatchers.IO)) }
-    single { FailedVedtaksmeldingProcessor(get(), get(), CoroutineScope(Dispatchers.IO)) }
+    single { VedtaksmeldingProcessor(get(), get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get()) }
 
     LocalOIDCWireMock.start()
 }
@@ -133,8 +131,8 @@ fun preprodConfig(config: ApplicationConfig) = module {
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingService(get(), get()) }
-    single { VedtaksmeldingProcessor(get(), get(), get(), CoroutineScope(Dispatchers.IO)) }
-    single { FailedVedtaksmeldingProcessor(get(), get(), CoroutineScope(Dispatchers.IO)) }
+    single { VedtaksmeldingProcessor(get(), get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get()) }
     single {
         PostgresRepository(get(), get()) as YtelsesperiodeRepository
     }
@@ -158,8 +156,8 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { PostgresRepository(get(), get()) as YtelsesperiodeRepository }
     single { VedtaksmeldingService(get(), get()) }
 
-    single { VedtaksmeldingProcessor(get(), get(), get(), CoroutineScope(Dispatchers.IO)) }
-    single { FailedVedtaksmeldingProcessor(get(), get(), CoroutineScope(Dispatchers.IO)) }
+    single { VedtaksmeldingProcessor(get(), get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get()) }
 }
 
 val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {

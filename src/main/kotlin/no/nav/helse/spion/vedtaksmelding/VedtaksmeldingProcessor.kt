@@ -1,6 +1,7 @@
 package no.nav.helse.spion.vedtaksmelding
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmelding
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
 import java.time.Duration
@@ -10,7 +11,7 @@ class VedtaksmeldingProcessor(
         private val kafkaVedtaksProvider: KafkaMessageProvider,
         private val service: VedtaksmeldingService,
         private val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
-        coroutineScope: CoroutineScope,
+        coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
         waitTimeWhenEmptyQueue: Duration = Duration.ofSeconds(30)
 ) : RecurringJob(coroutineScope, waitTimeWhenEmptyQueue) {
 
