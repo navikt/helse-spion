@@ -1,8 +1,0 @@
-specFileName: spec/openapi.yaml
-apiTitle: helse-spion
-splitSpec: true
-codeSamples: false
-swaggerUI: true
-travis: false
-repo: navikt/helse-spion
-oasVersion: 3.0.0
