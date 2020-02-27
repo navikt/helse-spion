@@ -24,7 +24,8 @@ import java.sql.ResultSet
 import java.sql.SQLException
 
 internal class dbUnitTests : KoinComponent {
-
+    val dsMock = mockk<HikariDataSource>()
+    val conMock = mockk<Connection>(relaxed = true)
     @BeforeEach
     internal fun setUp() {
         startKoin {
@@ -38,9 +39,6 @@ internal class dbUnitTests : KoinComponent {
     }
     @Test
     fun `Lukker connection etter bruk`() {
-        val dsMock = mockk<HikariDataSource>()
-        val conMock = mockk<Connection>(relaxed = true)
-
         every { dsMock.connection } returns conMock
 
         val repo = PostgresYtelsesperiodeRepository(dsMock, get())
@@ -52,8 +50,6 @@ internal class dbUnitTests : KoinComponent {
 
     @Test
     fun `Lukker connection etter bruk selv ved feil`() {
-        val dsMock = mockk<HikariDataSource>()
-        val conMock = mockk<Connection>(relaxed = true)
         val rsMock = mockk<ResultSet>()
 
         every { dsMock.connection } returns conMock
@@ -65,19 +61,17 @@ internal class dbUnitTests : KoinComponent {
         assertThrows<Exception> {
             repo.getYtelserForPerson("10987654321", "555555555")
         }
+
         verify(exactly = 1) { dsMock.connection }
         verify(exactly = 1) { conMock.close() }
     }
 
     @Test
     fun `ruller tilbake en transaksjon hvis noe feiler`() {
-        val dsMock = mockk<HikariDataSource>()
-        val conMock = mockk<Connection>(relaxed = true)
         val ypGen = YtelsesperiodeGenerator(10, 10)
         val yp = ypGen.next()
 
         every { dsMock.connection } returns conMock
-
         every {conMock.prepareStatement(any()).executeUpdate()} throws SQLException()
 
         val repo = PostgresYtelsesperiodeRepository(dsMock, get())

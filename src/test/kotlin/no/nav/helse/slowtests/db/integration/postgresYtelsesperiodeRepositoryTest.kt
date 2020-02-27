@@ -29,7 +29,7 @@ import kotlin.test.assertEquals
 
 internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
-
+    lateinit var repo : PostgresYtelsesperiodeRepository;
     val testYtelsesPeriode = Ytelsesperiode(
             periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
             kafkaOffset = 2,
@@ -49,7 +49,6 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
             merknad = "Fritak fra AGP",
             sistEndret = LocalDate.now()
     )
-    val dataSource = HikariDataSource(createLocalHikariConfig())
 
     @BeforeEach
     internal fun setUp() {
@@ -57,14 +56,12 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
             loadKoinModules(common)
 
         }
-
-        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
+        repo = PostgresYtelsesperiodeRepository(HikariDataSource(createLocalHikariConfig()), get())
         repo.upsert(testYtelsesPeriode)
     }
 
     @AfterEach
     internal fun tearDown() {
-        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
         repo.delete(testYtelsesPeriode)
         stopKoin()
 
@@ -72,8 +69,6 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     @Test
     fun `Henter en ytelsesperiode fra repo`() {
-        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
-
         val p = repo.getYtelserForPerson("10987654321", "555555555")
 
         assertEquals(testYtelsesPeriode, p.first())
@@ -82,7 +77,6 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     @Test
     fun `Sletter en ytelsesperiode`() {
-        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
         val deletedCount = repo.delete(testYtelsesPeriode)
 
         assertEquals(1, deletedCount)
@@ -90,7 +84,6 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     @Test
     fun `sletter bare riktig ytelsesperiode`() {
-        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
         val ypAnnenPeriode = testYtelsesPeriode.copy(periode = Periode(LocalDate.of(2020, 5, 5), LocalDate.of(2020, 8, 1)))
         repo.upsert(ypAnnenPeriode)
 
@@ -107,7 +100,6 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     @Test
     fun `lagrer en nyere ytelsesperiode`() {
-        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
         val ypNewer = testYtelsesPeriode.copy(kafkaOffset = 5, status = Ytelsesperiode.Status.INNVILGET)
 
         repo.upsert(ypNewer)
@@ -121,7 +113,6 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     @Test
     fun `lagrer ytelsesperiode kun hvis den har høyere offset enn en eksisterende versjon`() {
-        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
         val ypNewer = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
         val ypOlder = testYtelsesPeriode.copy(kafkaOffset = 1, status = Ytelsesperiode.Status.HENLAGT)
 
@@ -136,25 +127,26 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     @Test
     fun `lagrer ikke to ytelsesperioder med samme primærnøkkel`() {
-        val repo = PostgresYtelsesperiodeRepository(dataSource, get())
+        val con = HikariDataSource(createLocalHikariConfig()).connection
 
         val yp = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
 
         assertThrows<PSQLException> {
-            repo.executeSave(yp, dataSource.connection)
+            repo.executeSave(yp, con)
         }
     }
 
     @Test
     fun `lagrer ikke en ytelsesperiode som mangler del av primærnøkkel`() {
+        val ds = HikariDataSource(createLocalHikariConfig())
         val mapperMock = mockk<ObjectMapper>()
         val validJsonMissingIdentitetsnummer = "{  \"periode\" : {    \"fom\" : \"2019-01-01\",    \"tom\" : \"2019-02-01\"  },  \"kafkaOffset\" : 2,  \"arbeidsforhold\" : {    \"arbeidsforholdId\" : \"1\",    \"arbeidstaker\" : {      \"fornavn\" : \"Solan\",      \"etternavn\" : \"Gundersen\"   },    \"arbeidsgiver\" : {      \"navn\" : \"Flåklypa Verksted\",      \"organisasjonsnummer\" : \"666666666\",      \"arbeidsgiverId\" : \"555555555\"    }  },  \"vedtaksId\" : \"1\",  \"refusjonsbeløp\" : 10000,  \"status\" : \"UNDER_BEHANDLING\",  \"grad\" : 50,  \"dagsats\" : 200,  \"maxdato\" : \"2019-01-01\",  \"ferieperioder\" : [ ],  \"ytelse\" : \"SP\",  \"merknad\" : \"Fritak fra AGP\",  \"sistEndret\" : \"2020-02-26\"}"
         every {mapperMock.writeValueAsString(any())} returns validJsonMissingIdentitetsnummer
 
-        val repo = PostgresYtelsesperiodeRepository(dataSource, mapperMock)
+        repo = PostgresYtelsesperiodeRepository(ds, mapperMock)
 
         assertThrows<PSQLException> {
-            repo.executeSave(testYtelsesPeriode, dataSource.connection)
+            repo.executeSave(testYtelsesPeriode, ds.connection)
         }
     }
 }
