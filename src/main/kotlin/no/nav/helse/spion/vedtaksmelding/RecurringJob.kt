@@ -27,13 +27,17 @@ abstract class RecurringJob(
             } catch (t: Throwable) {
                 if (retryOnFail)
                     logger.error("Jobben feilet, men forsøker på nytt etter ${waitTimeBetweenRuns.toSeconds()} s ", t)
-                else
+                else {
+                    isRunning = false
                     throw t
+                }
             }
 
             if (isRunning) {
                 delay(waitTimeBetweenRuns)
-                scheduleAsyncJobRun(retryOnFail)
+                if (isRunning) {
+                    scheduleAsyncJobRun(retryOnFail)
+                }
             } else {
                 logger.debug("Stoppet.")
             }

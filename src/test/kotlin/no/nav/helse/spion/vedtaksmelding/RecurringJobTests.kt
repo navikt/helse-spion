@@ -68,6 +68,22 @@ internal class RecurringJobTests {
         assertThat(job.getCallCounter()).isEqualTo(1)
     }
 
+    @Test
+    internal fun `Stopping the job prevents new execution`() {
+        testCoroutineDispatcher.pauseDispatcher()
+
+        job.startAsync()
+        testCoroutineDispatcher.runCurrent()
+        job.stop()
+
+        assertThat(job.getJobCompletedCounter()).isEqualTo(1)
+
+        testCoroutineDispatcher.advanceTimeBy(delay.toMillis())
+        testCoroutineDispatcher.runCurrent()
+
+        assertThat(job.getJobCompletedCounter()).isEqualTo(1)
+    }
+
     internal class TestRecurringJob(coroutineScope: CoroutineScope, waitTimeBetweenRuns: Duration) : RecurringJob(coroutineScope, waitTimeBetweenRuns) {
         public var failOnJob: Boolean = false
         private var jobCompletedCounter = 0
