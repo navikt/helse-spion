@@ -3,10 +3,15 @@ package no.nav.helse.spion.domene.ytelsesperiode.repository
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
+import org.slf4j.LoggerFactory
+import java.lang.Exception
 import java.sql.Connection
+import java.sql.SQLException
 import javax.sql.DataSource
 
 class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMapper) : YtelsesperiodeRepository {
+    private val logger = LoggerFactory.getLogger(PostgresYtelsesperiodeRepository::class.java)
     private val tableName = "ytelsesperiode"
     private val getByPersonAndArbeidsgiverStatement = """SELECT data::json FROM $tableName 
             WHERE data -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
@@ -48,19 +53,29 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
     /** Lagrer eller erstatter ytelseperiode med mindre det allerede eksisterer en med høyere offset. */
     override fun upsert(yp: Ytelsesperiode) {
         ds.connection.use { con ->
-            con.autoCommit = false
-            val existingYp = getExistingYtelsesperiode(con, yp)
-            existingYp?.let {
-                if (existingYp.kafkaOffset > yp.kafkaOffset)
-                    return
-                delete(existingYp)
+            try {
+                con.autoCommit = false
+                val existingYp = getExistingYtelsesperiode(con, yp)
+                existingYp?.let {
+                    if (existingYp.kafkaOffset > yp.kafkaOffset)
+                        return
+                    delete(existingYp)
+                }
+                executeSave(yp, con)
+                con.commit()
+            } catch (e: SQLException) {
+                logger.error("Ruller tilbake ytelsesperiode med offset ${yp.kafkaOffset}", e)
+                try {
+                    con.rollback()
+                } catch (ex: Exception) {
+                    logger.error("Klarte ikke rulle tilbake ytelsesperiode med offset ${yp.kafkaOffset}", e)
+                }
             }
-            executeSave(yp, con)
-            con.commit()
         }
+
     }
 
-     fun executeSave(yp: Ytelsesperiode, con: Connection): Int {
+    fun executeSave(yp: Ytelsesperiode, con: Connection): Int {
         val json = mapper.writeValueAsString(yp)
         return con.prepareStatement(saveStatement).apply {
             setString(1, json)

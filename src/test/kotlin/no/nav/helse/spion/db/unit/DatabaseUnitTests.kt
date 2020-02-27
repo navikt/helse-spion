@@ -5,6 +5,8 @@ import com.zaxxer.hikari.HikariDataSource
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.YtelsesperiodeGenerator
+import no.nav.helse.spion.db.getDataSource
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.web.common
 import org.junit.jupiter.api.AfterEach
@@ -19,6 +21,7 @@ import org.koin.core.get
 import java.lang.Exception
 import java.sql.Connection
 import java.sql.ResultSet
+import java.sql.SQLException
 
 internal class dbUnitTests : KoinComponent {
 
@@ -66,4 +69,21 @@ internal class dbUnitTests : KoinComponent {
         verify(exactly = 1) { conMock.close() }
     }
 
+    @Test
+    fun `ruller tilbake en transaksjon hvis noe feiler`() {
+        val dsMock = mockk<HikariDataSource>()
+        val conMock = mockk<Connection>(relaxed = true)
+        val ypGen = YtelsesperiodeGenerator(10, 10)
+        val yp = ypGen.next()
+
+        every { dsMock.connection } returns conMock
+
+        every {conMock.prepareStatement(any()).executeUpdate()} throws SQLException()
+
+        val repo = PostgresYtelsesperiodeRepository(dsMock, get())
+
+        repo.upsert(yp)
+
+        verify(exactly = 1) {conMock.rollback()}
+    }
 }
