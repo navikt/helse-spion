@@ -2,14 +2,12 @@ package no.nav.helse.spion.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.application.Application
-import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 
 
 enum class Role {
-    Admin, User, ReadOnly;
+    admin, user, readonly;
 
     override fun toString() = name.toLowerCase()
 }
@@ -17,16 +15,15 @@ enum class Role {
 
 fun getDataSource(hikariConfig: HikariConfig, dbName: String, vaultMountpath: String?) =
         if (!vaultMountpath.isNullOrEmpty()) {
-            dataSourceFromVault(hikariConfig, dbName, vaultMountpath, Role.User)
+            dataSourceFromVault(hikariConfig, dbName, vaultMountpath, Role.user)
         } else {
             HikariDataSource(hikariConfig)
         }
 
 @KtorExperimentalAPI
-fun dataSourceFromVault(hikariConfig: HikariConfig, dbName: String, vaultMountpath: String, role: Role) =
-        HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(
-                hikariConfig,
-                vaultMountpath,
-                "${dbName}-$role")
-
-
+fun dataSourceFromVault(hikariConfig: HikariConfig, dbName: String, vaultMountpath: String, role: Role): HikariDataSource {
+    return HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(
+            hikariConfig,
+            vaultMountpath,
+            "${dbName}-$role")
+}
