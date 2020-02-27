@@ -1,7 +1,7 @@
 package no.nav.helse.spion.vedtaksmelding.failed
 
 import kotlinx.coroutines.CoroutineScope
-import no.nav.helse.spion.vedtaksmelding.ScheduledJob
+import no.nav.helse.spion.vedtaksmelding.RecurringJob
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
 import java.time.Duration
 
@@ -10,7 +10,7 @@ class FailedVedtaksmeldingProcessor(
         val vedtaksmeldingService: VedtaksmeldingService,
         coroutineScope: CoroutineScope,
         waitTimeWhenEmpty: Duration = Duration.ofHours(3)
-) : ScheduledJob(coroutineScope, waitTimeWhenEmpty) {
+) : RecurringJob(coroutineScope, waitTimeWhenEmpty) {
 
     private val numberOfMessagesToRetryPerRun = 500
 

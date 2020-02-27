@@ -29,6 +29,8 @@ import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.vedtaksmelding.KafkaMessageProvider
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingGenerator
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
+import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
 import no.nav.helse.spion.vedtaksmelding.failed.PostgresFailedVedtaksmeldingRepository
 import org.koin.core.Koin
@@ -100,7 +102,10 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { generateKafkaMock(get()) as KafkaMessageProvider }
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
+
+    single { VedtaksmeldingService(get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get(), CoroutineScope(Dispatchers.IO)) }
+    single { FailedVedtaksmeldingProcessor(get(), get(), CoroutineScope(Dispatchers.IO)) }
 
     LocalOIDCWireMock.start()
 }
@@ -130,7 +135,9 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single { generateKafkaMock(get()) as KafkaMessageProvider }
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
+    single { VedtaksmeldingService(get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get(), CoroutineScope(Dispatchers.IO)) }
+    single { FailedVedtaksmeldingProcessor(get(), get(), CoroutineScope(Dispatchers.IO)) }
     single {
         PostgresRepository(get(), get()) as YtelsesperiodeRepository
     }
@@ -152,9 +159,11 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { generateKafkaMock(get()) as KafkaMessageProvider }
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
+    single { PostgresRepository(get(), get()) as YtelsesperiodeRepository }
+    single { VedtaksmeldingService(get(), get()) }
 
     single { VedtaksmeldingProcessor(get(), get(), get(), CoroutineScope(Dispatchers.IO)) }
-    single { PostgresRepository(get(), get()) as YtelsesperiodeRepository }
+    single { FailedVedtaksmeldingProcessor(get(), get(), CoroutineScope(Dispatchers.IO)) }
 }
 
 val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {

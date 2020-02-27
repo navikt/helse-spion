@@ -6,7 +6,7 @@ import kotlinx.coroutines.time.delay
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
-abstract class ScheduledJob(
+abstract class RecurringJob(
         val coroutineScope: CoroutineScope,
         val waitTimeBetweenRuns: Duration) {
 

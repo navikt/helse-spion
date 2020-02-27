@@ -12,7 +12,7 @@ class VedtaksmeldingProcessor(
         val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
         coroutineScope: CoroutineScope,
         waitTimeWhenEmptyQueue: Duration = Duration.ofSeconds(30)
-) : ScheduledJob(coroutineScope, waitTimeWhenEmptyQueue) {
+) : RecurringJob(coroutineScope, waitTimeWhenEmptyQueue) {
 
     override fun doJob() {
         do {
