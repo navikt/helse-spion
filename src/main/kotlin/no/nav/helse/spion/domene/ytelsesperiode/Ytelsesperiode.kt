@@ -6,6 +6,7 @@ import java.time.LocalDate
 
 data class Ytelsesperiode(
         val periode: Periode,
+        val kafkaOffset: Long,
         val arbeidsforhold: Arbeidsforhold,
         val vedtaksId: String,
         val refusjonsbeløp: BigDecimal?,

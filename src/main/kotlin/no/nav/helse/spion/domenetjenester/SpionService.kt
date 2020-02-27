@@ -8,7 +8,7 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeReposit
 class SpionService(private val sakRepo: YtelsesperiodeRepository, private val authRepo: AuthorizationsRepository) {
 
     fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
-        return sakRepo.hentYtelserForPerson(identitetsnummer, virksomhetsnummer)
+        return sakRepo.getYtelserForPerson(identitetsnummer, virksomhetsnummer)
     }
 
     fun hentArbeidsgivere(identitet: String): Set<AltinnOrganisasjon> {
