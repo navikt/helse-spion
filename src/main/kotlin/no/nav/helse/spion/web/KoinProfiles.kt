@@ -113,12 +113,9 @@ fun localDevConfig(config: ApplicationConfig) = module {
 @KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
     single {
-        val hikariConfig = createHikariConfig(
-                config.getjdbcUrlFromProperties(),
-                config.getString("database.username"),
-                config.getString("database.password")
-        )
-        getDataSource(hikariConfig, config.getString("database.name"), config.getString("database.vault.mountpath")) as DataSource
+        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties()),
+                config.getString("database.name"),
+                config.getString("database.vault.mountpath")) as DataSource
     }
 
     single {
@@ -144,11 +141,10 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) as SpionService }
 }
 
+@KtorExperimentalAPI
 fun prodConfig(config: ApplicationConfig) = module {
     single {
-        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties(),
-                config.getString("database.username"),
-                config.getString("database.password")),
+        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties()),
                 config.getString("database.name"),
                 config.getString("database.vault.mountpath")) as DataSource
     }
@@ -194,11 +190,10 @@ fun ApplicationConfig.getString(path: String): String {
 
 @KtorExperimentalAPI
 fun ApplicationConfig.getjdbcUrlFromProperties(): String {
-    return String.format("jdbc:postgresql://%s:%s/%s%s",
+    return String.format("jdbc:postgresql://%s:%s/%s",
             this.property("database.host").getString(),
             this.property("database.port").getString(),
-            this.property("database.name").getString(),
-            this.propertyOrNull("database.username")?.getString()?.let { "?user=$it" })
+            this.property("database.name").getString())
 }
 
 inline fun <reified T : Any> Koin.getAllOfType(): Collection<T> =
