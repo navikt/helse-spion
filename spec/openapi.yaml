@@ -1,7 +1,0 @@
-openapi: 3.0.0
-info:
-  title: Helse-spion-api
-  version: 1.0.0
-tags:
-  - name: Sak
-  - name: Arbeidsgiver
