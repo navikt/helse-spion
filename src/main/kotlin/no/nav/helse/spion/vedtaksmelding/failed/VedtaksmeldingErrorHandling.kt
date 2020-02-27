@@ -1,4 +1,4 @@
-package no.nav.helse.spion.vedtaksmelding
+package no.nav.helse.spion.vedtaksmelding.failed
 
 import java.util.*
 import javax.sql.DataSource
@@ -12,7 +12,7 @@ data class FailedVedtaksmelding(
 
 interface FailedVedtaksmeldingRepository {
     fun save(message: FailedVedtaksmelding)
-    fun getNextFailedMessages(numberToGet: Int): Collection<FailedVedtaksmelding>
+    fun getFailedMessages(numberToGet: Int): Collection<FailedVedtaksmelding>
     fun delete(id: UUID)
 }
 
@@ -34,9 +34,9 @@ class PostgresFailedVedtaksmeldingRepository(val dataSource: DataSource) : Faile
         }
     }
 
-    override fun getNextFailedMessages(numberToGet: Int): Collection<FailedVedtaksmelding> {
+    override fun getFailedMessages(numberToGet: Int): Collection<FailedVedtaksmelding> {
         dataSource.connection.use {
-            val res = it.prepareStatement(getStatement + " LIMIT $numberToGet")
+            val res = it.prepareStatement("$getStatement LIMIT $numberToGet")
                     .executeQuery()
 
             val resultatListe = mutableListOf<FailedVedtaksmelding>()

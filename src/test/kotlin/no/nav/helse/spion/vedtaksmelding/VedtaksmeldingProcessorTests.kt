@@ -4,57 +4,52 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
+import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmelding
+import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.IOException
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 
 open class VedtaksmeldingProcessorTests {
 
     val kafkaMock = mockk<KafkaMessageProvider>(relaxed = true)
-    val ypDaoMock = mockk<YtelsesperiodeRepository>(relaxed = true)
+    val serviceMock = mockk<VedtaksmeldingService>(relaxed = true)
     val failedMessageDaoMock = mockk<FailedVedtaksmeldingRepository>(relaxed = true)
     val mapper = ObjectMapper()
             .registerModule(KotlinModule())
             .registerModule(JavaTimeModule())
-
-    val omMock = mockk<ObjectMapper>()
 
     val meldingsGenerator = VedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
     val processor = VedtaksmeldingProcessor(
-            kafkaMock, ypDaoMock, failedMessageDaoMock, omMock, CoroutineScope(testCoroutineDispatcher)
+            kafkaMock, serviceMock, failedMessageDaoMock, CoroutineScope(testCoroutineDispatcher)
     )
 
     private lateinit var messageList: List<MessageWithOffset>
 
     @BeforeEach
     internal fun setUp() {
-        messageList = listOf<MessageWithOffset>(
-                Pair(1, mapper.writeValueAsString(meldingsGenerator.next())),
-                Pair(2, mapper.writeValueAsString(meldingsGenerator.next()))
+        messageList = listOf(
+                MessageWithOffset(1, mapper.writeValueAsString(meldingsGenerator.next())),
+                MessageWithOffset(2, mapper.writeValueAsString(meldingsGenerator.next()))
         )
 
-        every { omMock.readValue<Vedtaksmelding>(any<String>(), Vedtaksmelding::class.java) } answers { mapper.readValue<Vedtaksmelding>(it.invocation.args[0] as String) }
         every { kafkaMock.getMessagesToProcess() } returnsMany listOf(messageList, emptyList())
     }
 
     @Test
     internal fun `successful processingMessages saves To Repository and commits To the Queue`() {
-        val queueWasEmpty = processor.processOneBatch()
-        assertFalse { queueWasEmpty }
-        verify(exactly = 1) { kafkaMock.getMessagesToProcess() }
-        verify(exactly = 2) { ypDaoMock.upsert(any()) }
+        processor.doJob()
+
+        verify(exactly = 2) { kafkaMock.getMessagesToProcess() }
+        verify(exactly = 2) { serviceMock.processAndSaveMessage(any()) }
         verify(exactly = 1) { kafkaMock.confirmProcessingDone() }
     }
 
@@ -63,12 +58,12 @@ open class VedtaksmeldingProcessorTests {
         val message = "Error message"
         val saveArg = slot<FailedVedtaksmelding>()
 
-        every { omMock.readValue<Vedtaksmelding>(messageList[0].second, Vedtaksmelding::class.java) } throws JsonParseException(null, message)
+        every { serviceMock.processAndSaveMessage(messageList[0]) } throws JsonParseException(null, message)
         every { failedMessageDaoMock.save(capture(saveArg)) } just Runs
 
-        processor.processOneBatch()
+        processor.doJob()
 
-        verify(exactly = 1) { ypDaoMock.upsert(any()) }
+        verify(exactly = 2) { serviceMock.processAndSaveMessage(any()) }
         verify(exactly = 1) { failedMessageDaoMock.save(any()) }
         verify(exactly = 1) { kafkaMock.confirmProcessingDone() }
 
@@ -80,56 +75,15 @@ open class VedtaksmeldingProcessorTests {
 
     @Test
     internal fun `If processing fails and saving the fail fails, throw and do not commit to kafka`() {
-        every { omMock.readValue<Vedtaksmelding>(messageList[0].second, Vedtaksmelding::class.java) } throws JsonParseException(null, "message")
+        every { serviceMock.processAndSaveMessage(messageList[0]) } throws JsonParseException(null, "WRONG")
         every { failedMessageDaoMock.save(any()) } throws IOException("DATABSE DOWN")
 
-        assertThrows<IOException> { processor.processOneBatch() }
+        assertThrows<IOException> { processor.doJob() }
 
-        verify(exactly = 0) { ypDaoMock.upsert(any()) }
+        verify(exactly = 1) { serviceMock.processAndSaveMessage(messageList[0]) }
         verify(exactly = 1) { failedMessageDaoMock.save(any()) }
         verify(exactly = 0) { kafkaMock.confirmProcessingDone() }
     }
 
-    @Test
-    internal fun `StartAsync polls in coroutine untill the queue is empty and then waits`() {
-        testCoroutineDispatcher.pauseDispatcher()
-
-        processor.startAsync()
-        verify(exactly = 0) { kafkaMock.getMessagesToProcess() }
-
-        testCoroutineDispatcher.runCurrent()
-
-        verify(exactly = 2) { kafkaMock.getMessagesToProcess() }
-        verify(exactly = 2) { ypDaoMock.upsert(any()) }
-        verify(exactly = 1) { kafkaMock.confirmProcessingDone() }
-    }
 }
 
-class VedtaksmeldingMappingTests {
-    @Test
-    internal fun mappingShouldBeCorrect() {
-        val generator = VedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
-
-        for (i in 0..100) {
-            val melding = generator.next()
-            val yp = mapVedtaksMeldingTilYtelsesPeriode(melding, i.toLong())
-
-            assertEquals(melding.fom, yp.periode.fom)
-            assertEquals(melding.tom, yp.periode.tom)
-
-            assertEquals(melding.fornavn, yp.arbeidsforhold.arbeidstaker.fornavn)
-            assertEquals(melding.etternavn, yp.arbeidsforhold.arbeidstaker.etternavn)
-            assertEquals(melding.identitetsNummer, yp.arbeidsforhold.arbeidstaker.identitetsnummer)
-
-            assertEquals(melding.virksomhetsnummer, yp.arbeidsforhold.arbeidsgiver.arbeidsgiverId)
-
-            assertEquals(melding.refusjonsbeløp?.toBigDecimal(), yp.refusjonsbeløp)
-            assertEquals(melding.dagsats?.toBigDecimal(), yp.dagsats)
-
-            assertEquals(melding.status.correspondingDomainStatus, yp.status)
-            assertEquals(melding.maksDato, yp.maxdato)
-
-            assertEquals(melding.sykemeldingsgrad?.toBigDecimal(), yp.grad)
-        }
-    }
-}
