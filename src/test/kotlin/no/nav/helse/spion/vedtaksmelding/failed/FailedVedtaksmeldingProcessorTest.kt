@@ -30,8 +30,8 @@ internal class FailedVedtaksmeldingProcessorTest {
     internal fun setUp() {
 
         msg = listOf(
-                FailedVedtaksmelding("data", "error"),
-                FailedVedtaksmelding("data", "error")
+                FailedVedtaksmelding("data", 1, "error"),
+                FailedVedtaksmelding("data", 2, "error")
         )
 
         every { failedMessageDaoMock.getFailedMessages(any()) } returns msg
@@ -41,7 +41,7 @@ internal class FailedVedtaksmeldingProcessorTest {
     internal fun `successful processingMessages saves To Repository and commits To the Queue`() {
         processor.doJob()
 
-        verify(exactly = 2) { serviceMock.processAndSaveMessage("data") }
+        verify(exactly = 2) { serviceMock.processAndSaveMessage(any()) }
         verify(exactly = 2) { failedMessageDaoMock.delete(or(msg[0].id, msg[1].id)) }
         verify(exactly = 1) { failedMessageDaoMock.getFailedMessages(any()) }
     }

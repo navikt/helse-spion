@@ -31,27 +31,27 @@ internal class VedtaksmeldingServiceTest {
 
     @Test
     internal fun `successful processing deserializes and saves To Repository`() {
-        service.processAndSaveMessage(mockValidJsonMessage)
+        service.processAndSaveMessage(MessageWithOffset(1, mockValidJsonMessage))
         verify(exactly = 1) { omMock.readValue(mockValidJsonMessage, Vedtaksmelding::class.java) }
-        verify(exactly = 1) { ypDaoMock.save(any()) }
+        verify(exactly = 1) { ypDaoMock.upsert(any()) }
     }
 
     @Test
     internal fun `If json parsing fails, the error is thrown`() {
-        assertThrows<JsonParseException> { service.processAndSaveMessage(mockInvalidJson) }
+        assertThrows<JsonParseException> { service.processAndSaveMessage(MessageWithOffset(1, mockInvalidJson)) }
 
         verify(exactly = 1) { omMock.readValue(mockInvalidJson, Vedtaksmelding::class.java) }
-        verify(exactly = 0) { ypDaoMock.save(any()) }
+        verify(exactly = 0) { ypDaoMock.upsert(any()) }
     }
 
     @Test
     internal fun `If saving to the DB fails, the error is thrown`() {
-        every { ypDaoMock.save(any()) } throws IOException()
+        every { ypDaoMock.upsert(any()) } throws IOException()
 
-        assertThrows<IOException> { service.processAndSaveMessage(mockValidJsonMessage) }
+        assertThrows<IOException> { service.processAndSaveMessage(MessageWithOffset(1, mockValidJsonMessage)) }
 
         verify(exactly = 1) { omMock.readValue(mockValidJsonMessage, Vedtaksmelding::class.java) }
-        verify(exactly = 1) { ypDaoMock.save(any()) }
+        verify(exactly = 1) { ypDaoMock.upsert(any()) }
     }
 
     @Test
@@ -60,7 +60,7 @@ internal class VedtaksmeldingServiceTest {
 
         for (i in 0..100) {
             val melding = generator.next()
-            val yp = VedtaksmeldingService.mapVedtaksMeldingTilYtelsesPeriode(melding)
+            val yp = VedtaksmeldingService.mapVedtaksMeldingTilYtelsesPeriode(melding, 1)
 
             kotlin.test.assertEquals(melding.fom, yp.periode.fom)
             kotlin.test.assertEquals(melding.tom, yp.periode.tom)

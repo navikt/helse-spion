@@ -32,13 +32,13 @@ open class VedtaksmeldingProcessorTests {
             kafkaMock, serviceMock, failedMessageDaoMock, CoroutineScope(testCoroutineDispatcher)
     )
 
-    private lateinit var messageList: List<String>
+    private lateinit var messageList: List<MessageWithOffset>
 
     @BeforeEach
     internal fun setUp() {
         messageList = listOf(
-                mapper.writeValueAsString(meldingsGenerator.next()),
-                mapper.writeValueAsString(meldingsGenerator.next())
+                MessageWithOffset(1, mapper.writeValueAsString(meldingsGenerator.next())),
+                MessageWithOffset(2, mapper.writeValueAsString(meldingsGenerator.next()))
         )
 
         every { kafkaMock.getMessagesToProcess() } returnsMany listOf(messageList, emptyList())
@@ -70,7 +70,7 @@ open class VedtaksmeldingProcessorTests {
         assertThat(saveArg.isCaptured).isTrue()
         assertThat(saveArg.captured.errorMessage).isEqualTo(message)
         assertThat(saveArg.captured.id).isNotNull()
-        assertThat(saveArg.captured.messageData).isEqualTo(messageList[0])
+        assertThat(saveArg.captured.messageData).isEqualTo(messageList[0].second)
     }
 
     @Test

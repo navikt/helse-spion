@@ -28,13 +28,13 @@ class VedtaksmeldingProcessor(
         } while (!wasEmpty)
     }
 
-    private fun tryProcessOneMessage(melding: String) {
+    private fun tryProcessOneMessage(melding: MessageWithOffset) {
         try {
             service.processAndSaveMessage(melding)
         } catch (t: Throwable) {
             val errorId = UUID.randomUUID()
             logger.error("Feilet vedtaksmelding, Database ID: $errorId", t)
-            failedVedtaksmeldingRepository.save(FailedVedtaksmelding(melding, t.message, errorId))
+            failedVedtaksmeldingRepository.save(FailedVedtaksmelding(melding.second, melding.first, t.message, errorId))
         }
     }
 }

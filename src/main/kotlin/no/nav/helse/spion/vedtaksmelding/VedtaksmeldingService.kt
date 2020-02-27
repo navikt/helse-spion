@@ -13,17 +13,17 @@ class VedtaksmeldingService(
         private val ypRepo: YtelsesperiodeRepository,
         private val om: ObjectMapper
 ) {
-
-    fun processAndSaveMessage(melding: String) {
-        val deserializedKafkaMessage = om.readValue(melding, Vedtaksmelding::class.java)
-        val mapped = mapVedtaksMeldingTilYtelsesPeriode(deserializedKafkaMessage)
-        ypRepo.save(mapped)
+    fun processAndSaveMessage(melding: MessageWithOffset) {
+        val deserializedKafkaMessage = om.readValue(melding.second, Vedtaksmelding::class.java)
+        val mapped = mapVedtaksMeldingTilYtelsesPeriode(deserializedKafkaMessage, melding.first)
+        ypRepo.upsert(mapped)
     }
 
     companion object Mapper {
-        fun mapVedtaksMeldingTilYtelsesPeriode(vm: Vedtaksmelding): Ytelsesperiode {
+        fun mapVedtaksMeldingTilYtelsesPeriode(vm: Vedtaksmelding, kafkaOffset: Long): Ytelsesperiode {
             return Ytelsesperiode(
                     Periode(vm.fom, vm.tom),
+                    kafkaOffset,
                     Arbeidsforhold("",
                             Person(vm.fornavn, vm.etternavn, vm.identitetsNummer),
                             Arbeidsgiver("TODO?", "TODO?", vm.virksomhetsnummer)),
