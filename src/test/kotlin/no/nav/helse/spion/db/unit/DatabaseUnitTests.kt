@@ -5,7 +5,9 @@ import com.zaxxer.hikari.HikariDataSource
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresRepository
+import no.nav.helse.YtelsesperiodeGenerator
+import no.nav.helse.spion.db.getDataSource
+import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.web.common
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -19,9 +21,11 @@ import org.koin.core.get
 import java.lang.Exception
 import java.sql.Connection
 import java.sql.ResultSet
+import java.sql.SQLException
 
 internal class dbUnitTests : KoinComponent {
-
+    val dsMock = mockk<HikariDataSource>()
+    val conMock = mockk<Connection>(relaxed = true)
     @BeforeEach
     internal fun setUp() {
         startKoin {
@@ -35,13 +39,10 @@ internal class dbUnitTests : KoinComponent {
     }
     @Test
     fun `Lukker connection etter bruk`() {
-        val dsMock = mockk<HikariDataSource>()
-        val conMock = mockk<Connection>(relaxed = true)
-
         every { dsMock.connection } returns conMock
 
-        val repo = PostgresRepository(dsMock, get())
-        repo.hentYtelserForPerson("10987654321", "555555555")
+        val repo = PostgresYtelsesperiodeRepository(dsMock, get())
+        repo.getYtelserForPerson("10987654321", "555555555")
 
         verify(exactly = 1) { dsMock.connection }
         verify(exactly = 1) { conMock.close() }
@@ -49,8 +50,6 @@ internal class dbUnitTests : KoinComponent {
 
     @Test
     fun `Lukker connection etter bruk selv ved feil`() {
-        val dsMock = mockk<HikariDataSource>()
-        val conMock = mockk<Connection>(relaxed = true)
         val rsMock = mockk<ResultSet>()
 
         every { dsMock.connection } returns conMock
@@ -58,12 +57,27 @@ internal class dbUnitTests : KoinComponent {
         every { rsMock.next() } returns true
         every { rsMock.getString("ytelsesperiode") } returns """ {"svaret" : 42 } """
 
-        val repo = PostgresRepository(dsMock, get())
+        val repo = PostgresYtelsesperiodeRepository(dsMock, get())
         assertThrows<Exception> {
-            repo.hentYtelserForPerson("10987654321", "555555555")
+            repo.getYtelserForPerson("10987654321", "555555555")
         }
+
         verify(exactly = 1) { dsMock.connection }
         verify(exactly = 1) { conMock.close() }
     }
 
+    @Test
+    fun `ruller tilbake en transaksjon hvis noe feiler`() {
+        val ypGen = YtelsesperiodeGenerator(10, 10)
+        val yp = ypGen.next()
+
+        every { dsMock.connection } returns conMock
+        every {conMock.prepareStatement(any()).executeUpdate()} throws SQLException()
+
+        val repo = PostgresYtelsesperiodeRepository(dsMock, get())
+
+        repo.upsert(yp)
+
+        verify(exactly = 1) {conMock.rollback()}
+    }
 }

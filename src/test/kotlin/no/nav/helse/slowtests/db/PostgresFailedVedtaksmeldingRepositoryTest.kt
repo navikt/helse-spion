@@ -13,7 +13,7 @@ internal class PostgresFailedVedtaksmeldingRepositoryTest {
     lateinit var repo: PostgresFailedVedtaksmeldingRepository
     lateinit var dataSource: HikariDataSource
 
-    private val failedVedtaksmelding = FailedVedtaksmelding("""{"test": "test"}""", "test")
+    private val failedVedtaksmelding = FailedVedtaksmelding("""{"test": "test"}""",0, "test")
 
     @BeforeEach
     internal fun setUp() {

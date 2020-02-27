@@ -26,10 +26,11 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
             ferieperioder = emptyList(),
             ytelse = Ytelsesperiode.Ytelse.SP,
             merknad = "Fritak fra AGP",
-            sistEndret = LocalDate.now()
+            sistEndret = LocalDate.now(),
+            kafkaOffset = 1
     )
 
-    override fun hentYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
+    override fun getYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
         val perioder = listOf(
                 Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
                 Periode(LocalDate.of(2019, 3, 10), LocalDate.of(2019, 3, 28)),
@@ -41,7 +42,7 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
         return ytelsesperioder
     }
 
-    override fun save(yp: Ytelsesperiode) {
+    override fun upsert(yp: Ytelsesperiode) {
         println("saving $yp")
     }
 }

@@ -21,7 +21,7 @@ import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.db.getDataSource
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
-import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresRepository
+import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.vedtaksmelding.KafkaMessageProvider
@@ -92,7 +92,7 @@ fun buildAndTestConfig() = module {
 fun localDevConfig(config: ApplicationConfig) = module {
     single { getDataSource(createLocalHikariConfig(), "spion", null) as DataSource }
 
-    single { PostgresRepository(get(), get()) as YtelsesperiodeRepository }
+    single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
     single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
@@ -134,7 +134,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
     single {
-        PostgresRepository(get(), get()) as YtelsesperiodeRepository
+        PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository
     }
     single { SpionService(get(), get()) as SpionService }
 }
@@ -153,7 +153,9 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { generateKafkaMock(get()) as KafkaMessageProvider }
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
-    single { PostgresRepository(get(), get()) as YtelsesperiodeRepository }
+
+    single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
+    single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
     single { VedtaksmeldingService(get(), get()) }
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
@@ -168,9 +170,10 @@ val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
         )
 
         val generator = VedtaksmeldingGenerator(arbeidsgivere)
-        override fun getMessagesToProcess(): List<String> {
+        override fun getMessagesToProcess(): List <MessageWithOffset> {
+            var offset = 0.toLong()
             return if (Random.Default.nextDouble() < 0.1)
-                generator.take(Random.Default.nextInt(2, 50)).map { om.writeValueAsString(it) }
+                generator.take(Random.Default.nextInt(2, 50)).map { Pair(offset++, om.writeValueAsString(it))}
             else emptyList()
         }
 
