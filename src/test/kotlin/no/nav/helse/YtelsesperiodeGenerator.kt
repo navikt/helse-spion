@@ -11,20 +11,29 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.random.Random
 
-private class ArbeidsgiverGenerator(private val maxUniqueArbeidsgivere: Int = 1000) {
+private class ArbeidsgiverGenerator(private val maxUniqueArbeidsgivere: Int = 1000, private val maxUniqueOrganisasjoner: Int = 1000) {
     private val faker = Faker()
     private val arbeidsgivere = mutableListOf<Arbeidsgiver>()
+    private val organisasjoner = mutableListOf<String>()
     fun getRandomArbeidsGiver(): Arbeidsgiver {
         return if (arbeidsgivere.size >= maxUniqueArbeidsgivere) {
             arbeidsgivere.pickRandom()
         } else {
             val arbeidsGiver = Arbeidsgiver(
-                    faker.funnyName().name(),
-                    Random.Default.nextLong(111111111, 999999999).toString(),
-                    Random.Default.nextLong(111111111, 999999999).toString()
+                    navn = faker.funnyName().name(),
+                    organisasjonsnummer = getOrganisasjonRandomOrgnr(),
+                    arbeidsgiverId = Random.Default.nextLong(111111111, 999999999).toString()
             )
             arbeidsgivere.add(arbeidsGiver)
             arbeidsGiver
+        }
+    }
+
+    fun getOrganisasjonRandomOrgnr(): String {
+        return if (organisasjoner.size >= maxUniqueOrganisasjoner) {
+            organisasjoner.pickRandom()
+        } else {
+            Random.Default.nextLong(111111111, 999999999).toString()
         }
     }
 }
@@ -59,13 +68,14 @@ private val periodStateGenerator = {
 
 class YtelsesperiodeGenerator(
         maxUniqueArbeidsgivere: Int,
+        maxUniqueOrganisasjoner: Int,
         maxUniquePersoner: Int,
         private val initDate: LocalDate = LocalDate.of(2020, 1, 1)
 ) : Iterable<Ytelsesperiode>, Iterator<Ytelsesperiode>
 
 {
 
-    private val arbeidsgiverGenerator = ArbeidsgiverGenerator(maxUniqueArbeidsgivere)
+    private val arbeidsgiverGenerator = ArbeidsgiverGenerator(maxUniqueArbeidsgivere, maxUniqueOrganisasjoner)
     private val personGenerator = PersonGenerator(maxUniquePersoner)
     private var numGeneratedPerioder = 0
     private val maxPeriodeLength = 31L;

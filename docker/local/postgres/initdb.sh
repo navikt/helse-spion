@@ -15,6 +15,8 @@ psql -v ON_ERROR_STOP=1 --username "spion" --dbname "spion" <<-EOSQL
     CREATE INDEX arbeidsgiverId ON ytelsesperiode ((data ->'arbeidsforhold'-> 'arbeidsgiver' ->> 'arbeidsgiverId'));
     CREATE INDEX arbeidstaker ON ytelsesperiode ((data ->'arbeidsforhold'-> 'arbeidstaker' ->> 'identitetsnummer'));
     CREATE INDEX orgnr ON ytelsesperiode ((data ->'arbeidsforhold'-> 'arbeidsgiver' ->> 'organisasjonsnummer'));
+    CREATE INDEX fom ON ytelsesperiode ((data ->'periode'->> 'fom'));
+    CREATE INDEX tom ON ytelsesperiode ((data -> 'periode' ->> 'tom'));
 
     ALTER TABLE ytelsesperiode ADD CONSTRAINT pk_must_exist CHECK ( data -> 'arbeidsforhold' -> 'arbeidstaker' ? 'identitetsnummer'
         AND data -> 'arbeidsforhold' -> 'arbeidsgiver' ? 'arbeidsgiverId'
