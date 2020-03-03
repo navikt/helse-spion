@@ -1,7 +1,6 @@
 
 package no.nav.helse
-
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class YtelsesperiodeGeneratorTest {
@@ -14,6 +13,6 @@ class YtelsesperiodeGeneratorTest {
                 .toList()
                 .onEach { println(it) }
 
-        Assert.assertEquals(50, ypl.size)
+        assertThat(ypl).hasSize(50)
     }
 }

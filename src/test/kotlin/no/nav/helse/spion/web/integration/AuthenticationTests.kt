@@ -11,9 +11,8 @@ import no.nav.helse.spion.web.dto.OppslagDto
 import no.nav.helse.spion.web.spionModule
 import no.nav.security.token.support.test.JwtTokenGenerator
 import org.junit.jupiter.api.Test
+import org.assertj.core.api.Assertions.assertThat
 import org.koin.core.get
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
 
@@ -28,7 +27,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
             handleRequest(HttpMethod.Post, "/api/v1/ytelsesperioder/oppslag") {
 
             }.apply {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+                assertThat(response.status()).isEqualTo(HttpStatusCode.Unauthorized)
             }
         }
     }
@@ -40,7 +39,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
         }) {
             handleRequest(HttpMethod.Get, "/isalive") {
             }.apply {
-                assertEquals(HttpStatusCode.OK, response.status())
+                assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
             }
         }
     }
@@ -52,7 +51,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
         }) {
             handleRequest(HttpMethod.Get, "/isready") {
             }.apply {
-                assertEquals(HttpStatusCode.OK, response.status())
+                assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
             }
         }
     }
@@ -69,7 +68,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(objectMapper.writeValueAsString(oppslag))
             }.apply {
-                assertNotEquals(HttpStatusCode.Unauthorized, response.status())
+                assertThat(response.status()).isNotEqualTo(HttpStatusCode.Unauthorized)
             }
         }
     }
@@ -82,7 +81,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
             doAuthenticatedRequest(HttpMethod.Get, "/api/v1/saker/oppslag") {
 
             }.apply {
-                assertNotEquals(HttpStatusCode.Unauthorized, response.status())
+                assertThat(response.status()).isNotEqualTo(HttpStatusCode.Unauthorized)
             }
         }
     }

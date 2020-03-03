@@ -9,14 +9,14 @@ import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.Person
 import no.nav.helse.spion.domene.ytelsesperiode.Arbeidsforhold
-import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
+import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.web.common
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertAll
-import org.junit.jupiter.api.assertThrows
 import org.koin.core.KoinComponent
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
@@ -25,7 +25,6 @@ import org.koin.core.get
 import org.postgresql.util.PSQLException
 import java.math.BigDecimal
 import java.time.LocalDate
-import kotlin.test.assertEquals
 
 internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
@@ -69,17 +68,17 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     @Test
     fun `Henter en ytelsesperiode fra repo`() {
-        val p = repo.getYtelserForPerson("10987654321", "555555555")
+        val yp = repo.getYtelserForPerson("10987654321", "555555555")
 
-        assertEquals(testYtelsesPeriode, p.first())
-        assertEquals(1, p.size)
+        assertThat(yp.size).isEqualTo(1)
+        assertThat(yp.first()).isEqualTo(testYtelsesPeriode)
     }
 
     @Test
     fun `Sletter en ytelsesperiode`() {
         val deletedCount = repo.delete(testYtelsesPeriode)
 
-        assertEquals(1, deletedCount)
+        assertThat(deletedCount).isEqualTo(1)
     }
 
     @Test
@@ -89,10 +88,10 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
         val deletedCount = repo.delete(testYtelsesPeriode)
 
-        val ypLagret = repo.getYtelserForPerson("10987654321", "555555555").first()
+        val ypLagret = repo.getYtelserForPerson("10987654321", "555555555")
 
-        assertEquals(1, deletedCount)
-        assertEquals(ypAnnenPeriode, ypLagret)
+        assertThat(deletedCount).isEqualTo(1)
+        assertThat(ypLagret).containsOnly(ypAnnenPeriode)
 
         repo.delete(ypAnnenPeriode)
 
@@ -106,8 +105,7 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
         val savedYpList = repo.getYtelserForPerson("10987654321", "555555555")
 
-        assertEquals(savedYpList.size, 1)
-        assertEquals(savedYpList.first(), ypNewer)
+        assertThat(savedYpList).containsOnly(ypNewer)
 
     }
 
@@ -121,8 +119,8 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
         val savedYpList = repo.getYtelserForPerson("10987654321", "555555555")
 
-        assertEquals(1, savedYpList.size)
-        assertEquals(ypNewer, savedYpList.first())
+
+        assertThat(savedYpList).containsOnly(ypNewer)
     }
 
     @Test
@@ -131,7 +129,7 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
         val yp = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
 
-        assertThrows<PSQLException> {
+        assertThatExceptionOfType(PSQLException::class.java).isThrownBy {
             repo.executeSave(yp, con)
         }
     }
@@ -145,9 +143,10 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
         repo = PostgresYtelsesperiodeRepository(ds, mapperMock)
 
-        assertThrows<PSQLException> {
+        assertThatExceptionOfType(PSQLException::class.java).isThrownBy {
             repo.executeSave(testYtelsesPeriode, ds.connection)
         }
+
     }
 
     @Test
@@ -166,8 +165,8 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
         val result = repo.getYtelserForPerson(testYtelsesPeriode.arbeidsforhold.arbeidstaker.identitetsnummer, testYtelsesPeriode.arbeidsforhold.arbeidsgiver.arbeidsgiverId, queryRange)
 
-        assertEquals(3, result.size)
-        assertEquals( setOf(withinRange, fomWithinRange, tomWithinRange), result.toSet())
+        assertThat(result).hasSize(3)
+                .containsOnly(withinRange, fomWithinRange, tomWithinRange)
 
         yps.forEach {
             repo.delete(it)

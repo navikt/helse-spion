@@ -11,7 +11,7 @@ import no.nav.helse.spion.web.common
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.koin.core.KoinComponent
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
@@ -56,7 +56,7 @@ internal class dbUnitTests : KoinComponent {
         every { rsMock.getString("ytelsesperiode") } returns """ {"svaret" : 42 } """
 
         val repo = PostgresYtelsesperiodeRepository(dsMock, get())
-        assertThrows<Exception> {
+        assertThatExceptionOfType(Exception::class.java).isThrownBy {
             repo.getYtelserForPerson("10987654321", "555555555")
         }
 

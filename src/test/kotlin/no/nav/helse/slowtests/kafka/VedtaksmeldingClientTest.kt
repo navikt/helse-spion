@@ -13,8 +13,9 @@ import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
-import org.junit.Assert
 import org.junit.jupiter.api.*
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.koin.core.KoinApplication
 import org.koin.core.KoinComponent
 import java.time.LocalDate
@@ -66,7 +67,10 @@ internal class VedtaksmeldingClientTest : KoinComponent {
 
         client.stop()
 
-        assertThrows<Exception> { runBlocking { client.doHealthCheck() } }
+
+        assertThatExceptionOfType(Exception::class.java).isThrownBy {
+            runBlocking { client.doHealthCheck() }
+        }
     }
 
     @Test
@@ -75,7 +79,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         val client = VedtaksmeldingClient(testProps, topicName)
         val noMessagesExpected = client.getMessagesToProcess()
 
-        Assert.assertEquals(0, noMessagesExpected.size)
+        assertThat(noMessagesExpected).isEmpty()
 
         val producer = KafkaProducer<String, String>(testProps, StringSerializer(), StringSerializer())
         val om = koin.koin.get<ObjectMapper>()
@@ -98,12 +102,12 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         ).get(10, TimeUnit.SECONDS)
 
         val oneMessageExpected = client.getMessagesToProcess()
-        Assert.assertEquals(1, oneMessageExpected.size)
+        assertThat(oneMessageExpected).hasSize(1)
 
         client.confirmProcessingDone()
 
         val zeroMessagesExpected = client.getMessagesToProcess()
-        Assert.assertEquals(0, zeroMessagesExpected.size)
+        assertThat(zeroMessagesExpected).isEmpty()
 
         client.stop()
     }
