@@ -21,6 +21,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.auth.localCookieDispenser
 import no.nav.helse.spion.nais.nais
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
+import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.web.api.spion
 import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.koin.ktor.ext.Koin
@@ -38,12 +39,19 @@ fun main() {
 
     embeddedServer(Netty, createApplicationEnvironment()).let { app ->
         app.start(wait = false)
+
+        val koin = app.application.getKoin()
+        val vedtaksmeldingProcessor = koin.get<VedtaksmeldingProcessor>()
+        vedtaksmeldingProcessor.startAsync(retryOnFail = true)
+
+        val failedVedtaksmeldingProcessor = koin.get<FailedVedtaksmeldingProcessor>()
+        failedVedtaksmeldingProcessor.startAsync(retryOnFail = true)
+
         Runtime.getRuntime().addShutdownHook(Thread {
+            vedtaksmeldingProcessor.stop()
+            failedVedtaksmeldingProcessor.stop()
             app.stop(1, 1, TimeUnit.SECONDS)
         })
-
-        val kafkaProcessor = app.application.getKoin().get<VedtaksmeldingProcessor>()
-        kafkaProcessor.startAsync()
     }
 }
 

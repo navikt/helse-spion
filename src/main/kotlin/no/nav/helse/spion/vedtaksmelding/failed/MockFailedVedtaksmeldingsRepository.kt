@@ -1,4 +1,4 @@
-package no.nav.helse.spion.vedtaksmelding
+package no.nav.helse.spion.vedtaksmelding.failed
 
 import java.util.*
 
@@ -8,7 +8,7 @@ class MockFailedVedtaksmeldingsRepository : FailedVedtaksmeldingRepository {
         list.add(message)
     }
 
-    override fun getNextFailedMessages(numberToGet: Int): Collection<FailedVedtaksmelding> {
+    override fun getFailedMessages(numberToGet: Int): Collection<FailedVedtaksmelding> {
         return list
     }
 

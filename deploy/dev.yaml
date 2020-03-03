@@ -36,11 +36,11 @@ spec:
     enabled: true
     paths:
       - mountPath: /var/run/secrets/nais.io/vault
-        kvPath: kv/preprod/fss/helse-spion/default
+        kvPath: /kv/preprod/fss/helse-spion/default
       - mountPath: /var/run/secrets/nais.io/service_user
         kvPath: /serviceuser/data/dev/srvhelsespion
       - mountPath: /var/run/secrets/nais.io/apigw/altinn
-        kvPath: apikey/apigw/dev/eksternapp.altinn.serviceowner/helse-spion_q1
+        kvPath: /apikey/apigw/dev/eksternapp.altinn.serviceowner/helse-spion_q1
   webproxy: true
   env:
   - name: KOIN_PROFILE

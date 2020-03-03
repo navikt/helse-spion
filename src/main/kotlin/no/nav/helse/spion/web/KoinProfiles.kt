@@ -14,8 +14,6 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.auth.altinn.AltinnClient
 import no.nav.helse.spion.db.createHikariConfig
@@ -27,6 +25,9 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiod
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.vedtaksmelding.*
+import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
+import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
+import no.nav.helse.spion.vedtaksmelding.failed.PostgresFailedVedtaksmeldingRepository
 import org.koin.core.Koin
 import org.koin.core.definition.Kind
 import org.koin.core.module.Module
@@ -96,7 +97,10 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { generateKafkaMock(get()) as KafkaMessageProvider }
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
-    single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
+
+    single { VedtaksmeldingService(get(), get()) }
+    single { VedtaksmeldingProcessor(get(), get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get()) }
 
     LocalOIDCWireMock.start()
 }
@@ -123,7 +127,9 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single { generateKafkaMock(get()) as KafkaMessageProvider }
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
-    single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
+    single { VedtaksmeldingService(get(), get()) }
+    single { VedtaksmeldingProcessor(get(), get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get()) }
     single {
         PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository
     }
@@ -145,8 +151,11 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { generateKafkaMock(get()) as KafkaMessageProvider }
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
 
-    single { VedtaksmeldingProcessor(get(), get(), get(), get(), CoroutineScope(Dispatchers.IO), 30000) }
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
+    single { VedtaksmeldingService(get(), get()) }
+
+    single { VedtaksmeldingProcessor(get(), get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get()) }
 }
 
 val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
