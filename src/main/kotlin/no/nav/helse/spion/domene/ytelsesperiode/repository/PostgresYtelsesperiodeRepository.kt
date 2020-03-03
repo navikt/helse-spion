@@ -2,8 +2,8 @@ package no.nav.helse.spion.domene.ytelsesperiode.repository
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
-import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import org.slf4j.LoggerFactory
 import java.lang.Exception
 import java.sql.Connection
@@ -16,6 +16,13 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
     private val getByPersonAndArbeidsgiverStatement = """SELECT data::json FROM $tableName 
             WHERE data -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
             AND data -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?;"""
+
+    private val getByPersonAndArbeidsgiverInPeriodStatement = """SELECT data::json FROM $tableName 
+            WHERE data -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
+            AND data -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
+            AND ((? <=  data -> 'periode' ->> 'fom' AND ? >=  data -> 'periode' ->> 'fom')
+                OR
+                (? >= data -> 'periode' ->> 'tom' AND ? <= data -> 'periode' ->> 'tom'));"""
 
     private val saveStatement = "INSERT INTO $tableName (data) VALUES (?::json);"
 
@@ -34,14 +41,24 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
             AND data -> 'periode' ->> 'tom' = ?;"""
 
 
-    override fun getYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String): List<Ytelsesperiode> {
+    override fun getYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String, periode: Periode?): List<Ytelsesperiode> {
         ds.connection.use { con ->
-
-            val res = con.prepareStatement(getByPersonAndArbeidsgiverStatement).apply {
-                setString(1, identitetsnummer)
-                setString(2, virksomhetsnummer)
-            }.executeQuery()
             val resultList = ArrayList<Ytelsesperiode>()
+            val res = periode?.let {
+                con.prepareStatement(getByPersonAndArbeidsgiverInPeriodStatement).apply {
+                    setString(1, identitetsnummer)
+                    setString(2, virksomhetsnummer)
+                    setString(3, periode.fom.toString())
+                    setString(4, periode.tom.toString())
+                    setString(5, periode.tom.toString())
+                    setString(6, periode.fom.toString())
+                }.executeQuery()
+            } ?: run {
+                con.prepareStatement(getByPersonAndArbeidsgiverStatement).apply {
+                    setString(1, identitetsnummer)
+                    setString(2, virksomhetsnummer)
+                }.executeQuery()
+            }
 
             while (res.next()) {
                 resultList.add(mapper.readValue(res.getString("data")))

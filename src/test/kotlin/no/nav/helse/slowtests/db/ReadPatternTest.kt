@@ -156,10 +156,10 @@ class ReadPatternTest {
 
     fun personerVirksomheterPeriode2(vrknr: List<String>, fom: String, tom: String) {
         val sql = "select data  from  ytelsesperiode where  data -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' " +
-                "IN  ${vrknr.joinToString(prefix = "(", postfix = ")") { "'$it'" }} and" +
-                "('$fom' <=  data -> 'periode' ->> 'fom' AND '$tom' >=  data -> 'periode' ->> 'fom')" +
+                "IN  ${vrknr.joinToString(prefix = "(", postfix = ")") { "'$it'" }}" +
+                " AND( ('$fom' <=  data -> 'periode' ->> 'fom' AND '$tom' >=  data -> 'periode' ->> 'fom')" +
                 "OR" +
-                "('$tom' >= data -> 'periode' ->> 'tom' AND '$fom' <= data -> 'periode' ->> 'tom');"
+                "('$tom' >= data -> 'periode' ->> 'tom' AND '$fom' <= data -> 'periode' ->> 'tom') );"
         doTimedQuery(sql)
     }
 
