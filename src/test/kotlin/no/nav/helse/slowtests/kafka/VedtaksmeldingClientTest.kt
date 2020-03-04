@@ -37,8 +37,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
 
     val testProps = mutableMapOf<String, Any>(
             "bootstrap.servers" to "localhost:9092",
-            "max.poll.interval.ms" to "30000",
-            "group.id" to "juicey"
+            "max.poll.interval.ms" to "30000"
     )
 
     @BeforeAll
