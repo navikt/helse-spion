@@ -17,6 +17,7 @@ interface KafkaMessageProvider {
 }
 
 class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String, pollWaitWhenEmpty: Int = 30000) : KafkaMessageProvider, HealthCheck {
+    private var lastThrown: Exception? = null
     private val consumer: KafkaConsumer<String, String>
     override val healthCheckType = HealthCheckType.ALIVENESS
 
@@ -28,7 +29,7 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String, po
             put("group.id", "helsearbeidsgiver-worker")
         }
 
-        consumer = KafkaConsumer<String, String>(props.apply { }, StringDeserializer(), StringDeserializer())
+        consumer = KafkaConsumer<String, String>(props, StringDeserializer(), StringDeserializer())
         consumer.subscribe(Collections.singletonList(topicName));
 
         Runtime.getRuntime().addShutdownHook(Thread {
@@ -41,7 +42,14 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String, po
     fun stop() = consumer.close()
 
     override fun getMessagesToProcess(): List<MessageWithOffset> {
-        return consumer.poll(Duration.ofSeconds(10)).map {MessageWithOffset(it.offset(), it.value())}.toList()
+        try {
+            val result = consumer.poll(Duration.ofSeconds(10)).map { MessageWithOffset(it.offset(), it.value()) }.toList()
+            lastThrown = null
+            return result
+        } catch (e: Exception) {
+            lastThrown = e
+            throw e
+        }
     }
 
     override fun confirmProcessingDone() {
@@ -49,7 +57,7 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String, po
     }
 
     override suspend fun doHealthCheck() {
-        consumer.assignment()
+        lastThrown?.let { throw lastThrown as Exception }
     }
 }
 

@@ -66,6 +66,14 @@ internal class VedtaksmeldingClientTest : KoinComponent {
 
         client.stop()
 
+        assertThatExceptionOfType(Exception::class.java).isThrownBy {
+            runBlocking { client.doHealthCheck() }
+        }
+
+
+        assertThatExceptionOfType(Exception::class.java).isThrownBy {
+            runBlocking { client.getMessagesToProcess() }
+        }
 
         assertThatExceptionOfType(Exception::class.java).isThrownBy {
             runBlocking { client.doHealthCheck() }
