@@ -13,9 +13,12 @@ import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
-import org.junit.jupiter.api.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.koin.core.KoinApplication
 import org.koin.core.KoinComponent
 import java.time.LocalDate
@@ -65,11 +68,6 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         runBlocking { client.doHealthCheck() }
 
         client.stop()
-
-        assertThatExceptionOfType(Exception::class.java).isThrownBy {
-            runBlocking { client.doHealthCheck() }
-        }
-
 
         assertThatExceptionOfType(Exception::class.java).isThrownBy {
             runBlocking { client.getMessagesToProcess() }
