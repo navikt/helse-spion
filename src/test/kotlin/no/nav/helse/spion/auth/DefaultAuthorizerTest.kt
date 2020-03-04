@@ -5,8 +5,7 @@ import io.mockk.mockk
 import no.nav.helse.spion.domene.AltinnOrganisasjon
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 
 internal class DefaultAuthorizerTest {
     lateinit var authorizer : DefaultAuthorizer
@@ -30,21 +29,21 @@ internal class DefaultAuthorizerTest {
 
     @Test
     internal fun `access Is Given To Orgnumber In the Access List`() {
-        assertTrue { authorizer.hasAccess(subjectWithAccess, "123") }
+        assertThat(authorizer.hasAccess(subjectWithAccess, "123")).isTrue()
     }
 
     @Test
     internal fun `org numbers Not In the List Is Denied`() {
-        assertFalse { authorizer.hasAccess(subjectWithAccess, "666") }
+        assertThat(authorizer.hasAccess(subjectWithAccess, "666")).isFalse()
     }
 
     @Test
     internal fun `no Access Rights Are Denied`() {
-        assertFalse { authorizer.hasAccess(doesNotHaveAccess, "123") }
+        assertThat(authorizer.hasAccess(doesNotHaveAccess, "123")).isFalse()
     }
 
     @Test
     internal fun `It is valid to have access to an altinn socialSecurityNumber`() {
-        assertTrue { authorizer.hasAccess(subjectWithAccess, "01028454321") }
+        assertThat(authorizer.hasAccess(subjectWithAccess, "01028454321")).isTrue()
     }
 }

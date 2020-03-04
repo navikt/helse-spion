@@ -6,19 +6,17 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.YtelsesperiodeGenerator
-import no.nav.helse.spion.db.getDataSource
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.web.common
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.koin.core.KoinComponent
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.get
-import java.lang.Exception
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.SQLException
@@ -58,7 +56,7 @@ internal class dbUnitTests : KoinComponent {
         every { rsMock.getString("ytelsesperiode") } returns """ {"svaret" : 42 } """
 
         val repo = PostgresYtelsesperiodeRepository(dsMock, get())
-        assertThrows<Exception> {
+        assertThatExceptionOfType(Exception::class.java).isThrownBy {
             repo.getYtelserForPerson("10987654321", "555555555")
         }
 
@@ -68,7 +66,7 @@ internal class dbUnitTests : KoinComponent {
 
     @Test
     fun `ruller tilbake en transaksjon hvis noe feiler`() {
-        val ypGen = YtelsesperiodeGenerator(10, 10)
+        val ypGen = YtelsesperiodeGenerator(10, 10, 10)
         val yp = ypGen.next()
 
         every { dsMock.connection } returns conMock

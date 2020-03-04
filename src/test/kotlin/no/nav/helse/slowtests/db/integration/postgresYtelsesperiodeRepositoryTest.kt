@@ -1,7 +1,6 @@
 package no.nav.helse.slowtests.db.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.zaxxer.hikari.HikariDataSource
 import io.mockk.every
 import io.mockk.mockk
@@ -10,13 +9,14 @@ import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.Person
 import no.nav.helse.spion.domene.ytelsesperiode.Arbeidsforhold
-import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
+import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.web.common
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.koin.core.KoinComponent
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
@@ -25,11 +25,10 @@ import org.koin.core.get
 import org.postgresql.util.PSQLException
 import java.math.BigDecimal
 import java.time.LocalDate
-import kotlin.test.assertEquals
 
 internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
-    lateinit var repo : PostgresYtelsesperiodeRepository;
+    lateinit var repo: PostgresYtelsesperiodeRepository;
     val testYtelsesPeriode = Ytelsesperiode(
             periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
             kafkaOffset = 2,
@@ -69,17 +68,17 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     @Test
     fun `Henter en ytelsesperiode fra repo`() {
-        val p = repo.getYtelserForPerson("10987654321", "555555555")
+        val yp = repo.getYtelserForPerson("10987654321", "555555555")
 
-        assertEquals(testYtelsesPeriode, p.first())
-        assertEquals(1, p.size)
+        assertThat(yp.size).isEqualTo(1)
+        assertThat(yp.first()).isEqualTo(testYtelsesPeriode)
     }
 
     @Test
     fun `Sletter en ytelsesperiode`() {
         val deletedCount = repo.delete(testYtelsesPeriode)
 
-        assertEquals(1, deletedCount)
+        assertThat(deletedCount).isEqualTo(1)
     }
 
     @Test
@@ -89,10 +88,10 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
         val deletedCount = repo.delete(testYtelsesPeriode)
 
-        val ypLagret = repo.getYtelserForPerson("10987654321", "555555555").first()
+        val ypLagret = repo.getYtelserForPerson("10987654321", "555555555")
 
-        assertEquals(1, deletedCount)
-        assertEquals(ypAnnenPeriode, ypLagret)
+        assertThat(deletedCount).isEqualTo(1)
+        assertThat(ypLagret).containsOnly(ypAnnenPeriode)
 
         repo.delete(ypAnnenPeriode)
 
@@ -106,8 +105,7 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
         val savedYpList = repo.getYtelserForPerson("10987654321", "555555555")
 
-        assertEquals(savedYpList.size, 1)
-        assertEquals(savedYpList.first(), ypNewer)
+        assertThat(savedYpList).containsOnly(ypNewer)
 
     }
 
@@ -121,8 +119,8 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
         val savedYpList = repo.getYtelserForPerson("10987654321", "555555555")
 
-        assertEquals(1, savedYpList.size)
-        assertEquals(ypNewer, savedYpList.first())
+
+        assertThat(savedYpList).containsOnly(ypNewer)
     }
 
     @Test
@@ -131,7 +129,7 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
         val yp = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
 
-        assertThrows<PSQLException> {
+        assertThatExceptionOfType(PSQLException::class.java).isThrownBy {
             repo.executeSave(yp, con)
         }
     }
@@ -141,12 +139,37 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
         val ds = HikariDataSource(createLocalHikariConfig())
         val mapperMock = mockk<ObjectMapper>()
         val validJsonMissingIdentitetsnummer = "{  \"periode\" : {    \"fom\" : \"2019-01-01\",    \"tom\" : \"2019-02-01\"  },  \"kafkaOffset\" : 2,  \"arbeidsforhold\" : {    \"arbeidsforholdId\" : \"1\",    \"arbeidstaker\" : {      \"fornavn\" : \"Solan\",      \"etternavn\" : \"Gundersen\"   },    \"arbeidsgiver\" : {      \"navn\" : \"Flåklypa Verksted\",      \"organisasjonsnummer\" : \"666666666\",      \"arbeidsgiverId\" : \"555555555\"    }  },  \"vedtaksId\" : \"1\",  \"refusjonsbeløp\" : 10000,  \"status\" : \"UNDER_BEHANDLING\",  \"grad\" : 50,  \"dagsats\" : 200,  \"maxdato\" : \"2019-01-01\",  \"ferieperioder\" : [ ],  \"ytelse\" : \"SP\",  \"merknad\" : \"Fritak fra AGP\",  \"sistEndret\" : \"2020-02-26\"}"
-        every {mapperMock.writeValueAsString(any())} returns validJsonMissingIdentitetsnummer
+        every { mapperMock.writeValueAsString(any()) } returns validJsonMissingIdentitetsnummer
 
         repo = PostgresYtelsesperiodeRepository(ds, mapperMock)
 
-        assertThrows<PSQLException> {
+        assertThatExceptionOfType(PSQLException::class.java).isThrownBy {
             repo.executeSave(testYtelsesPeriode, ds.connection)
+        }
+
+    }
+
+    @Test
+    fun `henter perioder innenfor gitt tidsperiode`() {
+        val withinRange = testYtelsesPeriode.copy(periode = Periode(fom = LocalDate.of(2022, 12, 20), tom = LocalDate.of(2022, 12, 30)))
+        val fomWithinRange = testYtelsesPeriode.copy(periode = Periode(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 2, 1)))
+        val tomWithinRange = testYtelsesPeriode.copy(periode = Periode(LocalDate.of(2022, 10, 1), LocalDate.of(2022, 12, 30)))
+        val ypBefore = testYtelsesPeriode.copy(periode = Periode(LocalDate.of(2022, 2, 3), LocalDate.of(2022, 3, 1)))
+        val ypAfter = testYtelsesPeriode.copy(periode = Periode(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 3, 1)))
+        val yps = listOf(withinRange, fomWithinRange, tomWithinRange, ypBefore, ypAfter)
+        val queryRange = Periode(fom = LocalDate.of(2022, 12, 20), tom = LocalDate.of(2023, 1, 10))
+
+        yps.forEach {
+            repo.upsert(it)
+        }
+
+        val result = repo.getYtelserForPerson(testYtelsesPeriode.arbeidsforhold.arbeidstaker.identitetsnummer, testYtelsesPeriode.arbeidsforhold.arbeidsgiver.arbeidsgiverId, queryRange)
+
+        assertThat(result).hasSize(3)
+                .containsOnly(withinRange, fomWithinRange, tomWithinRange)
+
+        yps.forEach {
+            repo.delete(it)
         }
     }
 }

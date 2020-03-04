@@ -1,19 +1,18 @@
 
 package no.nav.helse
-
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class YtelsesperiodeGeneratorTest {
     @Test
     fun `Det skal komme ut data av generatoren`() {
-        val generator = YtelsesperiodeGenerator(2, 10)
+        val generator = YtelsesperiodeGenerator(2, 5, 10)
 
         val ypl = generator
                 .take(50)
                 .toList()
                 .onEach { println(it) }
 
-        Assert.assertEquals(50, ypl.size)
+        assertThat(ypl).hasSize(50)
     }
 }

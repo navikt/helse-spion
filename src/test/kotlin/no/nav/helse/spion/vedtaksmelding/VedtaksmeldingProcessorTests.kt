@@ -10,9 +10,9 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmelding
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.io.IOException
 
 open class VedtaksmeldingProcessorTests {
@@ -78,7 +78,9 @@ open class VedtaksmeldingProcessorTests {
         every { serviceMock.processAndSaveMessage(messageList[0]) } throws JsonParseException(null, "WRONG")
         every { failedMessageDaoMock.save(any()) } throws IOException("DATABSE DOWN")
 
-        assertThrows<IOException> { processor.doJob() }
+        assertThatExceptionOfType(IOException::class.java).isThrownBy {
+            processor.doJob()
+        }
 
         verify(exactly = 1) { serviceMock.processAndSaveMessage(messageList[0]) }
         verify(exactly = 1) { failedMessageDaoMock.save(any()) }
