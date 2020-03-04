@@ -28,6 +28,8 @@ import no.nav.helse.spion.vedtaksmelding.*
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
 import no.nav.helse.spion.vedtaksmelding.failed.PostgresFailedVedtaksmeldingRepository
+import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.common.config.SaslConfigs
 import org.koin.core.Koin
 import org.koin.core.definition.Kind
 import org.koin.core.module.Module
@@ -124,7 +126,15 @@ fun preprodConfig(config: ApplicationConfig) = module {
     }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    single { generateKafkaMock(get()) as KafkaMessageProvider }
+    single {
+        VedtaksmeldingClient(mutableMapOf(
+                "bootstrap.servers" to config.getString("kafka.endpoint"),
+                CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SASL_SSL",
+                SaslConfigs.SASL_MECHANISM to "PLAIN",
+                SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
+                        "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
+        ), config.getString("kafka.topicname")) as KafkaMessageProvider
+    }
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingService(get(), get()) }
