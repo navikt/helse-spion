@@ -21,7 +21,7 @@ private class ArbeidsgiverGenerator(private val maxUniqueArbeidsgivere: Int = 10
         } else {
             val arbeidsGiver = Arbeidsgiver(
                     navn = faker.funnyName().name(),
-                    organisasjonsnummer = getOrganisasjonRandomOrgnr(),
+                    organisasjonsnummer = getRandomOrganisasjonsnummer(),
                     arbeidsgiverId = Random.Default.nextLong(111111111, 999999999).toString()
             )
             arbeidsgivere.add(arbeidsGiver)
@@ -29,11 +29,15 @@ private class ArbeidsgiverGenerator(private val maxUniqueArbeidsgivere: Int = 10
         }
     }
 
-    fun getOrganisasjonRandomOrgnr(): String {
+    fun getRandomOrganisasjonsnummer(): String {
         return if (organisasjoner.size >= maxUniqueOrganisasjoner) {
             organisasjoner.pickRandom()
         } else {
-            Random.Default.nextLong(111111111, 999999999).toString()
+            Random.Default.nextLong(111111111, 999999999).toString().let {
+                organisasjoner.add(it)
+                it
+            }
+
         }
     }
 }
