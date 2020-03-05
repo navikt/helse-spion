@@ -26,7 +26,7 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String, po
     init {
         props.apply {
             put("enable.auto.commit", false)
-            put("group.id", "helsearbeidsgiver-worker")
+            put("group.id", "helsearbeidsgiver-mottak")
         }
 
         consumer = KafkaConsumer<String, String>(props, StringDeserializer(), StringDeserializer())
