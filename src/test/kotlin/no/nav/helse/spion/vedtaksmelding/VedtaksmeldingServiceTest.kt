@@ -6,10 +6,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.IOException
 
 internal class VedtaksmeldingServiceTest {
@@ -68,7 +68,7 @@ internal class VedtaksmeldingServiceTest {
             assertThat(yp)
                     .hasFieldOrProperty("periode")
                     .hasFieldOrProperty("arbeidsforhold")
-                    .hasFieldOrPropertyWithValue("refusjonsbeløp", melding.refusjonsbeløp?.toBigDecimal())
+                    .hasFieldOrPropertyWithValue("refusjonsbeløp", melding.refusjonsbeloep?.toBigDecimal())
                     .hasFieldOrPropertyWithValue("dagsats", melding.dagsats?.toBigDecimal())
                     .hasFieldOrPropertyWithValue("status", melding.status.correspondingDomainStatus)
                     .hasFieldOrPropertyWithValue("maxdato", melding.maksDato)

@@ -23,7 +23,7 @@ data class Vedtaksmelding(
         val etternavn: String,
 
         val sykemeldingsgrad: Int?,
-        val refusjonsbeløp: Double?,
+        val refusjonsbeloep: Double?,
         val dagsats: Double?,
         val maksDato: LocalDate?
 

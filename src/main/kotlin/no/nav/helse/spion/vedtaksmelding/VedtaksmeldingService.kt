@@ -28,7 +28,7 @@ class VedtaksmeldingService(
                             Person(vm.fornavn, vm.etternavn, vm.identitetsNummer),
                             Arbeidsgiver("TODO?", "TODO?", vm.virksomhetsnummer)),
                     "UKJENT",
-                    vm.refusjonsbeløp?.toBigDecimal(),
+                    vm.refusjonsbeloep?.toBigDecimal(),
                     vm.status.correspondingDomainStatus,
                     vm.sykemeldingsgrad?.toBigDecimal(),
                     vm.dagsats?.toBigDecimal(),
