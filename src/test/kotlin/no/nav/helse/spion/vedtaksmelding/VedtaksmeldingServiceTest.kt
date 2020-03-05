@@ -81,7 +81,7 @@ internal class VedtaksmeldingServiceTest {
             assertThat(yp.arbeidsforhold.arbeidstaker)
                     .hasFieldOrPropertyWithValue("fornavn", melding.fornavn)
                     .hasFieldOrPropertyWithValue("etternavn", melding.etternavn)
-                    .hasFieldOrPropertyWithValue("identitetsnummer", melding.identitetsNummer)
+                    .hasFieldOrPropertyWithValue("identitetsnummer", melding.identitetsnummer)
 
             assertThat(yp.arbeidsforhold.arbeidsgiver)
                     .hasFieldOrPropertyWithValue("arbeidsgiverId", melding.virksomhetsnummer)

@@ -12,7 +12,7 @@ enum class VedtaksmeldingsStatus(val correspondingDomainStatus: Ytelsesperiode.S
 }
 
 data class Vedtaksmelding(
-        val identitetsNummer: String,
+        val identitetsnummer: String,
         val virksomhetsnummer: String,
         val status: VedtaksmeldingsStatus,
         val fom: LocalDate,

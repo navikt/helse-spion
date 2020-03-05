@@ -25,7 +25,7 @@ class VedtaksmeldingService(
                     Periode(vm.fom, vm.tom),
                     kafkaOffset,
                     Arbeidsforhold("",
-                            Person(vm.fornavn, vm.etternavn, vm.identitetsNummer),
+                            Person(vm.fornavn, vm.etternavn, vm.identitetsnummer),
                             Arbeidsgiver("TODO?", "TODO?", vm.virksomhetsnummer)),
                     "UKJENT",
                     vm.refusjonsbeloep?.toBigDecimal(),
