@@ -35,3 +35,4 @@ jobs:
         uses: snyk/actions/gradle@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          JAVA_HOME: /usr/local/openjdk-11
