@@ -14,7 +14,7 @@ val assertJVersion = "3.12.2"
 val mockKVersion = "1.9.3"
 val tokenSupportVersion = "1.1.3"
 val koinVersion = "2.0.1"
-
+val valiktorVersion = "0.9.0"
 
 
 plugins {
@@ -65,6 +65,10 @@ dependencies {
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
     implementation("io.ktor:ktor-client-json:$ktorVersion")
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
+
+    implementation("org.valiktor:valiktor-core:$valiktorVersion")
+    implementation("org.valiktor:valiktor-javatime:$valiktorVersion")
+
 
     implementation("org.koin:koin-core:$koinVersion")
     implementation("org.koin:koin-ktor:$koinVersion")

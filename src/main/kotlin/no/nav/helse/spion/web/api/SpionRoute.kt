@@ -15,20 +15,15 @@ import no.nav.helse.spion.auth.Authorizer
 import no.nav.helse.spion.auth.hentIdentitetsnummerFraLoginToken
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.web.dto.OppslagDto
+import no.nav.helse.spion.web.dto.validation.validatePayload
 
 @KtorExperimentalAPI
 fun Route.spion(service: SpionService, authorizer: Authorizer) {
     route("api/v1") {
         route("/ytelsesperioder") {
-            intercept(ApplicationCallPipeline.Call) {
-                val test = call.receive<OppslagDto>()
-                val identitetsnummer = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
 
-                if (!authorizer.hasAccess(identitetsnummer, test.arbeidsgiverId)) {
-                    call.respond(ForbiddenResponse())
-                    finish()
-                }
-            }
+            validatePayload<OppslagDto>()
+            authorize(authorizer)
 
             post("/oppslag") {
                 val oppslag = call.receive<OppslagDto>()
@@ -40,6 +35,18 @@ fun Route.spion(service: SpionService, authorizer: Authorizer) {
                 val id = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
                 call.respond(service.hentArbeidsgivere(id))
             }
+        }
+    }
+}
+
+private fun Route.authorize(authorizer: Authorizer) {
+    intercept(ApplicationCallPipeline.Call) {
+        val test = call.receive<OppslagDto>()
+        val identitetsnummer = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
+
+        if (!authorizer.hasAccess(identitetsnummer, test.arbeidsgiverId)) {
+            call.respond(ForbiddenResponse())
+            finish()
         }
     }
 }
