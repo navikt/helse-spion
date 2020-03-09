@@ -1,0 +1,33 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-538488:
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-551995:
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-557631:
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORK-542933:
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORK-559346:
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  SNYK-JAVA-ORGYAML-537645:
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-557361:
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+patch: {}
