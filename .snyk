@@ -34,4 +34,8 @@ ignore:
     - '*':
         reason: None Given
         expires: 2030-01-01T00:00:00.000Z
+  EPL-1.0_OR_LGPL-2.0:
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
 patch: {}
