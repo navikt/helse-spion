@@ -31,8 +31,9 @@ jobs:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.sonartoken }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/gradle@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          JAVA_HOME: /opt/hostedtoolcache/jdk/11.0.6/x64
+  snyk:
+    - uses: actions/checkout@v2
+        - name: Run Snyk to check for vulnerabilities
+          uses: snyk/actions/gradle@master
+          env:
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
