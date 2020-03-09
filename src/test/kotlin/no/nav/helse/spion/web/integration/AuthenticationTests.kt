@@ -10,13 +10,13 @@ import io.ktor.server.testing.setBody
 import no.nav.helse.spion.web.dto.OppslagDto
 import no.nav.helse.spion.web.spionModule
 import no.nav.security.token.support.test.JwtTokenGenerator
-import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.koin.core.get
 
 class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
 
-    val oppslag = OppslagDto("200150015432", "987654321")
+    val oppslag = OppslagDto("20015001543", "987654321")
 
     @Test
     fun `saksOppslag with Missing JWT returns 401 Unauthorized`() {
