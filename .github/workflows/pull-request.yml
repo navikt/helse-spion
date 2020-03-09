@@ -32,10 +32,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.sonartoken }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   snyk:
-    - runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - name: Run Snyk to check for vulnerabilities
-          uses: snyk/actions/gradle@master
-          env:
-            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: snyk/actions/gradle@master
+      - name: Run Snyk to check for vulnerabilities
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
