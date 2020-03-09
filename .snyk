@@ -38,4 +38,64 @@ ignore:
     - '*':
         reason: None Given
         expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:org.junit.platform:junit-platform-engine:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:org.junit.platform:junit-platform-commons:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:org.junit.jupiter:junit-jupiter-params:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:org.junit.jupiter:junit-jupiter-engine:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:org.junit.jupiter:junit-jupiter-api:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:org.jacoco:org.jacoco.report:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:org.jacoco:org.jacoco.core:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:org.jacoco:org.jacoco.ant:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:org.jacoco:org.jacoco.agent:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:junit:junit:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:ch.qos.logback:logback-core:(EPL-1.0_OR_LGPL-2.0)':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:ch.qos.logback:logback-classic:(EPL-1.0_OR_LGPL-2.0)':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:ch.qos.logback.contrib:logback-json-core:(EPL-1.0_OR_LGPL-2.0)':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:ch.qos.logback.contrib:logback-json-classic:(EPL-1.0_OR_LGPL-2.0)':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:ch.qos.logback.contrib:logback-jackson:(EPL-1.0_OR_LGPL-2.0)':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
 patch: {}
