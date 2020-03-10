@@ -35,7 +35,7 @@ class VedtaksmeldingService(
                     vm.maksDato,
                     listOf(),
                     Ytelsesperiode.Ytelse.SP,
-                    "INGEN MERKNAD",
+                    null,
                     LocalDate.now()
             )
         }
