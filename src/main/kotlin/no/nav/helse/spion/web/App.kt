@@ -37,6 +37,7 @@ import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.get
 import org.koin.ktor.ext.getKoin
 import org.slf4j.LoggerFactory
+import org.valiktor.ConstraintViolationException
 import org.valiktor.i18n.toMessage
 import java.net.URI
 import java.util.*
@@ -124,25 +125,35 @@ fun Application.spionModule(config : ApplicationConfig = environment.config) {
         }
 
         exception<JsonMappingException> { cause ->
-            val errorId = UUID.randomUUID()
-            LOGGER.warn(errorId.toString(), cause)
-            val problem = Problem(
-                    title = "Feil ved prosessering av dataene som ble oppgitt",
-                    detail = cause.message,
-                    instance = URI.create("urn:spion:json-mapping-error:$errorId")
-            )
-            call.respond(HttpStatusCode.BadRequest, problem)
+            if (cause.cause is ConstraintViolationException) {
+                // Siden valideringen foregår i init {} blokken vil
+                // Jackson kunne støte på constrainViolations under de-serialisering.
+                // disse vil vi vise til klienten som valideringsfeil
+                val constraintViolationException = cause.cause as ConstraintViolationException
+
+                val problems = constraintViolationException.constraintViolations.map {
+                    ValidationProblemDetail(it.constraint.name, it.toMessage().message, it.property, it.value)
+                }.toSet()
+
+                call.respond(HttpStatusCode.BadRequest, ValidationProblem(problems))
+            } else {
+                val errorId = UUID.randomUUID()
+                LOGGER.warn(errorId.toString(), cause)
+                val problem = Problem(
+                        title = "Feil ved prosessering av dataene som ble oppgitt",
+                        detail = cause.message,
+                        instance = URI.create("urn:spion:json-mapping-error:$errorId")
+                )
+                call.respond(HttpStatusCode.BadRequest, problem)
+            }
         }
 
-        exception<org.valiktor.ConstraintViolationException> { cause ->
+        exception<ConstraintViolationException> { cause ->
             val problems = cause.constraintViolations.map {
                 ValidationProblemDetail(it.constraint.name, it.toMessage().message, it.property, it.value)
             }.toSet()
 
-            call.respond(
-                    HttpStatusCode.BadRequest,
-                    ValidationProblem(problems)
-            )
+            call.respond(HttpStatusCode.BadRequest, ValidationProblem(problems))
         }
     }
 

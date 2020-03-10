@@ -1,27 +1,16 @@
 package no.nav.helse.spion.web.dto.validation
 
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.call
-import io.ktor.request.receive
-import io.ktor.routing.Route
 import java.net.URI
 
 
-interface Validable {
-    fun validate()
-}
-
-inline fun <reified T : Any> Route.validatePayload() {
-    intercept(ApplicationCallPipeline.Call) {
-        val data: T = this.call.receive()
-        (data as Validable).let {
-            it.validate()
-        }
-    }
-}
-
 /**
+ * Tilbakemeldings-standard basert på
+ *
  * https://tools.ietf.org/html/rfc7807#page-5
+ *
+ * Hvis du trenger å gi klienter tilbakemelding som inneholder
+ * mer informasjon kan du arve fra denne klassen. ValidationProblem
+ * er et eksempel på dette som inneholder valideringsfeil.
  */
 open class Problem(
         val type: URI = URI.create("about:blank"),

@@ -15,14 +15,12 @@ import no.nav.helse.spion.auth.Authorizer
 import no.nav.helse.spion.auth.hentIdentitetsnummerFraLoginToken
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.web.dto.OppslagDto
-import no.nav.helse.spion.web.dto.validation.validatePayload
 
 @KtorExperimentalAPI
 fun Route.spion(service: SpionService, authorizer: Authorizer) {
     route("api/v1") {
         route("/ytelsesperioder") {
 
-            validatePayload<OppslagDto>()
             authorize(authorizer)
 
             post("/oppslag") {
@@ -39,6 +37,7 @@ fun Route.spion(service: SpionService, authorizer: Authorizer) {
     }
 }
 
+@KtorExperimentalAPI
 private fun Route.authorize(authorizer: Authorizer) {
     intercept(ApplicationCallPipeline.Call) {
         val test = call.receive<OppslagDto>()

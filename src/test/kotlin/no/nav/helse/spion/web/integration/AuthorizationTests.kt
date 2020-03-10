@@ -6,6 +6,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.setBody
+import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.web.dto.OppslagDto
 import no.nav.helse.spion.web.spionModule
 import org.junit.jupiter.api.Test
@@ -13,10 +14,11 @@ import org.koin.core.get
 import kotlin.test.assertEquals
 
 
+@KtorExperimentalAPI
 class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
 
-    val noAccessToThisOrg = OppslagDto("20015001543", "123456789")
-    val hasAccessToThisOrg = OppslagDto("20015001543", "910020102")
+    val noAccessToThisOrg = OppslagDto("20015001543", "123456785")
+    val hasAccessToThisOrg = OppslagDto("20015001543", "910020104")
 
     @Test
     fun `saksOppslag when logged in but unauthorized for the given Virksomhet returns 403 Forbidden`() {
