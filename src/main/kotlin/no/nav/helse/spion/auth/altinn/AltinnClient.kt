@@ -1,9 +1,8 @@
 package no.nav.helse.spion.auth.altinn
 
-import ch.qos.logback.classic.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.response.readText
+import io.ktor.client.statement.readText
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spion.auth.AuthorizationsRepository

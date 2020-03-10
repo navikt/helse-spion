@@ -64,7 +64,7 @@ fun main() {
         Runtime.getRuntime().addShutdownHook(Thread {
             vedtaksmeldingProcessor.stop()
             failedVedtaksmeldingProcessor.stop()
-            app.stop(1, 1, TimeUnit.SECONDS)
+            app.stop(1000, 1000)
         })
     }
 }
