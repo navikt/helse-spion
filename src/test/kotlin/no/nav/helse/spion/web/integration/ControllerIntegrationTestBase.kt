@@ -10,6 +10,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.server.testing.*
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.TestData
 import no.nav.security.token.support.test.JwkGenerator
 import no.nav.security.token.support.test.JwtTokenGenerator
 import org.junit.jupiter.api.AfterAll
@@ -19,8 +20,8 @@ import org.koin.test.KoinTest
 @KtorExperimentalAPI
 open class ControllerIntegrationTestBase : KoinTest {
 
-    protected val defaultSubject = "010285295122"
-    private val testConfig : ApplicationConfig
+    protected val defaultSubject = TestData.validIdentitetsnummer
+    private val testConfig: ApplicationConfig
     protected val idTokenCookieName = "selvbetjening-idtoken"
 
     init {

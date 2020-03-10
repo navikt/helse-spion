@@ -7,16 +7,19 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
+import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.web.dto.OppslagDto
 import no.nav.helse.spion.web.spionModule
+import no.nav.helse.validWithoutPeriode
 import no.nav.security.token.support.test.JwtTokenGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.koin.core.get
 
+@KtorExperimentalAPI
 class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
 
-    val oppslag = OppslagDto("20015001543", "987654321")
+    val oppslag = OppslagDto.validWithoutPeriode()
 
     @Test
     fun `saksOppslag with Missing JWT returns 401 Unauthorized`() {
