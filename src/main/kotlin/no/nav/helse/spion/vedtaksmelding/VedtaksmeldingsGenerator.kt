@@ -4,9 +4,19 @@ import com.github.javafaker.Faker
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.Person
+import no.nav.helse.spion.web.dto.validation.FoedselsNrValidator
+import no.nav.helse.spion.web.dto.validation.FoedselsNrValidator.Companion.tabeller.kontrollsiffer1
+import no.nav.helse.spion.web.dto.validation.FoedselsNrValidator.Companion.tabeller.kontrollsiffer2
+import no.nav.helse.spion.web.dto.validation.OrganisasjonsnummerValidator
+import no.nav.helse.spion.web.dto.validation.OrganisasjonsnummerValidator.Companion.tabeller.weights
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 import kotlin.random.Random.Default.nextDouble
+import kotlin.random.Random.Default.nextInt
+import kotlin.random.Random.Default.nextLong
 
 private class ArbeidsgiverGenerator(fixedList: MutableList<Arbeidsgiver>? = null, private var maxUniqueArbeidsgivere: Int = 1000) {
     private val faker = Faker()
@@ -22,10 +32,15 @@ private class ArbeidsgiverGenerator(fixedList: MutableList<Arbeidsgiver>? = null
         return if (arbeidsgivere.size >= maxUniqueArbeidsgivere) {
             arbeidsgivere.pickRandom()
         } else {
+            var orgNr = Random.Default.nextLong(11111111, 99999999).toString()
+            orgNr += OrganisasjonsnummerValidator.checksum(weights, orgNr)
+            var virkNr = Random.Default.nextLong(11111111, 99999999).toString()
+            virkNr += OrganisasjonsnummerValidator.checksum(weights, orgNr)
+
             val arbeidsGiver = Arbeidsgiver(
                     faker.funnyName().name(),
-                    Random.Default.nextLong(111111111, 999999999).toString(),
-                    Random.Default.nextLong(111111111, 999999999).toString()
+                    orgNr,
+                    virkNr
             )
             arbeidsgivere.add(arbeidsGiver)
             arbeidsGiver
@@ -40,10 +55,16 @@ private class PersonGenerator(private val maxUniquePersons: Int = 1000) {
         return if (persone.size >= maxUniquePersons) {
             persone.pickRandom()
         } else {
+            val tenYearsBeforeAfterEpoch = 3600 * 24 * 365 * 10L
+            val birthDay = LocalDate.ofInstant(Instant.ofEpochSecond(nextLong(-tenYearsBeforeAfterEpoch, tenYearsBeforeAfterEpoch)), ZoneId.systemDefault())
+            var fnr = birthDay.format(DateTimeFormatter.ofPattern("ddMMyy")) + nextInt(100, 999)
+            fnr += FoedselsNrValidator.checksum(kontrollsiffer1, fnr)
+            fnr += FoedselsNrValidator.checksum(kontrollsiffer2, fnr)
+
             val person = Person(
                     faker.name().firstName(),
                     faker.name().lastName(),
-                    Random.Default.nextLong(10000000000, 31120099999).toString()
+                    fnr
             )
             persone.add(person)
             person

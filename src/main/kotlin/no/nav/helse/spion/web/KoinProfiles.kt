@@ -172,7 +172,7 @@ val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
     return object : KafkaMessageProvider { // dum mock
         val arbeidsgivere = mutableListOf(
                 Arbeidsgiver("Eltrode AS", "917346380", "917404437"),
-                Arbeidsgiver("JØA OG SEL", "911366940", "910098896")
+                Arbeidsgiver("JØA OG SEL", "911366940", "910098898")
         )
 
         val generator = VedtaksmeldingGenerator(arbeidsgivere)

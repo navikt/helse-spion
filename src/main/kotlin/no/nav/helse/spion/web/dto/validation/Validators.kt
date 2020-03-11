@@ -5,7 +5,7 @@ import no.nav.helse.spion.web.dto.validation.FoedselsNrValidator.Companion.tabel
 import no.nav.helse.spion.web.dto.validation.OrganisasjonsnummerValidator.Companion.tabeller.weights
 
 
-internal class FoedselsNrValidator(input: String?) {
+class FoedselsNrValidator(input: String?) {
     val asString: String
 
     init {
@@ -63,7 +63,7 @@ internal class FoedselsNrValidator(input: String?) {
  * Sjekker at strengen er et gydlig org nummer ifølge:
  * https://www.brreg.no/om-oss/oppgavene-vare/alle-registrene-vare/om-enhetsregisteret/organisasjonsnummeret/
  */
-internal class OrganisasjonsnummerValidator(input: String?) {
+class OrganisasjonsnummerValidator(input: String?) {
     val asString: String
 
     init {

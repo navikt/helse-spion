@@ -41,7 +41,6 @@ import org.valiktor.ConstraintViolationException
 import org.valiktor.i18n.toMessage
 import java.net.URI
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 
 @KtorExperimentalAPI
@@ -108,6 +107,7 @@ fun Application.spionModule(config : ApplicationConfig = environment.config) {
             val errorId = UUID.randomUUID()
             LOGGER.error("Uventet feil, $errorId", cause)
             val problem = Problem(
+                    type = URI.create("urn:spion:uventet-feil"),
                     title = "Uventet feil",
                     detail = cause.message,
                     instance = URI.create("urn:spion:uventent-feil:$errorId")
