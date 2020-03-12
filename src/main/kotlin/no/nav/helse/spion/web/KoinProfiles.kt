@@ -15,7 +15,6 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.auth.*
-import no.nav.helse.spion.auth.altinn.AltinnClient
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.db.getDataSource
@@ -81,7 +80,7 @@ val common = module {
 
 fun buildAndTestConfig() = module {
     single { MockYtelsesperiodeRepository() as YtelsesperiodeRepository }
-    single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
+    single { StaticMockAuthRepo(get()) as AuthorizationsRepository } bind StaticMockAuthRepo::class
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
 
@@ -92,7 +91,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { getDataSource(createLocalHikariConfig(), "spion", null) as DataSource }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
-    single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
+    single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
 
@@ -115,7 +114,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 config.getString("database.vault.mountpath")) as DataSource
     }
 
-    single {
+    /*single {
         AltinnClient(
                 config.getString("altinn.service_owner_api_url"),
                 config.getString("altinn.gw_api_key"),
@@ -123,7 +122,9 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 config.getString("altinn.service_id"),
                 get()
         ) as AuthorizationsRepository
-    }
+    }*/
+
+    single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
 
     single {
@@ -154,7 +155,7 @@ fun prodConfig(config: ApplicationConfig) = module {
                 config.getString("database.vault.mountpath")) as DataSource
     }
 
-    single { MockAuthRepo(get()) as AuthorizationsRepository } bind MockAuthRepo::class
+    single { StaticMockAuthRepo(get()) as AuthorizationsRepository } bind StaticMockAuthRepo::class
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
