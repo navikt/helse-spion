@@ -30,7 +30,7 @@ sonarqube {
         property("sonar.organization", "navit")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.login", System.getenv("SONAR_TOKEN"))
-        property("sonar.exclusions", "**/Koin*,**Mock**")
+        property("sonar.exclusions", "**/Koin*,**Mock**,**/App**")
     }
 }
 

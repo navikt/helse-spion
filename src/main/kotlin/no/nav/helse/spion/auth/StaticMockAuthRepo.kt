@@ -1,16 +1,16 @@
 package no.nav.helse.spion.auth
 
-import loadFromResources
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import loadFromResources
 import no.nav.helse.spion.domene.AltinnOrganisasjon
 import no.nav.helse.spion.selfcheck.HealthCheck
 import no.nav.helse.spion.selfcheck.HealthCheckType
 
-class MockAuthRepo(om : ObjectMapper) : AuthorizationsRepository, HealthCheck {
+class StaticMockAuthRepo(om: ObjectMapper) : AuthorizationsRepository, HealthCheck {
     override val healthCheckType = HealthCheckType.READYNESS
 
-    private var acl: Set<AltinnOrganisasjon> = setOf(AltinnOrganisasjon("Kjellesen AS", "Enterprise", null, "AS" ,"1", null, null ))
+    private var acl: Set<AltinnOrganisasjon> = setOf(AltinnOrganisasjon("Kjellesen AS", "Enterprise", null, "AS", "1", null, null))
     var failSelfCheck = false
 
     init {
