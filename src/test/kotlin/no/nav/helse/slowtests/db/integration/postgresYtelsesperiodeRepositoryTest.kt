@@ -75,6 +75,16 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
     }
 
     @Test
+    fun `Henter ytelsesperiode med virksomhetsnummer og periode`() {
+
+
+        val yp = repo.getYtelserForVirksomhet("555555555", testYtelsesPeriode.periode)
+
+        assertThat(yp.size).isEqualTo(1)
+        assertThat(yp.first()).isEqualTo(testYtelsesPeriode)
+    }
+
+    @Test
     fun `Sletter en ytelsesperiode`() {
         val deletedCount = repo.delete(testYtelsesPeriode)
 

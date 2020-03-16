@@ -8,36 +8,36 @@ import org.junit.jupiter.api.Test
 import org.valiktor.ConstraintViolationException
 import java.time.LocalDate
 
-internal class OppslagDtoTest {
+internal class PersonOppslagDtoTest {
 
     @Test
     fun `Ugyldig identitetsnummer gir valideringsfeil`() {
         Assertions.assertThatExceptionOfType(ConstraintViolationException::class.java).isThrownBy {
-            OppslagDto(TestData.notValidIdentitetsnummer, TestData.validOrgNr)
+            PersonOppslagDto(TestData.notValidIdentitetsnummer, TestData.validOrgNr)
         }
     }
 
     @Test
     fun `Ugyldig org-nummer gir valideringsfeil`() {
         Assertions.assertThatExceptionOfType(ConstraintViolationException::class.java).isThrownBy {
-            OppslagDto(TestData.validIdentitetsnummer, TestData.notValidOrgNr)
+            PersonOppslagDto(TestData.validIdentitetsnummer, TestData.notValidOrgNr)
         }
     }
 
     @Test
     fun `Gyldig idnr og arbeidsgiverId og tom etter fom gir ingen feil`() {
-        OppslagDto.validWithPeriode(LocalDate.MIN, LocalDate.now())
+        PersonOppslagDto.validWithPeriode(LocalDate.MIN, LocalDate.now())
     }
 
     @Test
     fun `Gyldig idnr og arbeidsgiverId uten periode gir ingen feil`() {
-        OppslagDto.validWithoutPeriode()
+        PersonOppslagDto.validWithoutPeriode()
     }
 
     @Test
     fun `Om det finnes en periode må tom være etter fom`() {
         Assertions.assertThatExceptionOfType(ConstraintViolationException::class.java).isThrownBy {
-            OppslagDto.validWithPeriode(LocalDate.MAX, LocalDate.now())
+            PersonOppslagDto.validWithPeriode(LocalDate.MAX, LocalDate.now())
         }
     }
 }

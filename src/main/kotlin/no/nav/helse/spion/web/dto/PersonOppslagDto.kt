@@ -8,7 +8,7 @@ import org.valiktor.functions.validate
 import org.valiktor.validate
 
 
-class OppslagDto(
+class PersonOppslagDto(
         val identitetsnummer: String,
         val arbeidsgiverId: String,
         val periode: Periode? = null
@@ -17,10 +17,10 @@ class OppslagDto(
 
     init {
         validate(this) {
-            validate(OppslagDto::identitetsnummer).isValidIdentitetsnummer()
-            validate(OppslagDto::arbeidsgiverId).isValidOrganisasjonsnummer()
+            validate(PersonOppslagDto::identitetsnummer).isValidIdentitetsnummer()
+            validate(PersonOppslagDto::arbeidsgiverId).isValidOrganisasjonsnummer()
 
-            validate(OppslagDto::periode).validate {
+            validate(PersonOppslagDto::periode).validate {
                 validate(Periode::tom).isGreaterThanOrEqualTo(it.fom)
             }
         }

@@ -12,6 +12,10 @@ class SpionService(private val sakRepo: YtelsesperiodeRepository, private val au
         return sakRepo.getYtelserForPerson(identitetsnummer, virksomhetsnummer, periode)
     }
 
+    fun hentYtelserForVirksomhet(virksomhetsnummer: String, periode: Periode): List<Ytelsesperiode> {
+        return sakRepo.getYtelserForVirksomhet(virksomhetsnummer, periode)
+    }
+
     fun hentArbeidsgivere(identitet: String): Set<AltinnOrganisasjon> {
         return authRepo.hentOrgMedRettigheterForPerson(identitet)
     }

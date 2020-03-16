@@ -65,10 +65,10 @@ dependencies {
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
     implementation("io.ktor:ktor-client-json:$ktorVersion")
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-locations:$ktorVersion")
 
     implementation("org.valiktor:valiktor-core:$valiktorVersion")
     implementation("org.valiktor:valiktor-javatime:$valiktorVersion")
-
 
     implementation("org.koin:koin-core:$koinVersion")
     implementation("org.koin:koin-ktor:$koinVersion")

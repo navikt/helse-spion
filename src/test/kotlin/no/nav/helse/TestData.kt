@@ -1,7 +1,7 @@
 package no.nav.helse
 
 import no.nav.helse.spion.domene.Periode
-import no.nav.helse.spion.web.dto.OppslagDto
+import no.nav.helse.spion.web.dto.PersonOppslagDto
 import java.time.LocalDate
 
 object TestData {
@@ -12,5 +12,5 @@ object TestData {
 }
 
 
-fun OppslagDto.Companion.validWithoutPeriode() = OppslagDto(TestData.validIdentitetsnummer, TestData.validOrgNr)
-fun OppslagDto.Companion.validWithPeriode(fom: LocalDate, tom: LocalDate) = OppslagDto(TestData.validIdentitetsnummer, TestData.validOrgNr, Periode(fom, tom))
+fun PersonOppslagDto.Companion.validWithoutPeriode() = PersonOppslagDto(TestData.validIdentitetsnummer, TestData.validOrgNr)
+fun PersonOppslagDto.Companion.validWithPeriode(fom: LocalDate, tom: LocalDate) = PersonOppslagDto(TestData.validIdentitetsnummer, TestData.validOrgNr, Periode(fom, tom))
