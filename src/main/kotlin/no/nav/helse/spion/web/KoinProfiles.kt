@@ -159,7 +159,7 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    single { generateKafkaMock(get()) as KafkaMessageProvider }
+    single { generateEmptyMock() as KafkaMessageProvider }
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
@@ -186,6 +186,16 @@ val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
 
         override fun confirmProcessingDone() {
             println("KafkaMock: Comitta til kafka")
+        }
+    }
+}
+
+val generateEmptyMock = fun(): KafkaMessageProvider {
+    return object : KafkaMessageProvider { // dum mock
+        override fun getMessagesToProcess(): List <MessageWithOffset> {
+            return emptyList()
+        }
+        override fun confirmProcessingDone() {
         }
     }
 }
