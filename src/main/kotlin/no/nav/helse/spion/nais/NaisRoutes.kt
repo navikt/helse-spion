@@ -59,8 +59,8 @@ fun Application.nais() {
 
 
         get("/send-altinn-melding") {
-            if (environment.config.property("koin.profile").getString() != "PREPROD") {
-                call.respond(HttpStatusCode.ExpectationFailed, "Kan kun kalles i PREPROD")
+            if (environment.config.property("koin.profile").getString() == "PROD") {
+                call.respond(HttpStatusCode.ExpectationFailed, "Kan ikke kalles i PROD")
                 return@get
             }
 

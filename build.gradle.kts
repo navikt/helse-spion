@@ -17,6 +17,7 @@ val koinVersion = "2.0.1"
 val valiktorVersion = "0.9.0"
 val cxfVersion = "3.3.5"
 val jaxwsVersion = "2.3.1"
+val jaxwsToolsVersion = "2.3.1"
 
 
 plugins {
@@ -77,6 +78,10 @@ dependencies {
     implementation("org.apache.cxf:cxf-rt-features-logging:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-transports-http:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-ws-security:$cxfVersion")
+    implementation("org.apache.ws.xmlschema:xmlschema-core:2.2.4") // Force newer version of XMLSchema to fix illegal reflective access warning
+    implementation("com.sun.xml.ws:jaxws-tools:$jaxwsToolsVersion") {
+        exclude(group = "com.sun.xml.ws", module = "policy")
+    }
 
 
     implementation("org.koin:koin-core:$koinVersion")
