@@ -60,3 +60,5 @@ spec:
     value: aadb2c
   - name: PARTNER_GATEWAY_ALTINN_ENDPOINT
     value: https://pep-gw.oera.no:9443/ekstern/altinn/BehandleAltinnMelding/v1
+  - name: SECURITYTOKENSERVICE_URL
+    value: https://sts.adeo.no/SecurityTokenServiceProvider/

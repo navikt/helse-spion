@@ -67,3 +67,5 @@ spec:
     value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
   - name: PARTNER_GATEWAY_ALTINN_ENDPOINT
     value: https://pep-gw-q1.oera-q.local:9443/ekstern/altinn/BehandleAltinnMelding/v1
+  - name: SECURITYTOKENSERVICE_URL
+    value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/

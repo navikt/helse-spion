@@ -40,26 +40,28 @@ class AltinnVarselMapper {
                 .withReportee(altinnVarsel.orgnummer)
                 .withMessageSender("NAV (Arbeids- og velferdsetaten)")
                 .withServiceCode(MANGLER_INNTEKTSMELDING_TJENESTEKODE)
-                .withServiceEdition(SYKEPENGESOEKNAD_TJENESTEVERSJON) //.withNotifications(opprettManglendeInnsendingNotifications(namespace))
+                .withServiceEdition(MANGLER_INNTEKTSMELDING_TJENESTEVERSJON) //.withNotifications(opprettManglendeInnsendingNotifications(namespace))
                 .withContent(meldingsInnhold)
     }
 
     private fun opprettManglendeInnsendingNotifications(namespace: String): JAXBElement<NotificationBEList> {
-        val epost = opprettEpostNotification("Sykepengesøknad som ikke er sendt inn",
+        val epost = opprettEpostNotification("TEST EPOST",
                 "<p>En ansatt i \$reporteeName$ (\$reporteeNumber$) har fått en søknad om sykepenger til utfylling, men har foreløpig ikke sendt den inn.</p>" +
                         "<p>Logg inn på <a href=\"" + lenkeAltinnPortal() + "\">Altinn</a> for å se hvem det gjelder og hvilken periode søknaden gjelder for.</p>" +
                         "<p>Mer informasjon om digital sykmelding og sykepengesøknad finner du på www.nav.no/digitalsykmelding.</p>" +
                         "<p>Vennlig hilsen NAV</p>")
+
         val sms = opprettSMSNotification(
                 "En ansatt i \$reporteeName$ (\$reporteeNumber$) har fått en søknad om sykepenger til utfylling, men har foreløpig ikke sendt den inn.",
                 "Gå til meldingsboksen i " + smsLenkeAltinnPortal() + " for å se hvem det gjelder og hvilken periode søknaden gjelder for. \n\nVennlig hilsen NAV"
         )
+
         return JAXBElement(QName(namespace, "Notifications"), NotificationBEList::class.java, NotificationBEList()
                 .withNotification(epost, sms))
     }
 
     companion object {
         private const val MANGLER_INNTEKTSMELDING_TJENESTEKODE = "5534" // OBS! VIKTIG! Denne må ikke endres, da kan feil personer få tilgang i Altinn!
-        private const val SYKEPENGESOEKNAD_TJENESTEVERSJON = "1"
+        private const val MANGLER_INNTEKTSMELDING_TJENESTEVERSJON = "1"
     }
 }

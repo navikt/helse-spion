@@ -5,7 +5,8 @@ import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondence
 import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasicInsertCorrespondenceBasicV2AltinnFaultFaultFaultMessage
 import org.slf4j.LoggerFactory
 
-class AltinnVarselSender(private val altinnVarselMapper: AltinnVarselMapper, private val iCorrespondenceAgencyExternalBasic: ICorrespondenceAgencyExternalBasic,
+class AltinnVarselSender(private val altinnVarselMapper: AltinnVarselMapper,
+                         private val iCorrespondenceAgencyExternalBasic: ICorrespondenceAgencyExternalBasic,
                          private val username: String,
                          private val password: String) {
 
