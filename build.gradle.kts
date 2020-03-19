@@ -15,7 +15,7 @@ val mockKVersion = "1.9.3"
 val tokenSupportVersion = "1.1.4"
 val koinVersion = "2.0.1"
 val valiktorVersion = "0.9.0"
-val cxfVersion = "3.3.1"
+val cxfVersion = "3.3.5"
 val jaxwsVersion = "2.3.1"
 
 
