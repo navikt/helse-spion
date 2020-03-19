@@ -129,7 +129,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 config.getString("service_user.username") to config.getString("service_user.password")
         )
 
-        stsClient.configureFor(altinnMeldingWsClient)
+        stsClient.configureFor(altinnMeldingWsClient, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
 
         val client = ClientProxy.getClient(altinnMeldingWsClient)
         client.inInterceptors.add(LoggingInInterceptor())
