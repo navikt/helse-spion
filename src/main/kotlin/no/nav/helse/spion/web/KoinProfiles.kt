@@ -29,6 +29,9 @@ import no.nav.helse.spion.vedtaksmelding.*
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
 import no.nav.helse.spion.vedtaksmelding.failed.PostgresFailedVedtaksmeldingRepository
+import org.apache.cxf.ext.logging.LoggingInInterceptor
+import org.apache.cxf.ext.logging.LoggingOutInterceptor
+import org.apache.cxf.frontend.ClientProxy
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
 import org.koin.core.Koin
@@ -127,6 +130,10 @@ fun preprodConfig(config: ApplicationConfig) = module {
         )
 
         stsClient.configureFor(altinnMeldingWsClient)
+
+        val client = ClientProxy.getClient(altinnMeldingWsClient)
+        client.inInterceptors.add(LoggingInInterceptor())
+        client.outInterceptors.add(LoggingOutInterceptor())
 
         altinnMeldingWsClient as ICorrespondenceAgencyExternalBasic
     }

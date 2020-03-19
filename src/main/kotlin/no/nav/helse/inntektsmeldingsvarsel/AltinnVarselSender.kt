@@ -24,10 +24,10 @@ class AltinnVarselSender(private val altinnVarselMapper: AltinnVarselMapper,
                 throw RuntimeException("Feil ved sending varsel om manglende innsending av sykepengesøknad til Altinn")
             }
         } catch (e: ICorrespondenceAgencyExternalBasicInsertCorrespondenceBasicV2AltinnFaultFaultFaultMessage) {
-            log.error("Feil ved sending varsel om manglende innsending av sykepengesøknad til Altinn", e)
-            throw RuntimeException("Feil ved sending varsel om manglende innsending av sykepengesøknad til Altinn", e)
+            log.error("Feil ved sending varsel om manglende innsending av inntektsmelding til Altinn", e)
+            throw RuntimeException("Feil ved sending varsel om manglende innsending av inntektsmelding til Altinn", e)
         } catch (e: Exception) {
-            log.error("Feil ved sending varsel om manglende innsending av sykepengesøknad til Altinn", e)
+            log.error("Feil ved sending varsel om manglende innsending av inntektsmelding til Altinn", e)
             throw e
         }
     }
@@ -35,5 +35,4 @@ class AltinnVarselSender(private val altinnVarselMapper: AltinnVarselMapper,
     companion object {
         const val SYSTEM_USER_CODE = "NAV_HELSEARBEIDSGIVER"
     }
-
 }
