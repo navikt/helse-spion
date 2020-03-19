@@ -69,7 +69,7 @@ fun Application.nais() {
             altinnMeldingSender.sendManglendeInnsendingAvInntektsMeldingTilArbeidsgiver(
                     AltinnVarsel(
                             null,
-                            null,
+                            UUID.randomUUID().toString(),
                             null,
                             "811308412", //  -> Davik og Bøverdalen
                             null,

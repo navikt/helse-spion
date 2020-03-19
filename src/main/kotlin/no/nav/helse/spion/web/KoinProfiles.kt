@@ -17,8 +17,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasic
 import no.nav.helse.inntektsmeldingsvarsel.AltinnVarselMapper
 import no.nav.helse.inntektsmeldingsvarsel.AltinnVarselSender
-import no.nav.helse.inntektsmeldingsvarsel.LogErrorHandler
-import no.nav.helse.inntektsmeldingsvarsel.WsClient
+import no.nav.helse.inntektsmeldingsvarsel.Clients
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
@@ -40,8 +39,6 @@ import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import javax.sql.DataSource
-import javax.xml.ws.handler.Handler
-import javax.xml.ws.handler.MessageContext
 import kotlin.random.Random
 
 
@@ -122,11 +119,9 @@ fun preprodConfig(config: ApplicationConfig) = module {
     }
 
     single {
-        WsClient<ICorrespondenceAgencyExternalBasic>()
-                .createPort(
-                        config.getString("altinn_melding.pep_gw_endpoint"),
-                        ICorrespondenceAgencyExternalBasic::class.java, mutableListOf(LogErrorHandler()) as List<Handler<MessageContext>>?, false)
-                as ICorrespondenceAgencyExternalBasic
+        Clients.iCorrespondenceExternalBasic(
+                config.getString("altinn_melding.pep_gw_endpoint")
+        ) as ICorrespondenceAgencyExternalBasic
     }
 
     single {

@@ -1,5 +1,5 @@
-package no.nav.helse.inntektsmeldingsvarsel;
+package no.nav.helse.inntektsmeldingsvarsel
 
-public enum AltinnVarselType {
+enum class AltinnVarselType {
     HR_IKKE_SENDT_SYKEPENGESOKNAD
 }

@@ -1,68 +1,63 @@
-package no.nav.helse.inntektsmeldingsvarsel;
+package no.nav.helse.inntektsmeldingsvarsel
 
-import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
-import no.altinn.schemas.services.serviceengine.notification._2009._10.*;
+import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType
+import no.altinn.schemas.services.serviceengine.notification._2009._10.*
+import java.util.*
+import java.util.function.Function
 
-import java.util.function.Function;
-
-import static java.lang.System.getProperty;
-import static java.util.Optional.ofNullable;
-import static no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType.EMAIL;
-import static no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType.SMS;
-
-class NotificationAltinnGenerator {
-    private static final String NORSK_BOKMAL = "1044";
-    private static final String FRA_EPOST_ALTINN = "noreply@altinn.no";
-    private static final String NOTIFICATION_NAMESPACE = "http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10";
-
-    private static String urlEncode(String lenke) {
-        return lenke.replaceAll("=", "%3D");
+internal object NotificationAltinnGenerator {
+    private const val NORSK_BOKMAL = "1044"
+    private const val FRA_EPOST_ALTINN = "noreply@altinn.no"
+    private const val NOTIFICATION_NAMESPACE = "http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10"
+    private fun urlEncode(lenke: String): String {
+        return lenke.replace("=".toRegex(), "%3D")
     }
 
-    static String smsLenkeAltinnPortal() {
-        return urlEncode(lenkeAltinnPortal());
+    @JvmStatic
+    fun smsLenkeAltinnPortal(): String {
+        return urlEncode(lenkeAltinnPortal())
     }
 
-    static String lenkeAltinnPortal() {
-        return getProperty("altinn.portal.baseurl", "https://www.altinn.no") + "/ui/MessageBox?O=$reporteeNumber$";
+    @JvmStatic
+    fun lenkeAltinnPortal(): String {
+        return System.getProperty("altinn.portal.baseurl", "https://www.altinn.no") + "/ui/MessageBox?O=\$reporteeNumber$"
     }
 
-    static Notification opprettEpostNotification(String... text) {
-        return opprettNotification(FRA_EPOST_ALTINN, EMAIL, text);
+    @JvmStatic
+    fun opprettEpostNotification(vararg text: String): Notification {
+        return opprettNotification(FRA_EPOST_ALTINN, TransportType.EMAIL, *text)
     }
 
-    static Notification opprettSMSNotification(String... text) {
-        return opprettNotification(null, SMS, text);
+    @JvmStatic
+    fun opprettSMSNotification(vararg text: String): Notification {
+        return opprettNotification(null, TransportType.SMS, *text)
     }
 
-    private static Notification opprettNotification(String fraEpost, TransportType type, String... text) {
-        return opprettNotification(fraEpost, type, konverterTilTextTokens(text));
+    private fun opprettNotification(fraEpost: String?, type: TransportType, vararg text: String): Notification {
+        return opprettNotification(fraEpost, type, konverterTilTextTokens(*text))
     }
 
-    private static Notification opprettNotification(String fraEpost, TransportType type, TextToken[] textTokens) {
-        if (textTokens.length != 2) {
-            throw new IllegalArgumentException("Antall textTokens må være 2. Var " + textTokens.length);
-        }
-
-        return new Notification()
+    private fun opprettNotification(fraEpost: String?, type: TransportType, textTokens: Array<TextToken?>): Notification {
+        require(textTokens.size == 2) { "Antall textTokens må være 2. Var " + textTokens.size }
+        return Notification()
                 .withLanguageCode(NORSK_BOKMAL)
                 .withNotificationType("TokenTextOnly")
-                .withFromAddress(mapNullable(fraEpost, epost -> epost))
-                .withReceiverEndPoints(new ReceiverEndPointBEList()
-                        .withReceiverEndPoint(new ReceiverEndPoint().withTransportType(type))
+                .withFromAddress(mapNullable(fraEpost, Function { epost: String? -> epost }))
+                .withReceiverEndPoints(ReceiverEndPointBEList()
+                        .withReceiverEndPoint(ReceiverEndPoint().withTransportType(type))
                 )
-                .withTextTokens(new TextTokenSubstitutionBEList().withTextToken(textTokens));
+                .withTextTokens(TextTokenSubstitutionBEList().withTextToken(*textTokens))
     }
 
-    private static TextToken[] konverterTilTextTokens(String... text) {
-        TextToken[] textTokens = new TextToken[text.length];
-        for (int i = 0; i < text.length; i++) {
-            textTokens[i] = new TextToken().withTokenNum(i).withTokenValue(text[i]);
+    private fun konverterTilTextTokens(vararg text: String): Array<TextToken?> {
+        val textTokens = arrayOfNulls<TextToken>(text.size)
+        for (i in 0 until text.size) {
+            textTokens[i] = TextToken().withTokenNum(i).withTokenValue(text[i])
         }
-        return textTokens;
+        return textTokens
     }
 
-    private static <T, R> R mapNullable(T fra, Function<T, R> exp) {
-        return ofNullable(fra).map(exp).orElse(null);
+    private fun <T, R> mapNullable(fra: T, exp: Function<T, R>): R {
+        return Optional.ofNullable(fra).map(exp).orElse(null)
     }
 }
