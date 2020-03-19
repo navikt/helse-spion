@@ -15,6 +15,8 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
 import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasic
+import no.nav.helse.inntektsmeldingsvarsel.AltinnVarselMapper
+import no.nav.helse.inntektsmeldingsvarsel.AltinnVarselSender
 import no.nav.helse.inntektsmeldingsvarsel.LogErrorHandler
 import no.nav.helse.inntektsmeldingsvarsel.WsClient
 import no.nav.helse.spion.auth.*
@@ -125,6 +127,15 @@ fun preprodConfig(config: ApplicationConfig) = module {
                         config.getString("altinn_melding.pep_gw_endpoint"),
                         ICorrespondenceAgencyExternalBasic::class.java, mutableListOf(LogErrorHandler()) as List<Handler<MessageContext>>?, false)
                 as ICorrespondenceAgencyExternalBasic
+    }
+
+    single {
+        AltinnVarselSender(
+                AltinnVarselMapper(),
+                get(),
+                config.getString("service_user.username"),
+                config.getString("service_user.password")
+        ) as AltinnVarselSender
     }
 
     /*single {

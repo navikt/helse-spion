@@ -14,12 +14,16 @@ import io.ktor.util.pipeline.PipelineContext
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 import io.prometheus.client.hotspot.DefaultExports
+import no.nav.helse.inntektsmeldingsvarsel.AltinnVarsel
+import no.nav.helse.inntektsmeldingsvarsel.AltinnVarselSender
 import no.nav.helse.spion.selfcheck.HealthCheck
 import no.nav.helse.spion.selfcheck.HealthCheckState
 import no.nav.helse.spion.selfcheck.HealthCheckType
 import no.nav.helse.spion.selfcheck.runHealthChecks
 import no.nav.helse.spion.web.getAllOfType
+import org.koin.ktor.ext.get
 import org.koin.ktor.ext.getKoin
+import java.time.LocalDate
 import java.util.*
 
 private val collectorRegistry = CollectorRegistry.defaultRegistry
@@ -50,6 +54,33 @@ fun Application.nais() {
             val httpResult = if (checkResults.any { it.state == HealthCheckState.ERROR }) HttpStatusCode.InternalServerError else HttpStatusCode.OK
 
             call.respond(httpResult, checkResults)
+        }
+
+
+
+        get("/send-altinn-melding") {
+            if (environment.config.property("koin.profile").getString() != "PREPROD") {
+                call.respond(HttpStatusCode.ExpectationFailed, "Kan kun kalles i PREPROD")
+                return@get
+            }
+
+            val altinnMeldingSender = this@routing.get<AltinnVarselSender>()
+
+            altinnMeldingSender.sendManglendeInnsendingAvInntektsMeldingTilArbeidsgiver(
+                    AltinnVarsel(
+                            null,
+                            null,
+                            null,
+                            "811308412", //  -> Davik og Bøverdalen
+                            null,
+                            "01010112345",
+                            "Test Testesen",
+                            LocalDate.now().minusDays(5),
+                            LocalDate.now().plusDays(10)
+                    )
+            )
+
+            call.respond(HttpStatusCode.OK, "Melding sendt")
         }
     }
 }
