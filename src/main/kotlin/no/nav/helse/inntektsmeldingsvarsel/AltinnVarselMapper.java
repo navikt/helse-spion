@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 
 import static no.nav.helse.inntektsmeldingsvarsel.NotificationAltinnGenerator.*;
 
-class AltinnVarselMapper {
+public class AltinnVarselMapper {
     private static final String MANGLER_INNTEKTSMELDING_TJENESTEKODE = "5534"; // OBS! VIKTIG! Denne må ikke endres, da kan feil personer få tilgang i Altinn!
     private static final String SYKEPENGESOEKNAD_TJENESTEVERSJON = "1";
 
@@ -28,7 +28,7 @@ class AltinnVarselMapper {
                 "   </head>\n" +
                 "   <body>\n" +
                 "       <div class=\"melding\">\n" +
-                "           <h2>Søknad om sykepenger</h2>\n" +
+                "           <h2>DETTE ER EN TEST</h2>\n" +
                 "           <p>" + altinnVarsel.getNavnSykmeldt() + " (" + altinnVarsel.getFnrSykmeldt() + ") har fått en søknad om sykepenger til utfylling, men har foreløpig ikke sendt den inn.</p>\n" +
                 "           <p>Perioden søknaden gjelder for er " + formatter.format(altinnVarsel.getSoknadFom()) + "-" + formatter.format(altinnVarsel.getSoknadTom()) + "</p>\n" +
                 "           <h4>Om denne meldingen:</h4>\n" +
