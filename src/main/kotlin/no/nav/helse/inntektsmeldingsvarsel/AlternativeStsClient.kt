@@ -82,15 +82,6 @@ object STSClientConfig {
         setClientEndpointPolicy(client, policy)
     }
 
-    private fun requireProperty(key: String): String {
-        val property = System.getenv(key)
-        return property ?: systemProperty(key)
-    }
-
-    private fun systemProperty(key: String): String {
-        return System.getProperty(key) ?: throw IllegalStateException("Required property $key not available.")
-    }
-
     private fun resolvePolicyReference(client: Client, uri: String): Policy {
         val policyBuilder = client.bus.getExtension<PolicyBuilder>(PolicyBuilder::class.java)
         val resolver = RemoteReferenceResolver("", policyBuilder)
