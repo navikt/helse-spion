@@ -21,10 +21,13 @@ import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.db.getDataSource
 import no.nav.helse.spion.domene.Arbeidsgiver
+import no.nav.helse.spion.domene.varsling.repository.PostgresVarslingRepository
+import no.nav.helse.spion.domene.varsling.repository.VarslingRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
+import no.nav.helse.spion.varsling.*
 import no.nav.helse.spion.vedtaksmelding.*
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
@@ -108,6 +111,11 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
 
+    single { DummyVarslingSender() as VarslingSender}
+    single { VarslingMapper(get()) }
+    single { PostgresVarslingRepository(get()) as VarslingRepository}
+    single { VarslingService(get(), get()) }
+    single { VarslingProcessor(get(), get()) }
 
     single {
         val altinnMeldingWsClient = Clients.iCorrespondenceExternalBasic(
@@ -136,7 +144,6 @@ fun localDevConfig(config: ApplicationConfig) = module {
                 config.getString("altinn_melding.password")
         ) as AltinnVarselSender
     }
-
 
     LocalOIDCWireMock.start()
 }
@@ -206,6 +213,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single {
         PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository
     }
+    single { VarslingProcessor(get(), get(), get(), get()) }
     single { SpionService(get(), get()) as SpionService }
 }
 
@@ -229,6 +237,7 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { VarslingProcessor(get(), get(), get(), get()) }
 }
 
 val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
