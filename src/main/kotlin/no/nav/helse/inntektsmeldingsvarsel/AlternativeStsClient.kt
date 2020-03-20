@@ -6,6 +6,7 @@ import org.apache.cxf.binding.soap.Soap12
 import org.apache.cxf.binding.soap.SoapMessage
 import org.apache.cxf.endpoint.Client
 import org.apache.cxf.frontend.ClientProxy
+import org.apache.cxf.ws.addressing.WSAddressingFeature
 import org.apache.cxf.ws.policy.PolicyBuilder
 import org.apache.cxf.ws.policy.PolicyEngine
 import org.apache.cxf.ws.policy.attachment.reference.RemoteReferenceResolver
@@ -59,12 +60,15 @@ object STSClientConfig {
         return STSClientWSTrust13and14(bus)
     }
 
-    private fun configureSTSClient(stsClient: STSClient, location: String, username: String,
+    private fun configureSTSClient(stsClient: STSClient,
+                                   location: String,
+                                   username: String,
                                    password: String): STSClient {
 
         stsClient.isEnableAppliesTo = false
         stsClient.isAllowRenewing = false
         stsClient.location = location
+        stsClient.features = listOf(WSAddressingFeature())
 
         val properties = HashMap<String, Any>()
         properties[org.apache.cxf.rt.security.SecurityConstants.USERNAME] = username
