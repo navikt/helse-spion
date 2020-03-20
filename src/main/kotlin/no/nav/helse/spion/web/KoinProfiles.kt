@@ -32,6 +32,9 @@ import no.nav.helse.spion.vedtaksmelding.*
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
 import no.nav.helse.spion.vedtaksmelding.failed.PostgresFailedVedtaksmeldingRepository
+import org.apache.cxf.ext.logging.LoggingInInterceptor
+import org.apache.cxf.ext.logging.LoggingOutInterceptor
+import org.apache.cxf.frontend.ClientProxy
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
 import org.koin.core.Koin
@@ -114,6 +117,34 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { VarslingService(get(), get()) }
     single { VarslingProcessor(get(), get()) }
 
+    single {
+        val altinnMeldingWsClient = Clients.iCorrespondenceExternalBasic(
+                config.getString("altinn_melding.pep_gw_endpoint")
+        )
+
+        val client = ClientProxy.getClient(altinnMeldingWsClient)
+        client.inInterceptors.add(LoggingInInterceptor())
+        client.outInterceptors.add(LoggingOutInterceptor())
+
+        val sts = stsClient(
+                config.getString("sts_url"),
+                config.getString("service_user.username") to config.getString("service_user.password")
+        )
+
+        sts.configureFor(altinnMeldingWsClient)
+
+        altinnMeldingWsClient as ICorrespondenceAgencyExternalBasic
+    }
+
+    single {
+        AltinnVarselSender(
+                AltinnVarselMapper(),
+                get(),
+                config.getString("altinn_melding.username"),
+                config.getString("altinn_melding.password")
+        ) as AltinnVarselSender
+    }
+
     LocalOIDCWireMock.start()
 }
 
@@ -130,16 +161,19 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 config.getString("altinn_melding.pep_gw_endpoint")
         )
 
-        val stsClient = stsClient(
+        val client = ClientProxy.getClient(altinnMeldingWsClient)
+        client.inInterceptors.add(LoggingInInterceptor())
+        client.outInterceptors.add(LoggingOutInterceptor())
+
+        val sts = stsClient(
                 config.getString("sts_url"),
                 config.getString("service_user.username") to config.getString("service_user.password")
         )
 
-        stsClient.configureFor(altinnMeldingWsClient)
+        sts.configureFor(altinnMeldingWsClient)
 
         altinnMeldingWsClient as ICorrespondenceAgencyExternalBasic
     }
-
     single {
         AltinnVarselSender(
                 AltinnVarselMapper(),

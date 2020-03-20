@@ -15,7 +15,7 @@ val mockKVersion = "1.9.3"
 val tokenSupportVersion = "1.1.4"
 val koinVersion = "2.0.1"
 val valiktorVersion = "0.9.0"
-val cxfVersion = "3.3.5"
+val cxfVersion = "3.3.1"
 val jaxwsVersion = "2.3.1"
 val jaxwsToolsVersion = "2.3.1"
 
@@ -73,6 +73,7 @@ dependencies {
     implementation("org.valiktor:valiktor-javatime:$valiktorVersion")
 
     implementation("no.nav.tjenestespesifikasjoner:altinn-correspondence-agency-external-basic:1.2019.09.25-00.21-49b69f0625e0")
+
     implementation("javax.xml.ws:jaxws-api:$jaxwsVersion")
     implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-features-logging:$cxfVersion")
