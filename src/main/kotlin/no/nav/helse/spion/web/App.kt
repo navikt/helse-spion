@@ -61,13 +61,13 @@ fun main() {
         val failedVedtaksmeldingProcessor = koin.get<FailedVedtaksmeldingProcessor>()
         failedVedtaksmeldingProcessor.startAsync(retryOnFail = true)
 
-        val scheduler = koin.get<VarslingScheduler>()
-        scheduler.setup()
+        val varslingProcessor = koin.get<VarslingProcessor>()
+        varslingProcessor.startAsync(retryOnFail = true)
 
         Runtime.getRuntime().addShutdownHook(Thread {
             vedtaksmeldingProcessor.stop()
             failedVedtaksmeldingProcessor.stop()
-            scheduler.stop()
+            varslingProcessor.stop()
             app.stop(1000, 1000)
         })
     }

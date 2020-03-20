@@ -45,28 +45,28 @@ internal class PostgresVarslingRepositoryTest : KoinComponent {
 
     @AfterEach
     internal fun tearDown() {
-        repo.slett("4ded87e3-f266-41b8-8be7-d1c2d037f385")
+        repo.remove("4ded87e3-f266-41b8-8be7-d1c2d037f385")
         stopKoin()
     }
 
     @Test
     fun finnNesteUbehandlet() {
-        repo.lagre(varsling)
-        val neste = repo.finnNesteUbehandlet()
+        repo.insert(varsling)
+        val neste = repo.findByStatus()
         assertThat(neste.uuid).isEqualTo("4ded87e3-f266-41b8-8be7-d1c2d037f385")
-        repo.slett("4ded87e3-f266-41b8-8be7-d1c2d037f385")
+        repo.remove("4ded87e3-f266-41b8-8be7-d1c2d037f385")
     }
 
     @Test
     fun finnAntallUbehandlet() {
-        assertThat(repo.finnAntallUbehandlet()).isEqualTo(1)
+        assertThat(repo.countByStatus()).isEqualTo(1)
     }
 
     @Test
     fun oppdaterStatus() {
-        val neste = repo.finnNesteUbehandlet()
+        val neste = repo.findByStatus()
         repo.oppdaterStatus(neste, true)
-        val lagret = repo.finnNesteUbehandlet()
+        val lagret = repo.findByStatus()
         assertThat(lagret.status).isEqualTo(1)
     }
 

@@ -21,15 +21,13 @@ import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.db.getDataSource
 import no.nav.helse.spion.domene.Arbeidsgiver
-import no.nav.helse.spion.domene.varsling.repository.MockVarslingRepository
 import no.nav.helse.spion.domene.varsling.repository.PostgresVarslingRepository
+import no.nav.helse.spion.domene.varsling.repository.VarslingRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
-import no.nav.helse.spion.varsling.MockVarslingSender
-import no.nav.helse.spion.varsling.VarslingQueue
-import no.nav.helse.spion.varsling.VarslingScheduler
+import no.nav.helse.spion.varsling.*
 import no.nav.helse.spion.vedtaksmelding.*
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
@@ -87,7 +85,6 @@ val common = module {
 
 fun buildAndTestConfig() = module {
     single { MockYtelsesperiodeRepository() as YtelsesperiodeRepository }
-    single { VarslingScheduler(1, VarslingQueue(MockVarslingRepository()), MockVarslingSender()) }
     single { StaticMockAuthRepo(get()) as AuthorizationsRepository } bind StaticMockAuthRepo::class
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
@@ -99,7 +96,6 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { getDataSource(createLocalHikariConfig(), "spion", null) as DataSource }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
-    single { VarslingScheduler(10, VarslingQueue(PostgresVarslingRepository(get(), get())), MockVarslingSender()) }
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
@@ -111,6 +107,12 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingService(get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
+
+    single { DummyVarslingSender() as VarslingSender}
+    single { VarslingMapper(get()) }
+    single { PostgresVarslingRepository(get()) as VarslingRepository}
+    single { VarslingService(get(), get()) }
+    single { VarslingProcessor(get(), get()) }
 
     LocalOIDCWireMock.start()
 }
@@ -171,13 +173,13 @@ fun preprodConfig(config: ApplicationConfig) = module {
     }
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
-    single { VarslingScheduler(3600, VarslingQueue(PostgresVarslingRepository(get(), get())), MockVarslingSender()) }
     single { VedtaksmeldingService(get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
     single {
         PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository
     }
+    single { VarslingProcessor(get(), get(), get(), get()) }
     single { SpionService(get(), get()) as SpionService }
 }
 
@@ -195,13 +197,13 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { generateEmptyMock() as KafkaMessageProvider }
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
-    single { VarslingScheduler(3600, VarslingQueue(PostgresVarslingRepository(get(), get())), MockVarslingSender()) }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
     single { VedtaksmeldingService(get(), get()) }
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { VarslingProcessor(get(), get(), get(), get()) }
 }
 
 val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {

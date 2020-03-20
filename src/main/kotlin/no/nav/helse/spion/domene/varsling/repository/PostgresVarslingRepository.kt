@@ -1,8 +1,5 @@
 package no.nav.helse.spion.domene.varsling.repository
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.spion.domene.varsling.Varsling
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.Timestamp
@@ -10,25 +7,15 @@ import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
-class PostgresVarslingRepository(private val ds: DataSource, private val mapper: ObjectMapper) : VarslingRepository {
+class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepository {
 
     private val tableName = "varsling"
-    private val insertStatement = "INSERT INTO $tableName(data, status, opprettet, virksomhetsNr, uuid, dato) VALUES(?::json, ?, ?, ?, ?::uuid, ?)"
-    private val updateStatement = "UPDATE $tableName SET status = ?, behandlet = ? WHERE uuid = ?"
+    private val insertStatement = "INSERT INTO $tableName (data, status, opprettet, virksomhetsNr, uuid, dato) VALUES(?::json, ?, ?, ?, ?::uuid, ?)"
+    private val updateStatement = "UPDATE $tableName SET data = ?, status = ?, opprettet = ?, virksomhetsNr = ?, dato = ? WHERE uuid = ?"
+    private val updateStatusStatement = "UPDATE $tableName SET status = ?, behandlet = ? WHERE uuid = ?"
+    private val deleteStatement = "DELETE FROM $tableName WHERE uuid = ?"
     private val nextStatement = "SELECT * FROM $tableName WHERE status=? ORDER BY opprettet ASC LIMIT ?"
     private val countStatement = "SELECT count(*) FROM $tableName WHERE status = ?"
-    private val deleteStatement = "DELETE FROM $tableName WHERE uuid = ?"
-
-    fun mapToDto(varsling: Varsling): VarslingDto {
-        return VarslingDto(
-                uuid = varsling.uuid,
-                data = mapper.writeValueAsString(varsling.liste),
-                status = varsling.status,
-                opprettet = varsling.opprettet,
-                dato = varsling.dato,
-                virksomhetsNr = varsling.virksomhetsNr
-        )
-    }
 
     fun mapToDto(res: ResultSet): VarslingDto {
         return VarslingDto(
@@ -42,58 +29,44 @@ class PostgresVarslingRepository(private val ds: DataSource, private val mapper:
         )
     }
 
-    fun mapToDomain(dto: VarslingDto): Varsling {
-        return Varsling(
-                dato = dto.dato,
-                virksomhetsNr = dto.virksomhetsNr,
-                uuid = dto.uuid,
-                opprettet = dto.opprettet,
-                status = dto.status,
-                liste = mapper.readValue(dto.data)
-        )
-    }
-
-    override fun finnNesteUbehandlet(): Varsling {
-        return ds.connection.use {
-            val resultList = ArrayList<Varsling>()
+    override fun findByStatus(status: Int, max: Int): List<VarslingDto> {
+        ds.connection.use {
+            val resultList = ArrayList<VarslingDto>()
             val res = it.prepareStatement(nextStatement).apply {
                 setInt(1, 0)
-                setInt(2, 1)
+                setInt(2, max)
             }.executeQuery()
             while (res.next()) {
-                resultList.add(mapToDomain(mapToDto(res)))
+                resultList.add(mapToDto(res))
             }
-            resultList[0]
+            return resultList
         }
     }
 
-    override fun finnAntallUbehandlet(): Int {
+    override fun countByStatus(status: Int): Int {
         return ds.connection.use {
             val res = it.prepareStatement(countStatement).apply {
-                setInt(1, 0)
+                setInt(1, status)
             }.executeQuery()
             res.next()
             res.getInt(1)
         }
     }
 
-    override fun oppdaterStatus(varsling: Varsling, velykket: Boolean) {
-        val status = if (velykket) {
-            1
-        } else {
-            0
-        }
+    override fun update(dto: VarslingDto) {
         ds.connection.use {
             it.prepareStatement(updateStatement).apply {
-                setInt(1, status)
-                setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()))
-                setString(3, varsling.uuid)
+                setString(1, dto.data)
+                setInt(2, dto.status)
+                setTimestamp(3, Timestamp.valueOf(dto.opprettet))
+                setString(4, dto.virksomhetsNr)
+                setString(5, dto.uuid)
+                setDate(6, Date.valueOf(dto.dato))
             }.executeUpdate()
         }
     }
 
-    override fun lagre(varsling: Varsling) {
-        val dto = mapToDto(varsling)
+    override fun insert(dto: VarslingDto) {
         ds.connection.use {
             it.prepareStatement(insertStatement).apply {
                 setString(1, dto.data)
@@ -106,10 +79,20 @@ class PostgresVarslingRepository(private val ds: DataSource, private val mapper:
         }
     }
 
-    override fun slett(uuid: String) {
+    override fun remove(uuid: String) {
         ds.connection.use {
-            it.prepareStatement(updateStatement).apply {
+            it.prepareStatement(deleteStatement).apply {
                 setString(1, uuid)
+            }.executeUpdate()
+        }
+    }
+
+    override fun updateStatus(uuid: String, dato: LocalDateTime, status: Int) {
+        ds.connection.use {
+            it.prepareStatement(updateStatusStatement).apply {
+                setInt(1, status)
+                setTimestamp(2, Timestamp.valueOf(dato))
+                setString(3, uuid)
             }.executeUpdate()
         }
     }

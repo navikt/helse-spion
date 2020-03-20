@@ -1,35 +1,39 @@
 package no.nav.helse.spion.domene.varsling.repository
 
-import no.nav.helse.spion.domene.varsling.PersonVarsling
-import no.nav.helse.spion.domene.varsling.Varsling
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 class MockVarslingRepository(): VarslingRepository {
 
-    private val varsling1 = Varsling(LocalDate.now(), "123", listOf(PersonVarsling("Ola Nordmann", "111222333")))
-    private val varsling2 = Varsling(LocalDate.now(), "456", listOf(PersonVarsling("Kari Nordmann", "444555666")))
-    private val varsling3 = Varsling(LocalDate.now(), "789", listOf(PersonVarsling("Lise Nordmann", "777888999")))
+    private val varsling1 = VarslingDto(data="[]", uuid = UUID.randomUUID().toString(), status = 0, opprettet = LocalDateTime.now(), dato = LocalDate.of(2020,1,1), virksomhetsNr = "123456789" )
+    private val varsling2 = VarslingDto(data="[]", uuid = UUID.randomUUID().toString(), status = 0, opprettet = LocalDateTime.now(), dato = LocalDate.of(2020,1,1), virksomhetsNr = "123456789" )
+    private val varsling3 = VarslingDto(data="[]", uuid = UUID.randomUUID().toString(), status = 0, opprettet = LocalDateTime.now(), dato = LocalDate.of(2020,1,1), virksomhetsNr = "123456789" )
 
     val list = listOf(varsling1, varsling2, varsling3).toMutableList()
 
-    override fun finnNesteUbehandlet(): Varsling {
-        return list.removeAt(0)
+    override fun findByStatus(status: Int, max: Int): List<VarslingDto> {
+        return list
     }
 
-    override fun finnAntallUbehandlet(): Int {
+    override fun countByStatus(status: Int): Int {
         return list.size
     }
 
-    override fun oppdaterStatus(varsling: Varsling, velykket: Boolean) {
-        println("Oppdater $varsling med status $velykket")
+    override fun update(varsling: VarslingDto) {
+        println("Oppdater $varsling.uuid")
     }
 
-    override fun lagre(varsling: Varsling) {
+    override fun insert(varsling: VarslingDto) {
         println("Lagret $varsling")
     }
 
-    override fun slett(uuid: String) {
+    override fun remove(uuid: String) {
         println("Slettet $uuid")
+    }
+
+    override fun updateStatus(uuid: String, dato: LocalDateTime, status: Int) {
+        println("updateStatus $uuid $status")
     }
 
 }

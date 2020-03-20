@@ -1,11 +1,12 @@
 package no.nav.helse.spion.domene.varsling.repository
 
-import no.nav.helse.spion.domene.varsling.Varsling
+import java.time.LocalDateTime
 
 interface VarslingRepository {
-    fun finnNesteUbehandlet() : Varsling
-    fun finnAntallUbehandlet() : Int
-    fun oppdaterStatus(varsling: Varsling, velykket: Boolean)
-    fun lagre(varsling: Varsling)
-    fun slett(uuid: String)
+    fun findByStatus(status: Int, max: Int) : List<VarslingDto>
+    fun countByStatus(status: Int) : Int
+    fun update(varsling: VarslingDto)
+    fun insert(varsling: VarslingDto)
+    fun remove(uuid: String)
+    fun updateStatus(uuid: String, dato: LocalDateTime, status: Int)
 }
