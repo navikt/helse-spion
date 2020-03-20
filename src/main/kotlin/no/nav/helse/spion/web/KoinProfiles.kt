@@ -16,7 +16,6 @@ import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
 import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasic
 import no.nav.helse.inntektsmeldingsvarsel.*
-import no.nav.helse.inntektsmeldingsvarsel.STSClientConfig.configureRequestSamlToken
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
@@ -159,16 +158,15 @@ fun preprodConfig(config: ApplicationConfig) = module {
         client.inInterceptors.add(LoggingInInterceptor())
         client.outInterceptors.add(LoggingOutInterceptor())
 
-
-        configureRequestSamlToken(
-                altinnMeldingWsClient,
+        val sts = stsClient(
                 config.getString("sts_url"),
                 config.getString("service_user.username") to config.getString("service_user.password")
         )
 
+        sts.configureFor(altinnMeldingWsClient)
+
         altinnMeldingWsClient as ICorrespondenceAgencyExternalBasic
     }
-
     single {
         AltinnVarselSender(
                 AltinnVarselMapper(),
