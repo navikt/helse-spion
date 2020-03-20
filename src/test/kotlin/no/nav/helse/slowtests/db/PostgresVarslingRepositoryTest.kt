@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.domene.varsling.Varsling
 import no.nav.helse.spion.domene.varsling.repository.PostgresVarslingRepository
+import no.nav.helse.spion.domene.varsling.repository.VarslingDto
 import no.nav.helse.spion.web.common
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -17,6 +18,7 @@ import org.koin.core.context.stopKoin
 import org.koin.core.get
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 internal class PostgresVarslingRepositoryTest : KoinComponent {
 
@@ -32,14 +34,22 @@ internal class PostgresVarslingRepositoryTest : KoinComponent {
             virksomhetsNr = "123456789"
     )
 
+    private val varsling1 = VarslingDto(
+            data="[]",
+            uuid = UUID.randomUUID().toString(),
+            status = 0,
+            opprettet = LocalDateTime.now(),
+            dato = LocalDate.of(2020,1,1),
+            virksomhetsNr = "123456789"
+    )
+
     @BeforeEach
     internal fun setUp() {
         startKoin {
             loadKoinModules(common)
         }
         dataSource = HikariDataSource(createLocalHikariConfig())
-        val objectMapper = get<ObjectMapper>()
-        repo = PostgresVarslingRepository(dataSource, objectMapper)
+        repo = PostgresVarslingRepository(dataSource)
 
     }
 
@@ -49,37 +59,5 @@ internal class PostgresVarslingRepositoryTest : KoinComponent {
         stopKoin()
     }
 
-    @Test
-    fun finnNesteUbehandlet() {
-        repo.insert(varsling)
-        val neste = repo.findByStatus()
-        assertThat(neste.uuid).isEqualTo("4ded87e3-f266-41b8-8be7-d1c2d037f385")
-        repo.remove("4ded87e3-f266-41b8-8be7-d1c2d037f385")
-    }
-
-    @Test
-    fun finnAntallUbehandlet() {
-        assertThat(repo.countByStatus()).isEqualTo(1)
-    }
-
-    @Test
-    fun oppdaterStatus() {
-        val neste = repo.findByStatus()
-        repo.oppdaterStatus(neste, true)
-        val lagret = repo.findByStatus()
-        assertThat(lagret.status).isEqualTo(1)
-    }
-
-//    @Test
-//    fun mapToDto() {
-//    }
-//
-//    @Test
-//    fun testMapToDto() {
-//    }
-//
-//    @Test
-//    fun mapToDomain() {
-//    }
 
 }
