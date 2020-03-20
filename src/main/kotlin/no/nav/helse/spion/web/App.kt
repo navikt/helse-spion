@@ -26,6 +26,7 @@ import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.auth.localCookieDispenser
 import no.nav.helse.spion.nais.nais
+import no.nav.helse.spion.varsling.*
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.web.api.spion
@@ -60,9 +61,13 @@ fun main() {
         val failedVedtaksmeldingProcessor = koin.get<FailedVedtaksmeldingProcessor>()
         failedVedtaksmeldingProcessor.startAsync(retryOnFail = true)
 
+        val scheduler = koin.get<VarslingScheduler>()
+        scheduler.setup()
+
         Runtime.getRuntime().addShutdownHook(Thread {
             vedtaksmeldingProcessor.stop()
             failedVedtaksmeldingProcessor.stop()
+            scheduler.stop()
             app.stop(1000, 1000)
         })
     }
