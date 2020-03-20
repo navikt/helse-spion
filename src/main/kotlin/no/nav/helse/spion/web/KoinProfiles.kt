@@ -15,9 +15,7 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
 import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasic
-import no.nav.helse.inntektsmeldingsvarsel.AltinnVarselMapper
-import no.nav.helse.inntektsmeldingsvarsel.AltinnVarselSender
-import no.nav.helse.inntektsmeldingsvarsel.Clients
+import no.nav.helse.inntektsmeldingsvarsel.*
 import no.nav.helse.inntektsmeldingsvarsel.STSClientConfig.configureRequestSamlToken
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
@@ -110,6 +108,36 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingService(get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
+
+
+    single {
+        val altinnMeldingWsClient = Clients.iCorrespondenceExternalBasic(
+                config.getString("altinn_melding.pep_gw_endpoint")
+        )
+
+        val client = ClientProxy.getClient(altinnMeldingWsClient)
+        client.inInterceptors.add(LoggingInInterceptor())
+        client.outInterceptors.add(LoggingOutInterceptor())
+
+        val sts = stsClient(
+                config.getString("sts_url"),
+                config.getString("service_user.username") to config.getString("service_user.password")
+        )
+
+        sts.configureFor(altinnMeldingWsClient)
+
+        altinnMeldingWsClient as ICorrespondenceAgencyExternalBasic
+    }
+
+    single {
+        AltinnVarselSender(
+                AltinnVarselMapper(),
+                get(),
+                config.getString("altinn_melding.username"),
+                config.getString("altinn_melding.password")
+        ) as AltinnVarselSender
+    }
+
 
     LocalOIDCWireMock.start()
 }
