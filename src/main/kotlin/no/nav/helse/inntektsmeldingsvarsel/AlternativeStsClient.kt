@@ -5,6 +5,7 @@ import org.apache.cxf.Bus
 import org.apache.cxf.binding.soap.Soap12
 import org.apache.cxf.binding.soap.SoapMessage
 import org.apache.cxf.endpoint.Client
+import org.apache.cxf.ext.logging.LoggingFeature
 import org.apache.cxf.frontend.ClientProxy
 import org.apache.cxf.ws.addressing.WSAddressingFeature
 import org.apache.cxf.ws.policy.PolicyBuilder
@@ -68,7 +69,7 @@ object STSClientConfig {
         stsClient.isEnableAppliesTo = false
         stsClient.isAllowRenewing = false
         stsClient.location = location
-        stsClient.features = listOf(WSAddressingFeature())
+        stsClient.features = listOf(WSAddressingFeature(), LoggingFeature())
 
         val properties = HashMap<String, Any>()
         properties[org.apache.cxf.rt.security.SecurityConstants.USERNAME] = username
