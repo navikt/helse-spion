@@ -117,34 +117,6 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { VarslingService(get(), get()) }
     single { VarslingProcessor(get(), get()) }
 
-    single {
-        val altinnMeldingWsClient = Clients.iCorrespondenceExternalBasic(
-                config.getString("altinn_melding.pep_gw_endpoint")
-        )
-
-        val client = ClientProxy.getClient(altinnMeldingWsClient)
-        client.inInterceptors.add(LoggingInInterceptor())
-        client.outInterceptors.add(LoggingOutInterceptor())
-
-        val sts = stsClient(
-                config.getString("sts_url"),
-                config.getString("service_user.username") to config.getString("service_user.password")
-        )
-
-        sts.configureFor(altinnMeldingWsClient)
-
-        altinnMeldingWsClient as ICorrespondenceAgencyExternalBasic
-    }
-
-    single {
-        AltinnVarselSender(
-                AltinnVarselMapper(),
-                get(),
-                config.getString("altinn_melding.username"),
-                config.getString("altinn_melding.password")
-        ) as AltinnVarselSender
-    }
-
     LocalOIDCWireMock.start()
 }
 
@@ -179,6 +151,35 @@ fun preprodConfig(config: ApplicationConfig) = module {
         ), config.getString("kafka.topicname")) as KafkaMessageProvider
     }
 
+    single {
+        val altinnMeldingWsClient = Clients.iCorrespondenceExternalBasic(
+                config.getString("altinn_melding.pep_gw_endpoint")
+        )
+
+        val client = ClientProxy.getClient(altinnMeldingWsClient)
+        client.inInterceptors.add(LoggingInInterceptor())
+        client.outInterceptors.add(LoggingOutInterceptor())
+
+        val sts = stsClient(
+                config.getString("sts_url"),
+                config.getString("service_user.username") to config.getString("service_user.password")
+        )
+
+        sts.configureFor(altinnMeldingWsClient)
+
+        altinnMeldingWsClient as ICorrespondenceAgencyExternalBasic
+    }
+
+    single {
+        AltinnVarselSender(
+                AltinnVarselMapper(),
+                get(),
+                config.getString("altinn_melding.username"),
+                config.getString("altinn_melding.password")
+        ) as AltinnVarselSender
+    }
+
+
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingService(get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
@@ -186,7 +187,9 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single {
         PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository
     }
-    single { VarslingProcessor(get(), get(), get(), get()) }
+
+    //single { VarslingProcessor(get(), get()) }
+
     single { SpionService(get(), get()) as SpionService }
 }
 
