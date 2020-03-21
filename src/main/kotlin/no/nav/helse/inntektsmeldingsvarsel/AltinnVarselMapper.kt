@@ -49,6 +49,10 @@ class AltinnVarselMapper {
                         Dersom dere har sendt inn disse i løpet av de siste 24 timene kan dere se bort fra dette varselet.
                         </p>
                         <p></p>
+                        <p>
+                            <a href="www.nav.no">Skjema for inntektsmelding RF-xxxxx finner du her</a><br>
+                            Benytter dere eget HR-system for å sende inntektsmeldinger kan dere fortsatt benytte dette.
+                        </p>
                         ${altinnVarsel.liste.map { 
                         """
                             <p>
