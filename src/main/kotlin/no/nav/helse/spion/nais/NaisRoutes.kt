@@ -71,7 +71,7 @@ fun Application.nais() {
             altinnMeldingSender.send(
                     Varsling(
                             LocalDate.now(),
-                            "811308412", //  -> Davik og Bøverdalen
+                            "810007842", //  -> Anstendig Piggsvin Barnehage
                             listOf(
                                     PersonVarsling(
                                             "Test Testesen",
