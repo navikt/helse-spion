@@ -14,8 +14,10 @@ import io.ktor.util.pipeline.PipelineContext
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 import io.prometheus.client.hotspot.DefaultExports
-import no.nav.helse.inntektsmeldingsvarsel.AltinnVarsel
 import no.nav.helse.inntektsmeldingsvarsel.AltinnVarselSender
+import no.nav.helse.spion.domene.Periode
+import no.nav.helse.spion.domene.varsling.PersonVarsling
+import no.nav.helse.spion.domene.varsling.Varsling
 import no.nav.helse.spion.selfcheck.HealthCheck
 import no.nav.helse.spion.selfcheck.HealthCheckState
 import no.nav.helse.spion.selfcheck.HealthCheckType
@@ -66,18 +68,30 @@ fun Application.nais() {
 
             val altinnMeldingSender = this@routing.get<AltinnVarselSender>()
 
-            altinnMeldingSender.sendManglendeInnsendingAvInntektsMeldingTilArbeidsgiver(
-                    AltinnVarsel(
-                            null,
-                            UUID.randomUUID().toString(),
-                            null,
+            altinnMeldingSender.send(
+                    Varsling(
+                            LocalDate.now(),
                             "811308412", //  -> Davik og Bøverdalen
-                            null,
-                            "01010112345",
-                            "Test Testesen",
-                            LocalDate.now().minusDays(5),
-                            LocalDate.now().plusDays(10)
-                    )
+                            listOf(
+                                    PersonVarsling(
+                                            "Test Testesen",
+                                            "01010112345",
+                                            Periode(
+                                                    LocalDate.now().minusDays(5),
+                                                    LocalDate.now().plusDays(10)
+                                            )
+                                    ),
+                                    PersonVarsling(
+                                            "Fardin Farsan",
+                                            "01014812345",
+                                            Periode(
+                                                    LocalDate.now().minusDays(1),
+                                                    LocalDate.now().plusDays(60)
+                                            )
+                                    )
+                            ),
+                            UUID.randomUUID().toString()
+                            )
             )
 
             call.respond(HttpStatusCode.OK, "Melding sendt")

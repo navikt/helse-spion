@@ -7,42 +7,12 @@ import no.nav.helse.inntektsmeldingsvarsel.NotificationAltinnGenerator.lenkeAlti
 import no.nav.helse.inntektsmeldingsvarsel.NotificationAltinnGenerator.opprettEpostNotification
 import no.nav.helse.inntektsmeldingsvarsel.NotificationAltinnGenerator.opprettSMSNotification
 import no.nav.helse.inntektsmeldingsvarsel.NotificationAltinnGenerator.smsLenkeAltinnPortal
+import no.nav.helse.spion.domene.varsling.Varsling
 import java.time.format.DateTimeFormatter
 import javax.xml.bind.JAXBElement
 import javax.xml.namespace.QName
 
 class AltinnVarselMapper {
-    fun mapAltinnVarselTilInsertCorrespondence(altinnVarsel: AltinnVarsel): InsertCorrespondenceV2 {
-        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-        val namespace = "http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10"
-        val tittel = "Manglende inntektsmelding i forbindelse med sykepenger - " + altinnVarsel.navnSykmeldt + " (" + altinnVarsel.fnrSykmeldt + ")"
-        val innhold = "" +
-                "<html>\n" +
-                "   <head>\n" +
-                "       <meta charset=\"UTF-8\">\n" +
-                "   </head>\n" +
-                "   <body>\n" +
-                "       <div class=\"melding\">\n" +
-                "           <h2>DETTE ER EN TEST</h2>\n" +
-                "           <p>" + altinnVarsel.navnSykmeldt + " (" + altinnVarsel.fnrSykmeldt + ") har fått en søknad om sykepenger til utfylling, men har foreløpig ikke sendt den inn.</p>\n" +
-                "           <p>Perioden søknaden gjelder for er " + formatter.format(altinnVarsel.soknadFom) + "-" + formatter.format(altinnVarsel.soknadTom) + "</p>\n" +
-                "           <h4>Om denne meldingen:</h4>\n" +
-                "           <p>Denne meldingen er automatisk generert og skal hjelpe arbeidsgivere med å få oversikt over sykepengesøknader som mangler. NAV påtar seg ikke ansvar for eventuell manglende påminnelse. Vi garanterer heller ikke for at foreldelsesfristen ikke er passert, eller om det er andre grunner til at retten til sykepenger ikke er oppfylt. Dersom arbeidstakeren har åpnet en søknad og avbrutt den, vil det ikke bli sendt melding til dere.</p>\n" +
-                "       </div>\n" +
-                "   </body>\n" +
-                "</html>"
-        val meldingsInnhold = ExternalContentV2()
-                .withLanguageCode("1044")
-                .withMessageTitle(tittel)
-                .withMessageBody(innhold)
-        return InsertCorrespondenceV2()
-                .withAllowForwarding(false)
-                .withReportee(altinnVarsel.orgnummer)
-                .withMessageSender("NAV (Arbeids- og velferdsetaten)")
-                .withServiceCode(MANGLER_INNTEKTSMELDING_TJENESTEKODE)
-                .withServiceEdition(MANGLER_INNTEKTSMELDING_TJENESTEVERSJON) //.withNotifications(opprettManglendeInnsendingNotifications(namespace))
-                .withContent(meldingsInnhold)
-    }
 
     private fun opprettManglendeInnsendingNotifications(namespace: String): JAXBElement<NotificationBEList> {
         val epost = opprettEpostNotification("TEST EPOST",
@@ -58,6 +28,55 @@ class AltinnVarselMapper {
 
         return JAXBElement(QName(namespace, "Notifications"), NotificationBEList::class.java, NotificationBEList()
                 .withNotification(epost, sms))
+    }
+
+    fun mapVarslingTilInsertCorrespondence(altinnVarsel: Varsling): InsertCorrespondenceV2 {
+        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+        val namespace = "http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10"
+        val tittel = "Varsel om manglende inntektsmelding ifm. søknad om sykepenger"
+        
+        val innhold = """
+            <html>
+               <head>
+                   <meta charset="UTF-8">
+               </head>
+               <body>
+                   <div class="melding">
+                       <h2>Varsel om manglende inntektsmelding ifm. søknad om sykepenger</h2>
+                       <p>
+                        NAV mangler inntektsmelding for følgende ansatte ved virksomheten (${altinnVarsel.virksomhetsNr}). 
+                        For at vi skal kunne utbetale sykepengene det søkes om må disse sendes oss så snart som mulig. 
+                        Dersom dere har sendt inn disse i løpet av de siste 24 timene kan dere se bort fra dette varselet.
+                        </p>
+                        <p></p>
+                        ${altinnVarsel.liste.map { 
+                        """
+                            <p>
+                            <strong>${it.navn}</strong><br>
+                            Personnummer: ${it.personnumer}<br>
+                            Periode: ${it.periode.fom} - ${it.periode.tom}
+                            </p>
+                        """.trimIndent()
+                        }.joinToString(separator = "\n")}
+                        
+                       <h4>Om denne meldingen:</h4>
+                       <p>Denne meldingen er automatisk generert og skal hjelpe arbeidsgivere med å få oversikt over inntektsmeldinger som mangler. NAV påtar seg ikke ansvar for eventuell manglende påminnelse. Vi garanterer heller ikke for at foreldelsesfristen ikke er passert, eller om det er andre grunner til at retten til sykepenger ikke er oppfylt. Dersom arbeidstakeren har åpnet en søknad og avbrutt den, vil det ikke bli sendt melding til dere.</p>
+                   </div>
+               </body>
+            </html>
+        """.trimIndent()
+
+        val meldingsInnhold = ExternalContentV2()
+                .withLanguageCode("1044")
+                .withMessageTitle(tittel)
+                .withMessageBody(innhold)
+        return InsertCorrespondenceV2()
+                .withAllowForwarding(false)
+                .withReportee(altinnVarsel.virksomhetsNr)
+                .withMessageSender("NAV (Arbeids- og velferdsetaten)")
+                .withServiceCode(MANGLER_INNTEKTSMELDING_TJENESTEKODE)
+                .withServiceEdition(MANGLER_INNTEKTSMELDING_TJENESTEVERSJON) //.withNotifications(opprettManglendeInnsendingNotifications(namespace))
+                .withContent(meldingsInnhold)
     }
 
     companion object {

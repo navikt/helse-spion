@@ -156,33 +156,6 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 config.getString("database.vault.mountpath")) as DataSource
     }
 
-    single {
-        val altinnMeldingWsClient = Clients.iCorrespondenceExternalBasic(
-                config.getString("altinn_melding.pep_gw_endpoint")
-        )
-
-        val client = ClientProxy.getClient(altinnMeldingWsClient)
-        client.inInterceptors.add(LoggingInInterceptor())
-        client.outInterceptors.add(LoggingOutInterceptor())
-
-        val sts = stsClient(
-                config.getString("sts_url"),
-                config.getString("service_user.username") to config.getString("service_user.password")
-        )
-
-        sts.configureFor(altinnMeldingWsClient)
-
-        altinnMeldingWsClient as ICorrespondenceAgencyExternalBasic
-    }
-    single {
-        AltinnVarselSender(
-                AltinnVarselMapper(),
-                get(),
-                config.getString("altinn_melding.username"),
-                config.getString("altinn_melding.password")
-        ) as AltinnVarselSender
-    }
-
     /*single {
         AltinnClient(
                 config.getString("altinn.service_owner_api_url"),
