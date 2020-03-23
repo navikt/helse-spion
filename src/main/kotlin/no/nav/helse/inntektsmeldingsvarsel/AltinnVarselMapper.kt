@@ -14,12 +14,12 @@ class AltinnVarselMapper(val altinnTjenesteKode: String) {
 
     private fun opprettManglendeInnsendingNotifications(): NotificationBEList {
         val epost = opprettEpostNotification("Varsel om manglende inntektsmelding",
-                "<p>NAV mangler inntektsmelding for en, eller flere av deres ansatte for å kunne utbetale stønaderdet nylig er søkt om.</p>" +
+                "<p>NAV mangler inntektsmelding for en, eller flere av deres ansatte for å kunne utbetale stønader det nylig er søkt om.</p>" +
                         "<p>Logg inn på <a href=\"" + lenkeAltinnPortal() + "\">Altinn</a> for å se hvem det gjelder og hvilken periode søknaden gjelder for.</p>" +
                         "<p>Vennlig hilsen NAV</p>")
 
         val sms = opprettSMSNotification(
-                "NAV mangler inntektsmelding for en, eller flere av deres ansatte for å kunne utbetale stønaderdet nylig er søkt om. ",
+                "NAV mangler inntektsmelding for en, eller flere av deres ansatte for å kunne utbetale stønader det nylig er søkt om. ",
                 "Gå til meldingsboksen i " + smsLenkeAltinnPortal() + " for å se hvem det gjelder og hvilken periode søknaden gjelder for. \n\nVennlig hilsen NAV"
         )
 
