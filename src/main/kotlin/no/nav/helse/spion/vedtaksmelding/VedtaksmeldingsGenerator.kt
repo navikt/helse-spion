@@ -48,7 +48,7 @@ private class ArbeidsgiverGenerator(fixedList: MutableList<Arbeidsgiver>? = null
     }
 }
 
-private class PersonGenerator(private val maxUniquePersons: Int = 1000) {
+class PersonGenerator(private val maxUniquePersons: Int = 1000) {
     private val faker = Faker()
     private val persone = mutableListOf<Person>()
     fun getRandomPerson(): Person {

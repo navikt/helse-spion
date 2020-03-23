@@ -14,7 +14,6 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
-import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasic
 import no.nav.helse.inntektsmeldingsvarsel.*
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
@@ -167,7 +166,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
 
         sts.configureFor(altinnMeldingWsClient)
 
-        altinnMeldingWsClient as ICorrespondenceAgencyExternalBasic
+        altinnMeldingWsClient
     }
 
     single {
@@ -176,21 +175,20 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 get(),
                 config.getString("altinn_melding.username"),
                 config.getString("altinn_melding.password")
-        ) as AltinnVarselSender
+        ) as VarslingSender
     }
-
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingService(get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
-    single {
-        PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository
-    }
+    single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
 
-    //single { VarslingProcessor(get(), get()) }
+    single { PostgresVarslingRepository(get()) as VarslingRepository }
+    single { VarslingService(get(), get(), get()) }
+    single { SendVarslingJob(get(), get()) }
 
-    single { SpionService(get(), get()) as SpionService }
+    single { SpionService(get(), get()) }
 }
 
 @KtorExperimentalAPI
@@ -213,7 +211,11 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
-    // single { SendVarslingJob(get(), get(), get(), get()) }
+
+
+
+
+
 }
 
 val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {
