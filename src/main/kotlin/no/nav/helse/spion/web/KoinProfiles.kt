@@ -103,7 +103,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
 
-    single { generateKafkaMock(get()) as KafkaMessageProvider }
+    single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
 
@@ -114,8 +114,8 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { DummyVarslingSender() as VarslingSender}
     single { VarslingMapper(get()) }
     single { PostgresVarslingRepository(get()) as VarslingRepository}
-    single { VarslingService(get(), get()) }
-    single { VarslingProcessor(get(), get()) }
+    single { VarslingService(get(), get(), get()) }
+    single { SendVarslingJob(get(), get()) }
 
     LocalOIDCWireMock.start()
 }
@@ -148,7 +148,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 SaslConfigs.SASL_MECHANISM to "PLAIN",
                 SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
                         "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
-        ), config.getString("kafka.topicname")) as KafkaMessageProvider
+        ), config.getString("kafka.topicname")) as VedtaksmeldingProvider
     }
 
     single {
@@ -205,7 +205,7 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    single { generateEmptyMock() as KafkaMessageProvider }
+    single { generateEmptyMock() as VedtaksmeldingProvider }
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
@@ -213,11 +213,11 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
-    single { VarslingProcessor(get(), get(), get(), get()) }
+    single { SendVarslingJob(get(), get(), get(), get()) }
 }
 
-val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
-    return object : KafkaMessageProvider { // dum mock
+val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {
+    return object : VedtaksmeldingProvider { // dum mock
         val arbeidsgivere = mutableListOf(
                 Arbeidsgiver("Eltrode AS", "917346380", "917404437"),
                 Arbeidsgiver("JØA OG SEL", "911366940", "910098898")
@@ -237,8 +237,8 @@ val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
     }
 }
 
-val generateEmptyMock = fun(): KafkaMessageProvider {
-    return object : KafkaMessageProvider { // dum mock
+val generateEmptyMock = fun(): VedtaksmeldingProvider {
+    return object : VedtaksmeldingProvider { // dum mock
         override fun getMessagesToProcess(): List <MessageWithOffset> {
             return emptyList()
         }

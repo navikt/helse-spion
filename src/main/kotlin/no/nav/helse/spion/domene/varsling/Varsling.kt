@@ -10,7 +10,7 @@ data class PersonVarsling(val navn: String, val personnumer: String, val periode
 data class Varsling(
         val dato: LocalDate,
         val virksomhetsNr: String,
-        val liste: List<PersonVarsling>,
+        val liste: MutableSet<PersonVarsling>,
         val uuid: String = UUID.randomUUID().toString(), // Uuid sendes til Altinn som referanse
         val opprettet: LocalDateTime = LocalDateTime.now(),
         val status: Int = 0

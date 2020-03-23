@@ -8,7 +8,7 @@ import java.time.Duration
 import java.util.*
 
 class VedtaksmeldingProcessor(
-        private val kafkaVedtaksProvider: KafkaMessageProvider,
+        private val kafkaVedtaksProvider: VedtaksmeldingProvider,
         private val service: VedtaksmeldingService,
         private val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
         coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),

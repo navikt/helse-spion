@@ -17,7 +17,7 @@ import java.io.IOException
 
 open class VedtaksmeldingProcessorTests {
 
-    val kafkaMock = mockk<KafkaMessageProvider>(relaxed = true)
+    val kafkaMock = mockk<VedtaksmeldingProvider>(relaxed = true)
     val serviceMock = mockk<VedtaksmeldingService>(relaxed = true)
     val failedMessageDaoMock = mockk<FailedVedtaksmeldingRepository>(relaxed = true)
     val mapper = ObjectMapper()

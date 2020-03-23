@@ -11,6 +11,9 @@ class MockVarslingRepository(): VarslingRepository {
     private val varsling3 = VarslingDto(data="[]", uuid = UUID.randomUUID().toString(), status = 0, opprettet = LocalDateTime.now(), dato = LocalDate.of(2020,1,1), virksomhetsNr = "123456789" )
 
     val list = listOf(varsling1, varsling2, varsling3).toMutableList()
+    override fun findByVirksomhetsnummerAndDato(virksomhetsnummer: String, dato: LocalDate): VarslingDto {
+        return varsling1
+    }
 
     override fun findByStatus(status: Int, max: Int): List<VarslingDto> {
         return list

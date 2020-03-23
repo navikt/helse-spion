@@ -72,7 +72,7 @@ fun Application.nais() {
                     Varsling(
                             LocalDate.now(),
                             "810007842", //  -> Anstendig Piggsvin Barnehage
-                            listOf(
+                            mutableSetOf(
                                     PersonVarsling(
                                             "Test Testesen",
                                             "01010112345",

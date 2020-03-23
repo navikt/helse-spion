@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import no.nav.helse.spion.vedtaksmelding.RecurringJob
 import java.time.Duration
 
-class VarslingProcessor(
+class SendVarslingJob(
         private val service: VarslingService,
         private val sender: VarslingSender,
         coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),

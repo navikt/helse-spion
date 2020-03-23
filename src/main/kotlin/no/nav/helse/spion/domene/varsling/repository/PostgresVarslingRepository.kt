@@ -3,6 +3,7 @@ package no.nav.helse.spion.domene.varsling.repository
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -15,6 +16,7 @@ class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepositor
     private val updateStatusStatement = "UPDATE $tableName SET status = ?, behandlet = ? WHERE uuid = ?"
     private val deleteStatement = "DELETE FROM $tableName WHERE uuid = ?"
     private val nextStatement = "SELECT * FROM $tableName WHERE status=? ORDER BY opprettet ASC LIMIT ?"
+    private val getByVirksomhetsnummerAndDate = "SELECT * FROM $tableName WHERE virksomhetsNr=? AND dato=?"
     private val countStatement = "SELECT count(*) FROM $tableName WHERE status = ?"
 
     fun mapToDto(res: ResultSet): VarslingDto {
@@ -40,6 +42,20 @@ class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepositor
                 resultList.add(mapToDto(res))
             }
             return resultList
+        }
+    }
+
+    override fun findByVirksomhetsnummerAndDato(virksomhetsnummer: String, dato: LocalDate): VarslingDto? {
+        ds.connection.use {
+            val resultList = ArrayList<VarslingDto>()
+            val res = it.prepareStatement(getByVirksomhetsnummerAndDate).apply {
+                setString(1, virksomhetsnummer)
+                setDate(2, Date.valueOf(dato))
+            }.executeQuery()
+            while (res.next()) {
+                resultList.add(mapToDto(res))
+            }
+            return resultList.firstOrNull()
         }
     }
 
