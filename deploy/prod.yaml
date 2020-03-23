@@ -34,10 +34,12 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: kv/preprod/fss/helse-spion/default
+      - kvPath: /kv/prod/fss/helse-spion/default
         mountPath: /var/run/secrets/nais.io/vault
       - mountPath: /var/run/secrets/nais.io/service_user
-        kvPath: /serviceuser/data/dev/srvhelsespion
+        kvPath: /serviceuser/data/prod/srvhelsespion
+      - mountPath: /var/run/secrets/nais.io/apigw/altinn
+        kvPath: /apikey/apigw/prod/eksternapp.altinn.serviceowner/helse-spion
   webproxy: true
   env:
   - name: KOIN_PROFILE
@@ -56,3 +58,7 @@ spec:
     value: 45104d6a-f5bc-4e8c-b352-4bbfc9381f25
   - name: OIDC_ISSUER_NAME
     value: aadb2c
+  - name: PARTNER_GATEWAY_ALTINN_ENDPOINT
+    value: https://pep-gw.oera.no:9443/ekstern/altinn/BehandleAltinnMelding/v1
+  - name: SECURITYTOKENSERVICE_URL
+    value: https://sts.adeo.no/SecurityTokenServiceProvider/

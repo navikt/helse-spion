@@ -14,19 +14,27 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
+import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasic
+import no.nav.helse.inntektsmeldingsvarsel.*
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.db.getDataSource
 import no.nav.helse.spion.domene.Arbeidsgiver
+import no.nav.helse.spion.domene.varsling.repository.PostgresVarslingRepository
+import no.nav.helse.spion.domene.varsling.repository.VarslingRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
+import no.nav.helse.spion.varsling.*
 import no.nav.helse.spion.vedtaksmelding.*
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
 import no.nav.helse.spion.vedtaksmelding.failed.PostgresFailedVedtaksmeldingRepository
+import org.apache.cxf.ext.logging.LoggingInInterceptor
+import org.apache.cxf.ext.logging.LoggingOutInterceptor
+import org.apache.cxf.frontend.ClientProxy
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
 import org.koin.core.Koin
@@ -95,13 +103,19 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
 
-    single { generateKafkaMock(get()) as KafkaMessageProvider }
+    single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
 
     single { VedtaksmeldingService(get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
+
+    single { DummyVarslingSender() as VarslingSender}
+    single { VarslingMapper(get()) }
+    single { PostgresVarslingRepository(get()) as VarslingRepository}
+    single { VarslingService(get(), get(), get()) }
+    single { SendVarslingJob(get(), get()) }
 
     LocalOIDCWireMock.start()
 }
@@ -134,8 +148,37 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 SaslConfigs.SASL_MECHANISM to "PLAIN",
                 SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
                         "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
-        ), config.getString("kafka.topicname")) as KafkaMessageProvider
+        ), config.getString("kafka.topicname")) as VedtaksmeldingProvider
     }
+
+    single {
+        val altinnMeldingWsClient = Clients.iCorrespondenceExternalBasic(
+                config.getString("altinn_melding.pep_gw_endpoint")
+        )
+
+        val client = ClientProxy.getClient(altinnMeldingWsClient)
+        client.inInterceptors.add(LoggingInInterceptor())
+        client.outInterceptors.add(LoggingOutInterceptor())
+
+        val sts = stsClient(
+                config.getString("sts_url"),
+                config.getString("service_user.username") to config.getString("service_user.password")
+        )
+
+        sts.configureFor(altinnMeldingWsClient)
+
+        altinnMeldingWsClient as ICorrespondenceAgencyExternalBasic
+    }
+
+    single {
+        AltinnVarselSender(
+                AltinnVarselMapper(),
+                get(),
+                config.getString("altinn_melding.username"),
+                config.getString("altinn_melding.password")
+        ) as AltinnVarselSender
+    }
+
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingService(get(), get()) }
@@ -144,6 +187,9 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single {
         PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository
     }
+
+    //single { VarslingProcessor(get(), get()) }
+
     single { SpionService(get(), get()) as SpionService }
 }
 
@@ -159,7 +205,7 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    single { generateKafkaMock(get()) as KafkaMessageProvider }
+    single { generateEmptyMock() as VedtaksmeldingProvider }
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
@@ -167,10 +213,11 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { SendVarslingJob(get(), get(), get(), get()) }
 }
 
-val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
-    return object : KafkaMessageProvider { // dum mock
+val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {
+    return object : VedtaksmeldingProvider { // dum mock
         val arbeidsgivere = mutableListOf(
                 Arbeidsgiver("Eltrode AS", "917346380", "917404437"),
                 Arbeidsgiver("JØA OG SEL", "911366940", "910098898")
@@ -186,6 +233,16 @@ val generateKafkaMock = fun(om: ObjectMapper): KafkaMessageProvider {
 
         override fun confirmProcessingDone() {
             println("KafkaMock: Comitta til kafka")
+        }
+    }
+}
+
+val generateEmptyMock = fun(): VedtaksmeldingProvider {
+    return object : VedtaksmeldingProvider { // dum mock
+        override fun getMessagesToProcess(): List <MessageWithOffset> {
+            return emptyList()
+        }
+        override fun confirmProcessingDone() {
         }
     }
 }
