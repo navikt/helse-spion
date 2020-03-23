@@ -185,7 +185,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
 
     single { PostgresVarslingRepository(get()) as VarslingRepository }
-    single { VarslingService(get(), VarslingMapper(), get()) }
+    single { VarslingService(get(), VarslingMapper(get()), get()) }
     single { SendVarslingJob(get(), get()) }
 
     single { SpionService(get(), get()) }
