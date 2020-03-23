@@ -23,6 +23,7 @@ import no.nav.helse.spion.selfcheck.HealthCheckState
 import no.nav.helse.spion.selfcheck.HealthCheckType
 import no.nav.helse.spion.selfcheck.runHealthChecks
 import no.nav.helse.spion.web.getAllOfType
+import org.apache.commons.lang.exception.ExceptionUtils
 import org.koin.ktor.ext.get
 import org.koin.ktor.ext.getKoin
 import java.time.LocalDate
@@ -66,35 +67,37 @@ fun Application.nais() {
                 return@get
             }
 
-            val altinnMeldingSender = this@routing.get<AltinnVarselSender>()
-
-            altinnMeldingSender.send(
-                    Varsling(
-                            LocalDate.now(),
-                            "810007842", //  -> Anstendig Piggsvin Barnehage
-                            mutableSetOf(
-                                    PersonVarsling(
-                                            "Test Testesen",
-                                            "01010112345",
-                                            Periode(
-                                                    LocalDate.now().minusDays(5),
-                                                    LocalDate.now().plusDays(10)
-                                            )
-                                    ),
-                                    PersonVarsling(
-                                            "Fardin Farsan",
-                                            "01014812345",
-                                            Periode(
-                                                    LocalDate.now().minusDays(1),
-                                                    LocalDate.now().plusDays(60)
-                                            )
-                                    )
-                            ),
-                            UUID.randomUUID().toString()
-                            )
-            )
-
-            call.respond(HttpStatusCode.OK, "Melding sendt")
+            try {
+                val altinnMeldingSender = this@routing.get<AltinnVarselSender>()
+                altinnMeldingSender.send(
+                        Varsling(
+                                LocalDate.now(),
+                                "810007842", //  -> Anstendig Piggsvin Barnehage
+                                mutableSetOf(
+                                        PersonVarsling(
+                                                "Test Testesen",
+                                                "01010112345",
+                                                Periode(
+                                                        LocalDate.now().minusDays(5),
+                                                        LocalDate.now().plusDays(10)
+                                                )
+                                        ),
+                                        PersonVarsling(
+                                                "Fardin Farsan",
+                                                "01014812345",
+                                                Periode(
+                                                        LocalDate.now().minusDays(1),
+                                                        LocalDate.now().plusDays(60)
+                                                )
+                                        )
+                                ),
+                                UUID.randomUUID().toString()
+                                )
+                )
+                call.respond(HttpStatusCode.OK, "Melding sendt")
+            } catch (t: Throwable) {
+                call.respond(HttpStatusCode.InternalServerError, t.message + "\n\n" + ExceptionUtils.getStackTrace(t))
+            }
         }
     }
 }
