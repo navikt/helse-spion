@@ -29,8 +29,8 @@ class ValidationProblem(
 ) : Problem(
         URI.create("urn:spion:validation-error"),
         "Valideringen av input feilet",
-        400,
-        "Se 'violations' for detaljer"
+        422,
+        "Ett eller flere felter har feil."
 )
 
 class ValidationProblemDetail(

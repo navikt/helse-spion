@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import org.slf4j.LoggerFactory
-import java.lang.Exception
 import java.sql.Connection
 import java.sql.SQLException
 import javax.sql.DataSource
@@ -13,6 +12,13 @@ import javax.sql.DataSource
 class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMapper) : YtelsesperiodeRepository {
     private val logger = LoggerFactory.getLogger(PostgresYtelsesperiodeRepository::class.java)
     private val tableName = "ytelsesperiode"
+
+    private val getByArbeidsgiverInPeriodStatement = """SELECT data::json FROM $tableName 
+            WHERE data -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
+            AND ((? <=  data -> 'periode' ->> 'fom' AND ? >=  data -> 'periode' ->> 'fom')
+                OR
+                (? >= data -> 'periode' ->> 'tom' AND ? <= data -> 'periode' ->> 'tom'));"""
+
     private val getByPersonAndArbeidsgiverStatement = """SELECT data::json FROM $tableName 
             WHERE data -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
             AND data -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?;"""
@@ -33,7 +39,7 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
             AND data -> 'periode' ->> 'fom' = ?
             AND data -> 'periode' ->> 'tom' = ?;"""
 
-    private val getStatement = """SELECT data::json FROM $tableName 
+    private val getByPersonStatement = """SELECT data::json FROM $tableName 
          WHERE data -> 'arbeidsforhold' -> 'arbeidstaker' ->> 'identitetsnummer' = ?
             AND data -> 'arbeidsforhold' -> 'arbeidsgiver' ->> 'arbeidsgiverId' = ?
             AND data ->> 'ytelse' = ?
@@ -59,6 +65,24 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
                     setString(2, virksomhetsnummer)
                 }.executeQuery()
             }
+
+            while (res.next()) {
+                resultList.add(mapper.readValue(res.getString("data")))
+            }
+            return resultList
+        }
+    }
+
+    override fun getYtelserForVirksomhet(virksomhetsnummer: String, periode: Periode): List<Ytelsesperiode> {
+        ds.connection.use { con ->
+            val resultList = ArrayList<Ytelsesperiode>()
+            val res = con.prepareStatement(getByArbeidsgiverInPeriodStatement).apply {
+                setString(1, virksomhetsnummer)
+                setString(2, periode.fom.toString())
+                setString(3, periode.tom.toString())
+                setString(4, periode.tom.toString())
+                setString(5, periode.fom.toString())
+            }.executeQuery()
 
             while (res.next()) {
                 resultList.add(mapper.readValue(res.getString("data")))
@@ -101,7 +125,7 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
 
     private fun getExistingYtelsesperiode(con: Connection, yp: Ytelsesperiode): Ytelsesperiode? {
         val existingYpList = ArrayList<Ytelsesperiode>()
-        val res = con.prepareStatement(getStatement).apply {
+        val res = con.prepareStatement(getByPersonStatement).apply {
             setString(1, yp.arbeidsforhold.arbeidstaker.identitetsnummer)
             setString(2, yp.arbeidsforhold.arbeidsgiver.arbeidsgiverId)
             setString(3, yp.ytelse.toString())
