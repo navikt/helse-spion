@@ -3,7 +3,6 @@ package no.nav.helse.spion.web.api
 import io.ktor.application.ApplicationCall
 import io.ktor.application.application
 import io.ktor.application.call
-import io.ktor.auth.ForbiddenResponse
 import io.ktor.locations.get
 import io.ktor.request.receive
 import io.ktor.response.respond
@@ -18,6 +17,7 @@ import no.nav.helse.spion.auth.hentIdentitetsnummerFraLoginToken
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.web.dto.PersonOppslagDto
 import no.nav.helse.spion.web.dto.VirksomhetsOppslagDTO
+import javax.ws.rs.ForbiddenException
 
 @KtorExperimentalAPI
 fun Route.spion(service: SpionService, authorizer: Authorizer) {
@@ -48,7 +48,6 @@ fun Route.spion(service: SpionService, authorizer: Authorizer) {
 private suspend fun PipelineContext<Unit, ApplicationCall>.authorize(authorizer: Authorizer, arbeidsgiverId: String) {
     val identitetsnummer = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
     if (!authorizer.hasAccess(identitetsnummer, arbeidsgiverId)) {
-        call.respond(ForbiddenResponse())
-        finish()
+        throw ForbiddenException()
     }
 }

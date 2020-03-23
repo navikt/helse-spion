@@ -38,6 +38,7 @@ import java.lang.reflect.InvocationTargetException
 import java.net.URI
 import java.time.LocalDate
 import java.util.*
+import javax.ws.rs.ForbiddenException
 
 
 @KtorExperimentalAPI
@@ -104,6 +105,13 @@ fun Application.spionModule(config: ApplicationConfig = environment.config) {
                 is ConstraintViolationException -> handleValidationError(call, cause.targetException as ConstraintViolationException)
                 else -> handleUnexpectedException(call, cause)
             }
+        }
+
+        exception<ForbiddenException> { cause ->
+            call.respond(
+                    HttpStatusCode.Forbidden,
+                    Problem(URI.create("urn:spion:forbidden"), "Ingen tilgang", HttpStatusCode.Forbidden.value)
+            )
         }
 
         exception<Throwable> { cause ->
