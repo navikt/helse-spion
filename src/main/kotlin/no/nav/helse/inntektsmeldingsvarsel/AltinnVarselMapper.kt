@@ -9,31 +9,27 @@ import no.nav.helse.inntektsmeldingsvarsel.NotificationAltinnGenerator.opprettSM
 import no.nav.helse.inntektsmeldingsvarsel.NotificationAltinnGenerator.smsLenkeAltinnPortal
 import no.nav.helse.spion.domene.varsling.Varsling
 import java.time.format.DateTimeFormatter
-import javax.xml.bind.JAXBElement
-import javax.xml.namespace.QName
 
-class AltinnVarselMapper {
+class AltinnVarselMapper(val altinnTjenesteKode: String) {
 
-    private fun opprettManglendeInnsendingNotifications(namespace: String): JAXBElement<NotificationBEList> {
-        val epost = opprettEpostNotification("TEST EPOST",
-                "<p>En ansatt i \$reporteeName$ (\$reporteeNumber$) har fått en søknad om sykepenger til utfylling, men har foreløpig ikke sendt den inn.</p>" +
+    private fun opprettManglendeInnsendingNotifications(): NotificationBEList {
+        val epost = opprettEpostNotification("Varsel om manglende inntektsmelding",
+                "<p>NAV mangler inntektsmelding for en, eller flere av deres ansatte for å kunne utbetale stønaderdet nylig er søkt om.</p>" +
                         "<p>Logg inn på <a href=\"" + lenkeAltinnPortal() + "\">Altinn</a> for å se hvem det gjelder og hvilken periode søknaden gjelder for.</p>" +
-                        "<p>Mer informasjon om digital sykmelding og sykepengesøknad finner du på www.nav.no/digitalsykmelding.</p>" +
                         "<p>Vennlig hilsen NAV</p>")
 
         val sms = opprettSMSNotification(
-                "En ansatt i \$reporteeName$ (\$reporteeNumber$) har fått en søknad om sykepenger til utfylling, men har foreløpig ikke sendt den inn.",
+                "NAV mangler inntektsmelding for en, eller flere av deres ansatte for å kunne utbetale stønaderdet nylig er søkt om. ",
                 "Gå til meldingsboksen i " + smsLenkeAltinnPortal() + " for å se hvem det gjelder og hvilken periode søknaden gjelder for. \n\nVennlig hilsen NAV"
         )
 
-        return JAXBElement(QName(namespace, "Notifications"), NotificationBEList::class.java, NotificationBEList()
-                .withNotification(epost, sms))
+        return NotificationBEList()
+                .withNotification(epost, sms)
     }
 
     fun mapVarslingTilInsertCorrespondence(altinnVarsel: Varsling): InsertCorrespondenceV2 {
         val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-        val namespace = "http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10"
-        val tittel = "Varsel om manglende inntektsmelding ifm. søknad om sykepenger"
+        val tittel = "Beskjed om manglende inntektsmelding"
         
         val innhold = """
             <html>
@@ -58,7 +54,7 @@ class AltinnVarselMapper {
                             <p>
                             <strong>${it.navn}</strong><br>
                             Personnummer: ${it.personnumer}<br>
-                            Periode: ${it.periode.fom} - ${it.periode.tom}
+                            Periode: ${it.periode.fom.format(formatter)} - ${it.periode.tom.format(formatter)}
                             </p>
                         """.trimIndent()
                         }.joinToString(separator = "\n")}
@@ -74,17 +70,15 @@ class AltinnVarselMapper {
                 .withLanguageCode("1044")
                 .withMessageTitle(tittel)
                 .withMessageBody(innhold)
+                .withMessageSummary("NAV mangler inntektsmelding for en, eller flere av deres ansatte for å kunne utbetale stønaderdet nylig er søkt om.")
+
         return InsertCorrespondenceV2()
                 .withAllowForwarding(false)
                 .withReportee(altinnVarsel.virksomhetsNr)
                 .withMessageSender("NAV (Arbeids- og velferdsetaten)")
-                .withServiceCode(MANGLER_INNTEKTSMELDING_TJENESTEKODE)
-                .withServiceEdition(MANGLER_INNTEKTSMELDING_TJENESTEVERSJON) //.withNotifications(opprettManglendeInnsendingNotifications(namespace))
+                .withServiceCode(altinnTjenesteKode)
+                .withServiceEdition("1")
+                .withNotifications(opprettManglendeInnsendingNotifications())
                 .withContent(meldingsInnhold)
-    }
-
-    companion object {
-        private const val MANGLER_INNTEKTSMELDING_TJENESTEKODE = "5534" // OBS! VIKTIG! Denne må ikke endres, da kan feil personer få tilgang i Altinn!
-        private const val MANGLER_INNTEKTSMELDING_TJENESTEVERSJON = "1"
     }
 }

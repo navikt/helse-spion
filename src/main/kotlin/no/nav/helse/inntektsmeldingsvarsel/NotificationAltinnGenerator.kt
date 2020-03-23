@@ -8,7 +8,7 @@ import java.util.function.Function
 internal object NotificationAltinnGenerator {
     private const val NORSK_BOKMAL = "1044"
     private const val FRA_EPOST_ALTINN = "noreply@altinn.no"
-    private const val NOTIFICATION_NAMESPACE = "http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10"
+
     private fun urlEncode(lenke: String): String {
         return lenke.replace("=".toRegex(), "%3D")
     }
@@ -20,7 +20,7 @@ internal object NotificationAltinnGenerator {
 
     @JvmStatic
     fun lenkeAltinnPortal(): String {
-        return System.getProperty("altinn.portal.baseurl", "https://www.altinn.no") + "/ui/MessageBox?O=\$reporteeNumber$"
+        return "https://www.altinn.no/ui/MessageBox?O=\$reporteeNumber$"
     }
 
     @JvmStatic

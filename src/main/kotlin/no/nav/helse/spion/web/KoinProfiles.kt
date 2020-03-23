@@ -172,7 +172,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
 
     single {
         AltinnVarselSender(
-                AltinnVarselMapper(),
+                AltinnVarselMapper(config.getString("altinn_melding.service_id")),
                 get(),
                 config.getString("altinn_melding.username"),
                 config.getString("altinn_melding.password")
@@ -213,7 +213,7 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
-    single { SendVarslingJob(get(), get(), get(), get()) }
+    // single { SendVarslingJob(get(), get(), get(), get()) }
 }
 
 val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {
