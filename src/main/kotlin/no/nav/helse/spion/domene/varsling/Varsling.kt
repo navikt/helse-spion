@@ -15,7 +15,3 @@ data class Varsling(
         val opprettet: LocalDateTime = LocalDateTime.now(),
         val status: Int = 0
 )
-
-enum class Status {
-    Venter, OK, Feilet
-}

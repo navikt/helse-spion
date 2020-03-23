@@ -1,7 +1,6 @@
 package no.nav.helse.spion.domene.varsling.repository
 
 import java.sql.Date
-import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -15,33 +14,33 @@ class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepositor
     private val updateStatement = "UPDATE $tableName SET data = ?, status = ?, opprettet = ?, virksomhetsNr = ?, dato = ? WHERE uuid = ?"
     private val updateStatusStatement = "UPDATE $tableName SET status = ?, behandlet = ? WHERE uuid = ?"
     private val deleteStatement = "DELETE FROM $tableName WHERE uuid = ?"
-    private val nextStatement = "SELECT * FROM $tableName WHERE status=? ORDER BY opprettet ASC LIMIT ?"
+    private val nextStatement = "SELECT * FROM $tableName WHERE status=? AND dato=? ORDER BY opprettet ASC LIMIT ?"
+    private val countStatement = "SELECT count(*) FROM $tableName WHERE status = ? AND dato = ?"
     private val getByVirksomhetsnummerAndDate = "SELECT * FROM $tableName WHERE virksomhetsNr=? AND dato=?"
-    private val countStatement = "SELECT count(*) FROM $tableName WHERE status = ?"
 
-    fun mapToDto(res: ResultSet): VarslingDto {
-        return VarslingDto(
-                data = res.getString("data"),
-                uuid = res.getString("uuid"),
-                status = res.getInt("status"),
-                opprettet = res.getTimestamp("opprettet").toLocalDateTime(),
-                behandlet = res.getTimestamp("behandlet")?.toLocalDateTime(),
-                dato = res.getDate("dato").toLocalDate(),
-                virksomhetsNr = res.getString("virksomhetsNr")
-        )
-    }
-
-    override fun findByStatus(status: Int, max: Int): List<VarslingDto> {
+    override fun findByStatus(dato: LocalDate, status: Int, max: Int): List<VarslingDto> {
         ds.connection.use {
             val resultList = ArrayList<VarslingDto>()
             val res = it.prepareStatement(nextStatement).apply {
                 setInt(1, 0)
-                setInt(2, max)
+                setDate(2, Date.valueOf(dato))
+                setInt(3, max)
             }.executeQuery()
             while (res.next()) {
-                resultList.add(mapToDto(res))
+                resultList.add(mapDto(res))
             }
             return resultList
+        }
+    }
+
+    override fun countByStatus(dato: LocalDate, status: Int): Int {
+        return ds.connection.use {
+            val res = it.prepareStatement(countStatement).apply {
+                setInt(1, status)
+                setDate(2, Date.valueOf(dato))
+            }.executeQuery()
+            res.next()
+            res.getInt(1)
         }
     }
 
@@ -53,19 +52,9 @@ class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepositor
                 setDate(2, Date.valueOf(dato))
             }.executeQuery()
             while (res.next()) {
-                resultList.add(mapToDto(res))
+                resultList.add(mapDto(res))
             }
             return resultList.firstOrNull()
-        }
-    }
-
-    override fun countByStatus(status: Int): Int {
-        return ds.connection.use {
-            val res = it.prepareStatement(countStatement).apply {
-                setInt(1, status)
-            }.executeQuery()
-            res.next()
-            res.getInt(1)
         }
     }
 
@@ -82,7 +71,7 @@ class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepositor
         }
     }
 
-    override fun insert(dto: VarslingDto) {
+    override fun save(dto: VarslingDto) {
         ds.connection.use {
             it.prepareStatement(insertStatement).apply {
                 setString(1, dto.data)

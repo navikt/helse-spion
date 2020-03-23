@@ -14,16 +14,17 @@ class VarslingService(
         private val mapper: VarslingMapper,
         private val om: ObjectMapper
 ) {
-    fun finnNesteUbehandlet(max: Int): List<Varsling> {
-        return repository.findByStatus(0, max).map { mapper.mapDomain(it) }
+
+    fun finnNesteUbehandlet(dato: LocalDate, max: Int): List<Varsling> {
+        return repository.findByStatus(dato, 0, max).map { mapper.mapDomain(it) }
     }
 
     fun oppdaterStatus(varsling: Varsling, velykket: Boolean) {
-        repository.updateStatus(varsling.uuid, LocalDateTime.now(),1)
+        repository.updateStatus(varsling.uuid, LocalDateTime.now(), if (velykket) 1 else 0 )
     }
 
     fun lagre(varsling: Varsling) {
-        repository.insert(mapper.mapDto(varsling))
+        repository.save(mapper.mapDto(varsling))
     }
 
     fun slett(uuid: String) {
@@ -40,20 +41,21 @@ class VarslingService(
                     melding.first,
                     kafkaMessage.virksomhetsnummer,
                     mutableSetOf(PersonVarsling(
-                        kafkaMessage.navn,
-                        kafkaMessage.identitetsnummer,
-                        Periode(kafkaMessage.fom, kafkaMessage.tom)
+                            kafkaMessage.navn,
+                            kafkaMessage.identitetsnummer,
+                            Periode(kafkaMessage.fom, kafkaMessage.tom)
                     ))
             )
-            repository.insert(mapper.mapDto(newEntry))
+            repository.save(mapper.mapDto(newEntry))
         } else {
             val domainVarsling = mapper.mapDomain(existingAggregate)
             domainVarsling.liste.add(PersonVarsling(
-                kafkaMessage.navn,
-                kafkaMessage.identitetsnummer,
-                Periode(kafkaMessage.fom, kafkaMessage.tom)
+                    kafkaMessage.navn,
+                    kafkaMessage.identitetsnummer,
+                    Periode(kafkaMessage.fom, kafkaMessage.tom)
             ))
             repository.update(mapper.mapDto(domainVarsling))
         }
     }
+
 }
