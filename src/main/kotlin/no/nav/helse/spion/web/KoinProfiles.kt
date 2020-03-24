@@ -160,7 +160,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 SaslConfigs.SASL_MECHANISM to "PLAIN",
                 SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
                         "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
-        ), config.getString("kafka.topicname")) as VedtaksmeldingProvider
+        ), config.getString("kafka.kafka_topic")) as VedtaksmeldingProvider
     }
 
     single {
