@@ -19,7 +19,7 @@ internal class PostgresVarslingRepositoryTest : KoinComponent {
     private val varsling = VarslingDto(
             dato = LocalDate.of(2020, 3, 19 ),
             status = 0,
-            uuid = "4ded87e3-f266-41b8-8be7-d1c2d037f385",
+            uuid = "mangler",
             data = "[]",
             opprettet = LocalDateTime.of(2019, 3, 19, 22, 30, 44),
             virksomhetsNr = "123456789"
@@ -33,20 +33,29 @@ internal class PostgresVarslingRepositoryTest : KoinComponent {
 
     @Test
     fun `Kan lagre, hente og slette (CRuD) og etterlater ingen åpne tilkoblinger fra connectionpoolen`() {
-        repository.save(varsling.copy(uuid = "5ded87e3-f266-41b8-8be7-d1c2d037f385"))
-        repository.save(varsling.copy(uuid = "6ded87e3-f266-41b8-8be7-d1c2d037f385"))
-        repository.save(varsling.copy(uuid = "7ded87e3-f266-41b8-8be7-d1c2d037f385", status = 1))
-        val list1 = repository.findByStatus(LocalDate.of(2020, 3, 19 ), 0, 10)
-        assertThat(list1.size).isEqualTo(2)
-        repository.save(varsling.copy( status = 1, behandlet = LocalDateTime.of(2020, 3, 19, 22, 30, 44)))
-        val list2 = repository.findByStatus(LocalDate.of(2020, 3, 19 ), 1, 10)
-        assertThat(list2.size).isEqualTo(1)
-        val dto = list2[0]
+        // Opprett 3 stk
+        repository.save(varsling.copy(uuid = "1ded87e3-f266-41b8-8be7-d1c2d037f385"))
+        repository.save(varsling.copy(uuid = "2ded87e3-f266-41b8-8be7-d1c2d037f385"))
+        repository.save(varsling.copy(uuid = "3ded87e3-f266-41b8-8be7-d1c2d037f385", status = 1))
+        val listStatusNull = repository.findByStatus(LocalDate.of(2020, 3, 19 ), 0, 10)
+        // Finn kun to stk da en er med annen status = 0
+        assertThat(listStatusNull.size).isEqualTo(2)
+        assertThat(listStatusNull[0].uuid).isEqualTo("1ded87e3-f266-41b8-8be7-d1c2d037f385") // Skal være riktig sortert
+        assertThat(listStatusNull[1].uuid).isEqualTo("2ded87e3-f266-41b8-8be7-d1c2d037f385") //
+
+        // Lagre 1 med status = 1
+        repository.save(varsling.copy(uuid = "4ded87e3-f266-41b8-8be7-d1c2d037f385", status = 1, dato = LocalDate.of(2020, 4, 19), behandlet = LocalDateTime.of(2020,4, 20,14,0,0)))
+        val listStatusEn = repository.findByStatus(LocalDate.of(2020, 4, 19 ), 1, 10)
+        assertThat(listStatusEn.size).isEqualTo(1)
+
+        val dto = listStatusEn[0]
         assertThat(dto.status).isEqualTo(1)
-        assertThat(dto.behandlet).isEqualTo(LocalDateTime.of(2020, 3, 19, 22, 30, 44))
-        repository.remove("5ded87e3-f266-41b8-8be7-d1c2d037f385")
-        repository.remove("6ded87e3-f266-41b8-8be7-d1c2d037f385")
-        repository.remove("7ded87e3-f266-41b8-8be7-d1c2d037f385")
+        assertThat(dto.uuid).isEqualTo("4ded87e3-f266-41b8-8be7-d1c2d037f385")
+        assertThat(dto.behandlet).isEqualTo(LocalDateTime.of(2020,4, 20,14,0,0))
+        repository.remove("1ded87e3-f266-41b8-8be7-d1c2d037f385")
+        repository.remove("2ded87e3-f266-41b8-8be7-d1c2d037f385")
+        repository.remove("3ded87e3-f266-41b8-8be7-d1c2d037f385")
+        repository.remove("4ded87e3-f266-41b8-8be7-d1c2d037f385")
         val list3 = repository.findByStatus(LocalDate.of(2020, 3, 19 ), 1, 10)
         assertThat(list3.size).isEqualTo(0)
         assertThat(dataSource.hikariPoolMXBean.activeConnections).isEqualTo(0)

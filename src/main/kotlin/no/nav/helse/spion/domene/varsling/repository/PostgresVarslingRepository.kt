@@ -10,8 +10,8 @@ import javax.sql.DataSource
 class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepository {
 
     private val tableName = "varsling"
-    private val insertStatement = "INSERT INTO $tableName (data, status, opprettet, virksomhetsNr, uuid, dato) VALUES(?::json, ?, ?, ?, ?::uuid, ?)"
-    private val updateStatement = "UPDATE $tableName SET data = ?, status = ?, opprettet = ?, virksomhetsNr = ?, dato = ? WHERE uuid = ?"
+    private val insertStatement = "INSERT INTO $tableName (data, status, opprettet, virksomhetsNr, uuid, dato, behandlet) VALUES(?::json, ?, ?, ?, ?::uuid, ?, ?)"
+    private val updateStatement = "UPDATE $tableName SET data = ?, status = ?, opprettet = ?, virksomhetsNr = ?, dato = ?, behandlet = ? WHERE uuid = ?"
     private val updateStatusStatement = "UPDATE $tableName SET status = ?, behandlet = ? WHERE uuid = ?"
     private val deleteStatement = "DELETE FROM $tableName WHERE uuid = ?"
     private val nextStatement = "SELECT * FROM $tableName WHERE status=? AND dato=? ORDER BY opprettet ASC LIMIT ?"
@@ -22,7 +22,7 @@ class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepositor
         ds.connection.use {
             val resultList = ArrayList<VarslingDto>()
             val res = it.prepareStatement(nextStatement).apply {
-                setInt(1, 0)
+                setInt(1, status)
                 setDate(2, Date.valueOf(dato))
                 setInt(3, max)
             }.executeQuery()
@@ -66,7 +66,8 @@ class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepositor
                 setTimestamp(3, Timestamp.valueOf(dto.opprettet))
                 setString(4, dto.virksomhetsNr)
                 setString(5, dto.uuid)
-                setDate(6, Date.valueOf(dto.dato))
+                setTimestamp(6, if (dto.behandlet == null) { null } else { Timestamp.valueOf(dto.behandlet) })
+                setDate(7, Date.valueOf(dto.dato))
             }.executeUpdate()
         }
     }
@@ -80,6 +81,7 @@ class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepositor
                 setString(4, dto.virksomhetsNr)
                 setString(5, dto.uuid)
                 setDate(6, Date.valueOf(dto.dato))
+                setTimestamp(7, if (dto.behandlet == null) { null } else { Timestamp.valueOf(dto.behandlet) })
             }.executeUpdate()
         }
     }
