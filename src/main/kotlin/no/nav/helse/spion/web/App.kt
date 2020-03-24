@@ -7,6 +7,8 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.spion.varsling.SendVarslingJob
+import no.nav.helse.spion.varsling.mottak.VarslingsmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import org.koin.ktor.ext.getKoin
@@ -30,13 +32,17 @@ fun main() {
         val failedVedtaksmeldingProcessor = koin.get<FailedVedtaksmeldingProcessor>()
         failedVedtaksmeldingProcessor.startAsync(retryOnFail = true)
 
-        //val varslingProcessor = koin.get<VarslingProcessor>()
-        // varslingProcessor.startAsync(retryOnFail = true)
+        val manglendeInntektsmeldingMottak = koin.get<VarslingsmeldingProcessor>()
+        manglendeInntektsmeldingMottak.startAsync(retryOnFail = true)
+
+        val varslingSenderJob = koin.get<SendVarslingJob>()
+        varslingSenderJob.startAsync(retryOnFail = true)
 
         Runtime.getRuntime().addShutdownHook(Thread {
             vedtaksmeldingProcessor.stop()
             failedVedtaksmeldingProcessor.stop()
-            // varslingProcessor.stop()
+            varslingSenderJob.stop()
+            manglendeInntektsmeldingMottak.stop()
             app.stop(1000, 1000)
         })
     }

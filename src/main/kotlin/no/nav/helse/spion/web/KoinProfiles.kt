@@ -27,6 +27,9 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiod
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.varsling.*
+import no.nav.helse.spion.varsling.mottak.ManglendeInntektsmeldingMeldingProvider
+import no.nav.helse.spion.varsling.mottak.VarslingsmeldingKafkaClient
+import no.nav.helse.spion.varsling.mottak.VarslingsmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.*
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
@@ -110,10 +113,20 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
 
+
+    single {
+        VarslingsmeldingKafkaClient(mutableMapOf<String, Any>(
+                "bootstrap.servers" to "localhost:9092",
+                "max.poll.interval.ms" to "30000")
+        , config.getString("altinn_melding.kafka_topic")) as ManglendeInntektsmeldingMeldingProvider
+    }
+
     single { DummyVarslingSender() as VarslingSender}
     single { VarslingMapper(get()) }
+
     single { PostgresVarslingRepository(get()) as VarslingRepository}
     single { VarslingService(get(), get(), get()) }
+    single { VarslingsmeldingProcessor(get(), get())}
     single { SendVarslingJob(get(), get()) }
 
     LocalOIDCWireMock.start()
@@ -151,6 +164,17 @@ fun preprodConfig(config: ApplicationConfig) = module {
     }
 
     single {
+        VarslingsmeldingKafkaClient(mutableMapOf(
+                "bootstrap.servers" to config.getString("kafka.endpoint"),
+                CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SASL_SSL",
+                SaslConfigs.SASL_MECHANISM to "PLAIN",
+                SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
+                        "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
+        ), config.getString("altinn_melding.topicname")) as ManglendeInntektsmeldingMeldingProvider
+    }
+
+
+    single {
         val altinnMeldingWsClient = Clients.iCorrespondenceExternalBasic(
                 config.getString("altinn_melding.pep_gw_endpoint")
         )
@@ -186,6 +210,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
 
     single { PostgresVarslingRepository(get()) as VarslingRepository }
     single { VarslingService(get(), VarslingMapper(get()), get()) }
+
     single { SendVarslingJob(get(), get()) }
 
     single { SpionService(get(), get()) }

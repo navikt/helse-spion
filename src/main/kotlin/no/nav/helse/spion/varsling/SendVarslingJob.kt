@@ -21,7 +21,7 @@ class SendVarslingJob(
                 sender.send(it)
                 service.oppdaterStatus(it, true)
             }
-        } while (isEmpty)
+        } while (!isEmpty)
     }
 
 }

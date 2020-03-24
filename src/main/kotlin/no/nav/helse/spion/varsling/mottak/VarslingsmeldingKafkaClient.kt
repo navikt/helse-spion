@@ -52,6 +52,7 @@ class VarslingsmeldingKafkaClient(props: MutableMap<String, Any>, topicName: Str
                 )
             }.toList()
             lastThrown = null
+            log.debug("Fikk ${result.size} meldinger")
             return result
         } catch (e: Exception) {
             lastThrown = e
