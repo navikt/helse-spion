@@ -33,17 +33,21 @@ internal class PostgresVarslingRepositoryTest : KoinComponent {
 
     @Test
     fun `Kan lagre, hente og slette (CRuD) og etterlater ingen åpne tilkoblinger fra connectionpoolen`() {
-        repository.save(varsling)
-        val list1 = repository.findByStatus(LocalDate.of(2020, 3, 19 ), 10, 10)
-        assertThat(list1.size).isEqualTo(1)
+        repository.save(varsling.copy(uuid = "5ded87e3-f266-41b8-8be7-d1c2d037f385"))
+        repository.save(varsling.copy(uuid = "6ded87e3-f266-41b8-8be7-d1c2d037f385"))
+        repository.save(varsling.copy(uuid = "7ded87e3-f266-41b8-8be7-d1c2d037f385", status = 1))
+        val list1 = repository.findByStatus(LocalDate.of(2020, 3, 19 ), 0, 10)
+        assertThat(list1.size).isEqualTo(2)
         repository.save(varsling.copy( status = 1, behandlet = LocalDateTime.of(2020, 3, 19, 22, 30, 44)))
-        val list2 = repository.findByStatus(LocalDate.of(2020, 3, 19 ), 10, 10)
+        val list2 = repository.findByStatus(LocalDate.of(2020, 3, 19 ), 1, 10)
         assertThat(list2.size).isEqualTo(1)
         val dto = list2[0]
         assertThat(dto.status).isEqualTo(1)
         assertThat(dto.behandlet).isEqualTo(LocalDateTime.of(2020, 3, 19, 22, 30, 44))
-        repository.remove(varsling.uuid)
-        val list3 = repository.findByStatus(LocalDate.of(2020, 3, 19 ), 10, 10)
+        repository.remove("5ded87e3-f266-41b8-8be7-d1c2d037f385")
+        repository.remove("6ded87e3-f266-41b8-8be7-d1c2d037f385")
+        repository.remove("7ded87e3-f266-41b8-8be7-d1c2d037f385")
+        val list3 = repository.findByStatus(LocalDate.of(2020, 3, 19 ), 1, 10)
         assertThat(list3.size).isEqualTo(0)
         assertThat(dataSource.hikariPoolMXBean.activeConnections).isEqualTo(0)
     }
