@@ -28,5 +28,5 @@ fun findAndSend(dato: LocalDate, service: VarslingService, sender: VarslingSende
             sender.send(it)
             service.oppdaterStatus(it, true)
         }
-    } while (isEmpty)
+    } while (!isEmpty)
 }
