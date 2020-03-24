@@ -28,7 +28,9 @@ class VarslingsmeldingKafkaClient(props: MutableMap<String, Any>, topicName: Str
     init {
         props.apply {
             put("enable.auto.commit", false)
-            put("group.id", "helsearbeidsgiver-mottak")
+            put("group.id", "helsearbeidsgiver-varsling-mottak")
+            put("max.poll.interval.ms", Duration.ofMinutes(60).toMillis())
+            put("auto.offset.reset", "earliest")
         }
 
         consumer = KafkaConsumer<String, String>(props, StringDeserializer(), StringDeserializer())
