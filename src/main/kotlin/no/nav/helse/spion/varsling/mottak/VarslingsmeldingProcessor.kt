@@ -10,7 +10,7 @@ class VarslingsmeldingProcessor(
         private val kafkaProvider: ManglendeInntektsmeldingMeldingProvider,
         private val service: VarslingService,
         coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-        waitTimeWhenEmptyQueue: Duration = Duration.ofMinutes(30)
+        waitTimeWhenEmptyQueue: Duration = Duration.ofSeconds(30)
 ) : RecurringJob(coroutineScope, waitTimeWhenEmptyQueue) {
 
     override fun doJob() {

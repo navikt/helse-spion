@@ -81,8 +81,7 @@ fun Application.nais() {
 
                 val topicName = cfg.getString("altinn_melding.kafka_topic")
                 val producer = KafkaProducer<String, String>(mutableMapOf<String, Any>(
-                            "bootstrap.servers" to cfg.getString("kafka.endpoint"),
-                            "max.poll.interval.ms" to "30000"
+                            "bootstrap.servers" to cfg.getString("kafka.endpoint")
                 ), StringSerializer(), StringSerializer())
 
                 val om = this@routing.get<ObjectMapper>()
