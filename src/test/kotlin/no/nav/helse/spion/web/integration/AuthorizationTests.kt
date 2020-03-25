@@ -18,7 +18,7 @@ import kotlin.test.assertEquals
 class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
 
     val noAccessToThisOrg = PersonOppslagDto("20015001543", "123456785")
-    val hasAccessToThisOrg = PersonOppslagDto("20015001543", "910020104")
+    val hasAccessToThisOrg = PersonOppslagDto("20015001543", "910020102")
 
     @Test
     fun `saksOppslag when logged in but unauthorized for the given Virksomhet returns 403 Forbidden`() {

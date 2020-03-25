@@ -100,7 +100,10 @@ class OrganisasjonsnummerValidator(input: String?) {
         }
 
         fun checksum(kontrollsifferVekter: List<Int>, orgNr: String): Int {
-            val produktsum = kontrollsifferVekter.reduceIndexed { i, sum, siffer -> sum + siffer * orgNr[i].toString().toInt() }
+            var produktsum = 0
+            for ((i, m) in kontrollsifferVekter.withIndex()) {
+                produktsum += m * orgNr[i].toString().toInt()
+            }
 
             val res = 11 - (produktsum % 11)
             return if (res == 11) 0 else res
