@@ -6,6 +6,7 @@ data class ManglendeInntektsMeldingMelding(
         val organisasjonsnummer: String,
         val fom: LocalDate,
         val tom: LocalDate,
+        val opprettet: String?,
         val fødselsnummer: String,
         val navn: String = ""
 )
