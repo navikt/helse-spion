@@ -121,11 +121,12 @@ fun localDevConfig(config: ApplicationConfig) = module {
         , config.getString("altinn_melding.kafka_topic")) as ManglendeInntektsmeldingMeldingProvider
     }
 
-    single { DummyVarslingSender() as VarslingSender}
     single { VarslingMapper(get()) }
 
     single { PostgresVarslingRepository(get()) as VarslingRepository}
     single { VarslingService(get(), get(), get()) }
+
+    single { DummyVarslingSender(get()) as VarslingSender}
     single { VarslingsmeldingProcessor(get(), get())}
     single { SendVarslingJob(get(), get()) }
 
@@ -237,10 +238,27 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
 
+    // <SPAM
 
+    single {
+        VarslingsmeldingKafkaClient(mutableMapOf(
+                "bootstrap.servers" to config.getString("kafka.endpoint"),
+                CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SASL_SSL",
+                SaslConfigs.SASL_MECHANISM to "PLAIN",
+                SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
+                        "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
+        ), config.getString("altinn_melding.topicname")) as ManglendeInntektsmeldingMeldingProvider
+    }
 
+    single { VarslingMapper(get()) }
 
+    single { PostgresVarslingRepository(get()) as VarslingRepository}
+    single { VarslingService(get(), get(), get()) }
+    single { DummyVarslingSender(get()) as VarslingSender}
+    single { VarslingsmeldingProcessor(get(), get())}
+    single { SendVarslingJob(get(), get()) }
 
+    // </SPAM
 }
 
 val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {
