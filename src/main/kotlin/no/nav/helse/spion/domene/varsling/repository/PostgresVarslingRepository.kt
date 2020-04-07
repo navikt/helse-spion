@@ -12,7 +12,7 @@ class PostgresVarslingRepository(private val ds: DataSource) : VarslingRepositor
 
     private val tableName = "varsling"
     private val insertStatement = "INSERT INTO $tableName (data, status, opprettet, virksomhetsNr, uuid, dato) VALUES(?::json, ?, ?, ?, ?::uuid, ?)"
-    private val updateStatement = "UPDATE $tableName SET data = ?::json, status = ?, opprettet = ?, virksomhetsNr = ?, dato = ? WHERE uuid = ?::uuid"
+    private val updateStatement = "UPDATE $tableName SET data = ?::json, status = ?, opprettet = ?, virksomhetsNr = ?, dato = ? WHERE uuid = ?"
     private val updateStatusStatement = "UPDATE $tableName SET status = ?, behandlet = ? WHERE uuid = ?"
     private val deleteStatement = "DELETE FROM $tableName WHERE uuid = ?"
     private val nextStatement = "SELECT * FROM $tableName WHERE status=? ORDER BY opprettet ASC LIMIT ?"
