@@ -64,3 +64,5 @@ spec:
     value: https://sts.adeo.no/SecurityTokenServiceProvider/
   - name: INNTEKTSMELDING_VARSEL_TOPIC_NAME
     value: aapen-helse-spre-arbeidsgiver
+  - name: KAFKA_ENDPOINTS
+    value: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443
