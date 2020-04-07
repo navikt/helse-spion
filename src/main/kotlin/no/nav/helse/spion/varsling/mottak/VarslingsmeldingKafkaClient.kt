@@ -29,7 +29,7 @@ class VarslingsmeldingKafkaClient(props: MutableMap<String, Any>, topicName: Str
         props.apply {
             put("enable.auto.commit", false)
             put("group.id", "helsearbeidsgiver-varsling-mottak")
-            put("max.poll.interval.ms", Duration.ofMinutes(60).toMillis())
+            put("max.poll.interval.ms", Duration.ofMinutes(60).toMillis().toInt())
             put("auto.offset.reset", "earliest")
         }
 

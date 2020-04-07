@@ -27,7 +27,7 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String) : 
         props.apply {
             put("enable.auto.commit", false)
             put("group.id", "helsearbeidsgiver-mottak")
-            put("max.poll.interval.ms", Duration.ofMinutes(60).toMillis())
+            put("max.poll.interval.ms", Duration.ofMinutes(60).toMillis().toInt())
             put("auto.offset.reset", "earliest")
         }
 
