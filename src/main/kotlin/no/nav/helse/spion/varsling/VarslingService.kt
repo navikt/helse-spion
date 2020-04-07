@@ -41,19 +41,19 @@ class VarslingService(
 
     fun aggregate(melding: Pair<LocalDate, String>) {
         val kafkaMessage = om.readValue(melding.second, ManglendeInntektsMeldingMelding::class.java)
-        logger.info("Fikk en melding fra kafka på virksomhetsnummer ${kafkaMessage.virksomhetsnummer} fra ${melding.first}")
+        logger.info("Fikk en melding fra kafka på virksomhetsnummer ${kafkaMessage.organisasjonsnummer} fra ${melding.first}")
 
         val existingAggregate =
-                repository.findByVirksomhetsnummerAndDato(kafkaMessage.virksomhetsnummer, melding.first)
+                repository.findByVirksomhetsnummerAndDato(kafkaMessage.organisasjonsnummer, melding.first)
 
         if (existingAggregate == null) {
             logger.info("Det finnes ikke et aggregat på denne virksomheten og datoen, laget er nytt")
             val newEntry = Varsling(
                     melding.first,
-                    kafkaMessage.virksomhetsnummer,
+                    kafkaMessage.organisasjonsnummer,
                     mutableSetOf(PersonVarsling(
                         kafkaMessage.navn,
-                        kafkaMessage.identitetsnummer,
+                        kafkaMessage.fødselsnummer,
                         Periode(kafkaMessage.fom, kafkaMessage.tom)
                     ))
             )
@@ -62,7 +62,7 @@ class VarslingService(
             val domainVarsling = mapper.mapDomain(existingAggregate)
             domainVarsling.liste.add(PersonVarsling(
                 kafkaMessage.navn,
-                kafkaMessage.identitetsnummer,
+                kafkaMessage.fødselsnummer,
                 Periode(kafkaMessage.fom, kafkaMessage.tom)
             ))
             logger.info("Det finnes et aggregat på denne virksomheten og datoen med ${domainVarsling.liste.size} personer, legger til personen i dette")
