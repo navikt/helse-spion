@@ -171,7 +171,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
                 SaslConfigs.SASL_MECHANISM to "PLAIN",
                 SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
                         "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
-        ), config.getString("altinn_melding.topicname")) as ManglendeInntektsmeldingMeldingProvider
+        ), config.getString("altinn_melding.kafka_topic")) as ManglendeInntektsmeldingMeldingProvider
     }
 
 
@@ -247,7 +247,7 @@ fun prodConfig(config: ApplicationConfig) = module {
                 SaslConfigs.SASL_MECHANISM to "PLAIN",
                 SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
                         "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
-        ), config.getString("altinn_melding.topicname")) as ManglendeInntektsmeldingMeldingProvider
+        ), config.getString("altinn_melding.kafka_topic")) as ManglendeInntektsmeldingMeldingProvider
     }
 
     single { VarslingMapper(get()) }
