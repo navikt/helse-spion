@@ -43,7 +43,7 @@ psql -v ON_ERROR_STOP=1 --username "spion" --dbname "spion" <<-EOSQL
 
     CREATE TABLE varsling (
         uuid varchar(64) NOT NULL primary key,
-        status bit NOT NULL,
+        status bool NOT NULL,
         opprettet timestamp NOT NULL,
         behandlet timestamp,
         aggregatPeriode varchar(64) NOT NULL,
