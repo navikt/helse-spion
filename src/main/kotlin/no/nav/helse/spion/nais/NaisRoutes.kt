@@ -32,6 +32,7 @@ import org.koin.ktor.ext.get
 import org.koin.ktor.ext.getKoin
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -91,6 +92,7 @@ fun Application.nais() {
                         "810007842", //  -> Anstendig Piggsvin Barnehage
                         LocalDate.now().minusDays(1),
                         LocalDate.now().plusDays(7),
+                        LocalDateTime.now().minusWeeks(2),
                         person.identitetsnummer,
                         person.fornavn + " " + person.etternavn
                 ))

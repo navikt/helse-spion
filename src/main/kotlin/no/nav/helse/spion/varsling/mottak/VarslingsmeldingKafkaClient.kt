@@ -6,15 +6,10 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 import java.util.*
 
-typealias MessageWithDate = Pair<LocalDate, String>
-
 interface ManglendeInntektsmeldingMeldingProvider {
-    fun getMessagesToProcess(): List<MessageWithDate>
+    fun getMessagesToProcess(): List<String>
     fun confirmProcessingDone()
 }
 
@@ -45,17 +40,14 @@ class VarslingsmeldingKafkaClient(props: MutableMap<String, Any>, topicName: Str
 
     fun stop() = consumer.close()
 
-    override fun getMessagesToProcess(): List<MessageWithDate> {
+    override fun getMessagesToProcess(): List<String> {
         try {
-            val result = consumer.poll(Duration.ofSeconds(10)).map {
-                MessageWithDate(
-                        LocalDate.from(Instant.ofEpochMilli(it.timestamp()).atZone(ZoneId.systemDefault()).toLocalDate()),
-                        it.value()
-                )
-            }.toList()
+            val kafkaMessages = consumer.poll(Duration.ofSeconds(10))
+            val payloads = kafkaMessages.map {it.value() }
             lastThrown = null
-            log.debug("Fikk ${result.size} meldinger")
-            return result
+            val offsets = kafkaMessages.map { it }
+            log.debug("Fikk ${kafkaMessages.count()} meldinger med offsets ${kafkaMessages.map { it.offset() }.joinToString(", ")}")
+            return payloads
         } catch (e: Exception) {
             lastThrown = e
             throw e

@@ -1,14 +1,13 @@
 package no.nav.helse.spion.domene.varsling.repository
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class VarslingDto(
+data class VarslingDbEntity(
         val data: String,
         val uuid: String,
-        val status: Int,
+        val status: Boolean,
         val opprettet: LocalDateTime,
         val behandlet: LocalDateTime? = null,
-        val dato: LocalDate,
+        val aggregatperiode: String,
         val virksomhetsNr: String
 )

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.TestInstance
 import org.koin.core.KoinApplication
 import org.koin.core.KoinComponent
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 
 
@@ -92,6 +93,7 @@ internal class VarslingsmeldingKafkaClientClientTest : KoinComponent {
                         "222323",
                         LocalDate.now(),
                         LocalDate.now().plusDays(7),
+                        LocalDateTime.now(),
                         "0102030405718",
                         "Hans Ingenmann"
                 )))

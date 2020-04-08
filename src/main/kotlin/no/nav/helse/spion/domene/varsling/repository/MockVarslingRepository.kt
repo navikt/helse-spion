@@ -1,33 +1,24 @@
 package no.nav.helse.spion.domene.varsling.repository
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 class MockVarslingRepository(): VarslingRepository {
 
-    private val varsling1 = VarslingDto(data="[]", uuid = UUID.randomUUID().toString(), status = 0, opprettet = LocalDateTime.now(), dato = LocalDate.of(2020,1,1), virksomhetsNr = "123456789" )
-    private val varsling2 = VarslingDto(data="[]", uuid = UUID.randomUUID().toString(), status = 0, opprettet = LocalDateTime.now(), dato = LocalDate.of(2020,1,1), virksomhetsNr = "123456789" )
-    private val varsling3 = VarslingDto(data="[]", uuid = UUID.randomUUID().toString(), status = 0, opprettet = LocalDateTime.now(), dato = LocalDate.of(2020,1,1), virksomhetsNr = "123456789" )
+    private val varsling1 = VarslingDbEntity(data="[]", uuid = UUID.randomUUID().toString(), status = false, opprettet = LocalDateTime.now(), virksomhetsNr = "123456789", aggregatperiode = "D-2020-01-01")
+    private val varsling2 = VarslingDbEntity(data="[]", uuid = UUID.randomUUID().toString(), status = false, opprettet = LocalDateTime.now(), virksomhetsNr = "123456789", aggregatperiode = "D-2020-01-01")
+    private val varsling3 = VarslingDbEntity(data="[]", uuid = UUID.randomUUID().toString(), status = false, opprettet = LocalDateTime.now(), virksomhetsNr = "123456789", aggregatperiode = "D-2020-01-01")
 
     val list = listOf(varsling1, varsling2, varsling3).toMutableList()
-    override fun findByVirksomhetsnummerAndDato(virksomhetsnummer: String, dato: LocalDate): VarslingDto {
+    override fun findByVirksomhetsnummerAndPeriode(virksomhetsnummer: String, aggregatperiode: String): VarslingDbEntity {
         return varsling1
     }
 
-    override fun findByStatus(status: Int, max: Int): List<VarslingDto> {
+    override fun findByStatus(status: Boolean, max: Int, aggregatPeriode: String): List<VarslingDbEntity> {
         return list
     }
 
-    override fun countByStatus(status: Int): Int {
-        return list.size
-    }
-
-    override fun update(varsling: VarslingDto) {
-        println("Oppdater $varsling.uuid")
-    }
-
-    override fun insert(varsling: VarslingDto) {
+    override fun insert(varsling: VarslingDbEntity) {
         println("Lagret $varsling")
     }
 
@@ -35,8 +26,12 @@ class MockVarslingRepository(): VarslingRepository {
         println("Slettet $uuid")
     }
 
-    override fun updateStatus(uuid: String, dato: LocalDateTime, status: Int) {
+    override fun updateStatus(uuid: String, timeOfUpdate: LocalDateTime, status: Boolean) {
         println("updateStatus $uuid $status")
+    }
+
+    override fun updateData(uuid: String, data: String) {
+
     }
 
 }

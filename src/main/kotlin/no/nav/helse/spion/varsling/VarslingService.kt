@@ -7,7 +7,6 @@ import no.nav.helse.spion.domene.varsling.Varsling
 import no.nav.helse.spion.domene.varsling.repository.VarslingRepository
 import no.nav.helse.spion.varsling.mottak.ManglendeInntektsMeldingMelding
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 class VarslingService(
@@ -18,17 +17,13 @@ class VarslingService(
 
     val logger = LoggerFactory.getLogger(VarslingService::class.java)
 
-    fun finnNesteUbehandlet(max: Int): List<Varsling> {
-        return repository.findByStatus(0, max).map { mapper.mapDomain(it) }
+    fun finnNesteUbehandlet(max: Int, aggregatPeriode: String): List<Varsling> {
+        return repository.findByStatus(false, max, aggregatPeriode).map { mapper.mapDomain(it) }
     }
 
     fun oppdaterStatus(varsling: Varsling, velykket: Boolean) {
         logger.info("Oppdaterer status på ${varsling.uuid} til $velykket")
-        if (velykket) {
-            repository.updateStatus(varsling.uuid, LocalDateTime.now(), 1)
-        } else {
-            repository.updateStatus(varsling.uuid, LocalDateTime.now(), 0)
-        }
+        repository.updateStatus(varsling.uuid, LocalDateTime.now(), velykket)
     }
 
     fun lagre(varsling: Varsling) {
@@ -39,34 +34,40 @@ class VarslingService(
         repository.remove(uuid)
     }
 
-    fun aggregate(melding: Pair<LocalDate, String>) {
-        val kafkaMessage = om.readValue(melding.second, ManglendeInntektsMeldingMelding::class.java)
-        logger.info("Fikk en melding fra kafka på virksomhetsnummer ${kafkaMessage.organisasjonsnummer} fra ${melding.first}")
+    fun aggregate(jsonMessageString: String) {
+        val kafkaMessage = om.readValue(jsonMessageString, ManglendeInntektsMeldingMelding::class.java)
+        logger.info("Fikk en melding fra kafka på virksomhetsnummer ${kafkaMessage.organisasjonsnummer} fra ${kafkaMessage.opprettet}")
 
+        val aggregateStrategy = resolveAggregationStrategy(kafkaMessage)
+        val aggregatPeriode = aggregateStrategy.toPeriodeId(kafkaMessage.opprettet.toLocalDate())
         val existingAggregate =
-                repository.findByVirksomhetsnummerAndDato(kafkaMessage.organisasjonsnummer, melding.first)
+                repository.findByVirksomhetsnummerAndPeriode(kafkaMessage.organisasjonsnummer, aggregatPeriode)
+
+        val person = PersonVarsling(
+                kafkaMessage.navn,
+                kafkaMessage.fødselsnummer,
+                Periode(kafkaMessage.fom, kafkaMessage.tom),
+                kafkaMessage.opprettet
+        )
 
         if (existingAggregate == null) {
-            logger.info("Det finnes ikke et aggregat på denne virksomheten og datoen, laget er nytt")
+            logger.info("Det finnes ikke et aggregat på ${kafkaMessage.organisasjonsnummer} for periode $aggregatPeriode, lager en ny")
             val newEntry = Varsling(
-                    melding.first,
+                    aggregatPeriode,
                     kafkaMessage.organisasjonsnummer,
-                    mutableSetOf(PersonVarsling(
-                        kafkaMessage.navn,
-                        kafkaMessage.fødselsnummer,
-                        Periode(kafkaMessage.fom, kafkaMessage.tom)
-                    ))
+                    mutableSetOf(person)
             )
             repository.insert(mapper.mapDto(newEntry))
         } else {
-            val domainVarsling = mapper.mapDomain(existingAggregate)
-            domainVarsling.liste.add(PersonVarsling(
-                kafkaMessage.navn,
-                kafkaMessage.fødselsnummer,
-                Periode(kafkaMessage.fom, kafkaMessage.tom)
-            ))
-            logger.info("Det finnes et aggregat på denne virksomheten og datoen med ${domainVarsling.liste.size} personer, legger til personen i dette")
-            repository.update(mapper.mapDto(domainVarsling))
+            val  domainVarsling = mapper.mapDomain(existingAggregate)
+            logger.info("Fant et aggregat på ${kafkaMessage.organisasjonsnummer} for $aggregatPeriode med ${domainVarsling.liste.size} personer")
+            domainVarsling.liste.add(person)
+            repository.updateData(domainVarsling.uuid, mapper.mapDto(domainVarsling).data)
         }
     }
+
+    /**
+     * Finner strategien som skal brukes for å aggregere varsler for denne meldingen. Kan i fremtiden baseres på org-nr etc
+     */
+    private fun resolveAggregationStrategy(kafkaMessage: ManglendeInntektsMeldingMelding) = DailyVarslingStrategy()
 }
