@@ -14,29 +14,19 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import io.ktor.util.KtorExperimentalAPI
-import no.nav.helse.inntektsmeldingsvarsel.*
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.db.getDataSource
 import no.nav.helse.spion.domene.Arbeidsgiver
-import no.nav.helse.spion.domene.varsling.repository.PostgresVarslingRepository
-import no.nav.helse.spion.domene.varsling.repository.VarslingRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
-import no.nav.helse.spion.varsling.*
-import no.nav.helse.spion.varsling.mottak.ManglendeInntektsmeldingMeldingProvider
-import no.nav.helse.spion.varsling.mottak.VarslingsmeldingKafkaClient
-import no.nav.helse.spion.varsling.mottak.VarslingsmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.*
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
 import no.nav.helse.spion.vedtaksmelding.failed.PostgresFailedVedtaksmeldingRepository
-import org.apache.cxf.ext.logging.LoggingInInterceptor
-import org.apache.cxf.ext.logging.LoggingOutInterceptor
-import org.apache.cxf.frontend.ClientProxy
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
 import org.koin.core.Koin
@@ -113,23 +103,6 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
 
-
-    single {
-        VarslingsmeldingKafkaClient(mutableMapOf<String, Any>(
-                "bootstrap.servers" to "localhost:9092",
-                "max.poll.interval.ms" to "30000")
-        , config.getString("altinn_melding.kafka_topic")) as ManglendeInntektsmeldingMeldingProvider
-    }
-
-    single { VarslingMapper(get()) }
-
-    single { PostgresVarslingRepository(get()) as VarslingRepository}
-    single { VarslingService(get(), get(), get()) }
-
-    single { DummyVarslingSender(get()) as VarslingSender}
-    single { VarslingsmeldingProcessor(get(), get())}
-    single { SendVarslingJob(get(), get()) }
-
     LocalOIDCWireMock.start()
 }
 
@@ -164,55 +137,12 @@ fun preprodConfig(config: ApplicationConfig) = module {
         ), config.getString("kafka.kafka_topic")) as VedtaksmeldingProvider
     }
 
-    single {
-        VarslingsmeldingKafkaClient(mutableMapOf(
-                "bootstrap.servers" to config.getString("kafka.endpoint"),
-                CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SASL_SSL",
-                SaslConfigs.SASL_MECHANISM to "PLAIN",
-                SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
-                        "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
-        ), config.getString("altinn_melding.kafka_topic")) as ManglendeInntektsmeldingMeldingProvider
-    }
-
-
-    single {
-        val altinnMeldingWsClient = Clients.iCorrespondenceExternalBasic(
-                config.getString("altinn_melding.pep_gw_endpoint")
-        )
-
-        val client = ClientProxy.getClient(altinnMeldingWsClient)
-        client.inInterceptors.add(LoggingInInterceptor())
-        client.outInterceptors.add(LoggingOutInterceptor())
-
-        val sts = stsClient(
-                config.getString("sts_url"),
-                config.getString("service_user.username") to config.getString("service_user.password")
-        )
-
-        sts.configureFor(altinnMeldingWsClient)
-
-        altinnMeldingWsClient
-    }
-
-    single {
-        AltinnVarselSender(
-                AltinnVarselMapper(config.getString("altinn_melding.service_id")),
-                get(),
-                config.getString("altinn_melding.username"),
-                config.getString("altinn_melding.password")
-        ) as VarslingSender
-    }
 
     single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingService(get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
-
-    single { PostgresVarslingRepository(get()) as VarslingRepository }
-    single { VarslingService(get(), VarslingMapper(get()), get()) }
-
-    single { SendVarslingJob(get(), get()) }
 
     single { SpionService(get(), get()) }
 }
@@ -237,28 +167,6 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get()) }
-
-    // <SPAM
-
-    single {
-        VarslingsmeldingKafkaClient(mutableMapOf(
-                "bootstrap.servers" to config.getString("kafka.endpoint"),
-                CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SASL_SSL",
-                SaslConfigs.SASL_MECHANISM to "PLAIN",
-                SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
-                        "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
-        ), config.getString("altinn_melding.kafka_topic")) as ManglendeInntektsmeldingMeldingProvider
-    }
-
-    single { VarslingMapper(get()) }
-
-    single { PostgresVarslingRepository(get()) as VarslingRepository}
-    single { VarslingService(get(), get(), get()) }
-    single { DummyVarslingSender(get()) as VarslingSender}
-    single { VarslingsmeldingProcessor(get(), get())}
-    single { SendVarslingJob(get(), get()) }
-
-    // </SPAM
 }
 
 val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {
