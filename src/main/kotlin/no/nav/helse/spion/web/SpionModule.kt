@@ -131,7 +131,7 @@ fun Application.spionModule(config: ApplicationConfig = environment.config) {
             call.respond(
                     HttpStatusCode.BadRequest,
                     ValidationProblem(setOf(
-                            ValidationProblemDetail("NotNull", cause.message, cause.path.joinToString(".") { it.fieldName }, "null"))
+                            ValidationProblemDetail("NotNull", cause.message ?: "uknown", cause.path.joinToString(".") { it.fieldName }, "null"))
                     )
             )
         }
