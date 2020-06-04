@@ -33,7 +33,7 @@ ignore:
   EPL-1.0:
     - '*':
         reason: None Given
-        expires: 2030-01-01T00:00:00.000Z
+        expires: 2020-07-04T09:52:49.420Z
   EPL-1.0_OR_LGPL-2.0:
     - '*':
         reason: None Given
@@ -166,4 +166,32 @@ ignore:
     - '*':
         reason: '''testing'''
         expires: 2017-03-29T22:00:00.000Z
+  SNYK-JAVA-COMMONSCOLLECTIONS-30078:
+    - '*':
+        reason: None Given
+        expires: 2020-07-04T08:41:37.540Z
+  SNYK-JAVA-COMMONSCOLLECTIONS-472711:
+    - '*':
+        reason: None Given
+        expires: 2020-07-04T08:44:47.339Z
+  SNYK-JAVA-IONETTY-564897:
+    - '*':
+        reason: None Given
+        expires: 2020-07-04T08:45:03.474Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-570072:
+    - '*':
+        reason: None Given
+        expires: 2020-07-04T08:45:27.606Z
+  SNYK-JAVA-ORGHIBERNATEVALIDATOR-568163:
+    - '*':
+        reason: None Given
+        expires: 2020-07-04T10:20:32.010Z
+  'nyk:lic:maven:org.jvnet.mimepull:mimepull:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
+  'snyk:lic:maven:org.jvnet.mimepull:mimepull:EPL-1.0':
+    - '*':
+        reason: None Given
+        expires: 2030-01-01T00:00:00.000Z
 patch: {}
