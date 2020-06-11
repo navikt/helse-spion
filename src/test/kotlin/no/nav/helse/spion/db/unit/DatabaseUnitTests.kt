@@ -66,7 +66,7 @@ internal class dbUnitTests : KoinComponent {
 
     @Test
     fun `ruller tilbake en transaksjon hvis noe feiler`() {
-        val ypGen = YtelsesperiodeGenerator(10, 10, 10)
+        val ypGen = YtelsesperiodeGenerator(maxUniqueArbeidsgivere =  10, maxUniquePersoner =  10)
         val yp = ypGen.next()
 
         every { dsMock.connection } returns conMock
