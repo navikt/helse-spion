@@ -1,76 +1,12 @@
 package no.nav.helse.spion.vedtaksmelding
 
-import com.github.javafaker.Faker
 import no.nav.helse.spion.domene.Arbeidsgiver
+import no.nav.helse.spion.domene.ArbeidsgiverGenerator
 import no.nav.helse.spion.domene.Periode
-import no.nav.helse.spion.domene.Person
-import no.nav.helse.spion.web.dto.validation.FoedselsNrValidator
-import no.nav.helse.spion.web.dto.validation.FoedselsNrValidator.Companion.tabeller.kontrollsiffer1
-import no.nav.helse.spion.web.dto.validation.FoedselsNrValidator.Companion.tabeller.kontrollsiffer2
-import no.nav.helse.spion.web.dto.validation.OrganisasjonsnummerValidator
-import no.nav.helse.spion.web.dto.validation.OrganisasjonsnummerValidator.Companion.tabeller.weights
-import java.time.Instant
+import no.nav.helse.spion.domene.ytelsesperiode.PersonGenerator
 import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 import kotlin.random.Random.Default.nextDouble
-import kotlin.random.Random.Default.nextInt
-import kotlin.random.Random.Default.nextLong
-
-private class ArbeidsgiverGenerator(fixedList: MutableList<Arbeidsgiver>? = null, private var maxUniqueArbeidsgivere: Int = 1000) {
-    private val faker = Faker()
-    private val arbeidsgivere = fixedList ?: mutableListOf()
-
-    init {
-        if (fixedList != null) {
-            maxUniqueArbeidsgivere = fixedList.size
-        }
-    }
-
-    fun getRandomArbeidsGiver(): Arbeidsgiver {
-        return if (arbeidsgivere.size >= maxUniqueArbeidsgivere) {
-            arbeidsgivere.pickRandom()
-        } else {
-            var orgNr = Random.Default.nextLong(11111111, 99999999).toString()
-            orgNr += OrganisasjonsnummerValidator.checksum(weights, orgNr)
-            var virkNr = Random.Default.nextLong(11111111, 99999999).toString()
-            virkNr += OrganisasjonsnummerValidator.checksum(weights, orgNr)
-
-            val arbeidsGiver = Arbeidsgiver(
-                    faker.funnyName().name(),
-                    orgNr,
-                    virkNr
-            )
-            arbeidsgivere.add(arbeidsGiver)
-            arbeidsGiver
-        }
-    }
-}
-
-class PersonGenerator(private val maxUniquePersons: Int = 1000) {
-    private val faker = Faker()
-    private val persone = mutableListOf<Person>()
-    fun getRandomPerson(): Person {
-        return if (persone.size >= maxUniquePersons) {
-            persone.pickRandom()
-        } else {
-            val tenYearsBeforeAfterEpoch = 3600 * 24 * 365 * 10L
-            val birthDay = LocalDate.ofInstant(Instant.ofEpochSecond(nextLong(-tenYearsBeforeAfterEpoch, tenYearsBeforeAfterEpoch)), ZoneId.systemDefault())
-            var fnr = birthDay.format(DateTimeFormatter.ofPattern("ddMMyy")) + nextInt(100, 999)
-            fnr += FoedselsNrValidator.checksum(kontrollsiffer1, fnr)
-            fnr += FoedselsNrValidator.checksum(kontrollsiffer2, fnr)
-
-            val person = Person(
-                    faker.name().firstName(),
-                    faker.name().lastName(),
-                    fnr
-            )
-            persone.add(person)
-            person
-        }
-    }
-}
 
 private val periodStateGenerator = {
     val rand = Random.Default.nextInt(0, 100)
