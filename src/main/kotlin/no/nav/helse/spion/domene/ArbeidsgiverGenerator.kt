@@ -22,9 +22,25 @@ class ArbeidsgiverGenerator(
             arbeidsgivere.pickRandom()
         } else {
             var orgNr = Random.Default.nextLong(11111111, 99999999).toString()
-            orgNr += OrganisasjonsnummerValidator.checksum(OrganisasjonsnummerValidator.Companion.tabeller.weights, orgNr)
+            var knrOrg = OrganisasjonsnummerValidator.checksum(OrganisasjonsnummerValidator.Companion.tabeller.weights, orgNr)
             var virkNr = Random.Default.nextLong(11111111, 99999999).toString()
-            virkNr += OrganisasjonsnummerValidator.checksum(OrganisasjonsnummerValidator.Companion.tabeller.weights, virkNr)
+            var knrVirk = OrganisasjonsnummerValidator.checksum(OrganisasjonsnummerValidator.Companion.tabeller.weights, virkNr)
+
+            while(knrOrg == 10) {
+                orgNr = Random.Default.nextLong(11111111, 99999999).toString()
+                knrOrg = OrganisasjonsnummerValidator.checksum(OrganisasjonsnummerValidator.Companion.tabeller.weights, orgNr)
+            }
+
+            while(knrVirk == 10) {
+                virkNr = Random.Default.nextLong(11111111, 99999999).toString()
+                knrVirk = OrganisasjonsnummerValidator.checksum(OrganisasjonsnummerValidator.Companion.tabeller.weights, virkNr)
+            }
+
+            orgNr += knrOrg
+            virkNr += knrVirk
+
+
+
 
             val arbeidsGiver = Arbeidsgiver(
                     faker.funnyName().name(),
