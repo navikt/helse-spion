@@ -34,6 +34,14 @@ psql -v ON_ERROR_STOP=1 --username "spion" --dbname "spion" <<-EOSQL
 
     CREATE UNIQUE INDEX pk ON ytelsesperiode (get_pk(data));
 
+    INSERT INTO ytelsesperiode (data) VALUES
+    ('{"grad": 50, "status": "AVSLÅTT", "ytelse": "SP", "dagsats": 5034, "maxdato": "2020-01-20", "merknad": "de2f3e3f-76b5-4309-9f44-da2d74feb0b0", "periode": {"fom": "2019-12-12", "tom": "2020-01-01"}, "vedtaksId": "9170f712-68f8-43f2-92dd-c08f1ba12e95", "sistEndret": "2020-06-08", "kafkaOffset": 0, "ferieperioder": [{"fom": "2020-01-01", "tom": "2020-01-18"}], "arbeidsforhold": {"arbeidsgiver": {"navn": "Eltrode AS", "arbeidsgiverId": "422566562", "organisasjonsnummer": "870680147"}, "arbeidstaker": {"fornavn": "Solan", "etternavn": "Gundersen", "identitetsnummer": "15077921467"}, "arbeidsforholdId": ""}, "refusjonsbeløp": 500}'),
+    ('{"grad": 100, "status": "INNVILGET", "ytelse": "SP", "dagsats": 209, "maxdato": "2020-01-20", "merknad": "de2f3e3f-76b5-4309-9f44-da2d74feb0b0", "periode": {"fom": "2020-04-05", "tom": "2020-06-07"}, "vedtaksId": "9170f712-68f8-43f2-92dd-c08f1ba12e95", "sistEndret": "2020-05-06", "kafkaOffset": 0, "ferieperioder": [], "arbeidsforhold": {"arbeidsgiver": {"navn": "Eltrode AS", "arbeidsgiverId": "422566562", "organisasjonsnummer": "870680147"}, "arbeidstaker": {"fornavn": "Solan", "etternavn": "Gundersen", "identitetsnummer": "15077921467"}, "arbeidsforholdId": ""}, "refusjonsbeløp": 1234}'),
+    ('{"grad": 80, "status": "INNVILGET", "ytelse": "SP", "dagsats": 765, "maxdato": "2020-01-20", "merknad": "de2f3e3f-76b5-4309-9f44-da2d74feb0b0", "periode": {"fom": "2020-01-01", "tom": "2020-01-20"}, "vedtaksId": "9170f712-68f8-43f2-92dd-c08f1ba12e95", "sistEndret": "2020-01-01", "kafkaOffset": 0, "ferieperioder": [], "arbeidsforhold": {"arbeidsgiver": {"navn": "Eltrode AS", "arbeidsgiverId": "422566562", "organisasjonsnummer": "870680147"}, "arbeidstaker": {"fornavn": "Solan", "etternavn": "Gundersen", "identitetsnummer": "15077921467"}, "arbeidsforholdId": ""}, "refusjonsbeløp": 3684}');
+
+
+
+
     CREATE TABLE failedvedtaksmelding (
         messageData jsonb NOT NULL,
         kafkaOffset integer,
