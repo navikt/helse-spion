@@ -25,10 +25,10 @@ fun main() {
 
         val koin = app.application.getKoin()
         val vedtaksmeldingProcessor = koin.get<VedtaksmeldingProcessor>()
-        //vedtaksmeldingProcessor.startAsync(retryOnFail = true)
+        vedtaksmeldingProcessor.startAsync(retryOnFail = true)
 
         val failedVedtaksmeldingProcessor = koin.get<FailedVedtaksmeldingProcessor>()
-        //failedVedtaksmeldingProcessor.startAsync(retryOnFail = true)
+        failedVedtaksmeldingProcessor.startAsync(retryOnFail = true)
 
         Runtime.getRuntime().addShutdownHook(Thread {
             vedtaksmeldingProcessor.stop()
