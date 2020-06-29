@@ -91,7 +91,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { getDataSource(createLocalHikariConfig(), "spion", null) as DataSource }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
-    single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
+    single { StaticMockAuthRepo(get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
 
@@ -173,7 +173,7 @@ val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvide
     return object : VedtaksmeldingProvider { // dum mock
         val arbeidsgivere = mutableListOf(
                 Arbeidsgiver("Eltrode AS", "917346380", "917404437"),
-                Arbeidsgiver("JØA OG SEL", "911366940", "910098898")
+                Arbeidsgiver("JØA OG SEL", "911366940", "711485759")
         )
 
         val generator = VedtaksmeldingGenerator(arbeidsgivere)
