@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.zaxxer.hikari.HikariDataSource
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.YtelsesperiodeGenerator
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.Periode
@@ -77,8 +76,6 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     @Test
     fun `Henter ytelsesperiode med virksomhetsnummer og periode`() {
-
-
         val yp = repo.getYtelserForVirksomhet("555555555", testYtelsesPeriode.periode)
 
         assertThat(yp.size).isEqualTo(1)
