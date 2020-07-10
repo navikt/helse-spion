@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmelding
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
+import no.nav.helse.utils.RecurringJob
 import java.time.Duration
 import java.util.*
 
@@ -28,13 +29,13 @@ class VedtaksmeldingProcessor(
         } while (!wasEmpty)
     }
 
-    private fun tryProcessOneMessage(melding: MessageWithOffset) {
+    private fun tryProcessOneMessage(melding: SpleisMelding) {
         try {
             service.processAndSaveMessage(melding)
         } catch (t: Throwable) {
             val errorId = UUID.randomUUID()
             logger.error("Feilet vedtaksmelding, Database ID: $errorId", t)
-            failedVedtaksmeldingRepository.save(FailedVedtaksmelding(melding.second, melding.first, t.message, errorId))
+            failedVedtaksmeldingRepository.save(FailedVedtaksmelding(melding, t.message, errorId))
         }
     }
 }

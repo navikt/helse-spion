@@ -1,6 +1,5 @@
 package no.nav.helse.spion.auth.altinn
 
-import loadFromResources
 import com.fasterxml.jackson.databind.MapperFeature
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -12,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.utils.loadFromResources
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test

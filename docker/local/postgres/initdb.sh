@@ -36,7 +36,6 @@ psql -v ON_ERROR_STOP=1 --username "spion" --dbname "spion" <<-EOSQL
 
     CREATE TABLE failedvedtaksmelding (
         messageData jsonb NOT NULL,
-        kafkaOffset integer,
         errorMessage text,
         id uuid NOT NULL
     );

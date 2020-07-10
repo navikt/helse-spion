@@ -2,9 +2,8 @@ package no.nav.helse.spion.vedtaksmelding.failed
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import no.nav.helse.spion.vedtaksmelding.MessageWithOffset
-import no.nav.helse.spion.vedtaksmelding.RecurringJob
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
+import no.nav.helse.utils.RecurringJob
 import java.time.Duration
 
 class FailedVedtaksmeldingProcessor(
@@ -24,7 +23,7 @@ class FailedVedtaksmeldingProcessor(
 
     private fun tryProcessOneMessage(failed: FailedVedtaksmelding) {
         try {
-            vedtaksmeldingService.processAndSaveMessage(MessageWithOffset(failed.kafkaOffset, failed.messageData))
+            vedtaksmeldingService.processAndSaveMessage(failed.melding)
             failedVedtaksmeldingRepository.delete(failed.id)
         } catch (t: Throwable) {
             logger.error("Reprossesering av ${failed.id} feilet", t)

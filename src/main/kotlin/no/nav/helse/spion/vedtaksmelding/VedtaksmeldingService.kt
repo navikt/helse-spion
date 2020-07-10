@@ -7,37 +7,61 @@ import no.nav.helse.spion.domene.Person
 import no.nav.helse.spion.domene.ytelsesperiode.Arbeidsforhold
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
+import no.nav.helse.spion.integrasjon.pdl.PdlClient
+import no.nav.helse.spion.integrasjon.pdl.PdlPersonNavn
 import java.time.LocalDate
 
 class VedtaksmeldingService(
         private val ypRepo: YtelsesperiodeRepository,
-        private val om: ObjectMapper
+        private val om: ObjectMapper,
+        private val pdl: PdlClient
 ) {
-    fun processAndSaveMessage(melding: MessageWithOffset) {
-        val deserializedKafkaMessage = om.readValue(melding.second, Vedtaksmelding::class.java)
-        val mapped = mapVedtaksMeldingTilYtelsesPeriode(deserializedKafkaMessage, melding.first)
+    fun processAndSaveMessage(melding: SpleisMelding) {
+
+        when(melding.type) {
+            SpleisMeldingstype.Behandlingstilstand.name -> processBehandlingstilstand(melding)
+            SpleisMeldingstype.Vedtak.name -> processVedtak(melding)
+            else -> { /* ignorer andre meldingstyper */ }
+        }
+    }
+
+    private fun processVedtak(melding: SpleisMelding) {
+        val vedtak = om.readValue(melding.messageBody, SpleisVedtakDto::class.java)
+        val person = pdl.person(melding.key)?.hentPerson?.navn?.firstOrNull() ?: PdlPersonNavn("Ukjent",  null, "Ukjent")
+        val virksomhet = vedtak.utbetalinger.map { it.mottaker }.firstOrNull() ?: throw IllegalStateException("Vedtaket har ingen utbetalinger, kan ikke knyttes til virkomshet")
+
+        if (virksomhet.length != 9) return // vedtaket har utbetaling til noe annet enn et organisasjonsnummer
+
+        val mapped = map(vedtak, melding.offset, melding.key, person.fornavn, person.etternavn, virksomhet)
+
         ypRepo.upsert(mapped)
     }
 
-    companion object Mapper {
-        fun mapVedtaksMeldingTilYtelsesPeriode(vm: Vedtaksmelding, kafkaOffset: Long): Ytelsesperiode {
-            return Ytelsesperiode(
-                    Periode(vm.fom, vm.tom),
-                    kafkaOffset,
-                    Arbeidsforhold("",
-                            Person(vm.fornavn, vm.etternavn, vm.identitetsnummer),
-                            Arbeidsgiver("TODO?", "TODO?", vm.virksomhetsnummer)),
-                    "UKJENT",
-                    vm.refusjonsbeloep?.toBigDecimal(),
-                    vm.status.correspondingDomainStatus,
-                    vm.sykemeldingsgrad?.toBigDecimal(),
-                    vm.dagsats?.toBigDecimal(),
-                    vm.maksDato,
-                    listOf(),
-                    Ytelsesperiode.Ytelse.SP,
-                    null,
-                    LocalDate.now()
-            )
-        }
+    private fun processBehandlingstilstand(melding: SpleisMelding) {
+        // https://github.com/navikt/helse-sporbar/blob/master/src/main/kotlin/no/nav/helse/sporbar/VedtaksperiodeDto.kt
+        // preliminær periode der fom tom er ukjent?
+        // Hvordan mappe til domene uten fom tom?
+    }
+
+    fun map(vm: SpleisVedtakDto, kafkaOffset: Long, fnr: String, fornavn: String, etternavn: String, virksomhet: String): Ytelsesperiode {
+        val beloep = vm.utbetalinger.sumBy { it.totalbeløp }.toBigDecimal()
+
+        return Ytelsesperiode(
+                Periode(vm.fom, vm.tom),
+                kafkaOffset,
+                Arbeidsforhold("",
+                        Person(fornavn, etternavn, fnr),
+                        Arbeidsgiver("TODO?", virksomhet, virksomhet)),
+                "UKJENT",
+                beloep,
+                Ytelsesperiode.Status.INNVILGET,
+                vm.snittGrad().toBigDecimal(),
+                vm.snittDagsats().toBigDecimal(),
+                vm.tom,
+                listOf(),
+                Ytelsesperiode.Ytelse.SP,
+                null,
+                LocalDate.now()
+        )
     }
 }
