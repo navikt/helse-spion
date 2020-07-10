@@ -61,6 +61,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         adminClient.close()
     }
 
+    @ExperimentalStdlibApi
     @Test
     internal fun testHealthCheck() {
         val client = VedtaksmeldingClient(testProps, topicName)
@@ -78,6 +79,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         }
     }
 
+    @ExperimentalStdlibApi
     @Test
     fun getMessages() {
 

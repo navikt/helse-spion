@@ -24,7 +24,7 @@ open class VedtaksmeldingProcessorTests {
             .registerModule(KotlinModule())
             .registerModule(JavaTimeModule())
 
-    val meldingsGenerator = VedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
+    val meldingsGenerator = SpleisVedtaksmeldingGenerator(mapper, maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
@@ -32,16 +32,16 @@ open class VedtaksmeldingProcessorTests {
             kafkaMock, serviceMock, failedMessageDaoMock, CoroutineScope(testCoroutineDispatcher)
     )
 
-    private lateinit var messageList: List<MessageWithOffset>
+    private lateinit var spleisMessageList: List<SpleisMelding>
 
     @BeforeEach
     internal fun setUp() {
-        messageList = listOf(
-                MessageWithOffset(1, mapper.writeValueAsString(meldingsGenerator.next())),
-                MessageWithOffset(2, mapper.writeValueAsString(meldingsGenerator.next()))
+        spleisMessageList = listOf(
+                meldingsGenerator.next(),
+                meldingsGenerator.next()
         )
 
-        every { kafkaMock.getMessagesToProcess() } returnsMany listOf(messageList, emptyList())
+        every { kafkaMock.getMessagesToProcess() } returnsMany listOf(spleisMessageList, emptyList())
     }
 
     @Test
@@ -58,7 +58,7 @@ open class VedtaksmeldingProcessorTests {
         val message = "Error message"
         val saveArg = slot<FailedVedtaksmelding>()
 
-        every { serviceMock.processAndSaveMessage(messageList[0]) } throws JsonParseException(null, message)
+        every { serviceMock.processAndSaveMessage(spleisMessageList[0]) } throws JsonParseException(null, message)
         every { failedMessageDaoMock.save(capture(saveArg)) } just Runs
 
         processor.doJob()
@@ -70,19 +70,19 @@ open class VedtaksmeldingProcessorTests {
         assertThat(saveArg.isCaptured).isTrue()
         assertThat(saveArg.captured.errorMessage).isEqualTo(message)
         assertThat(saveArg.captured.id).isNotNull()
-        assertThat(saveArg.captured.messageData).isEqualTo(messageList[0].second)
+        assertThat(saveArg.captured.melding).isEqualTo(spleisMessageList[0])
     }
 
     @Test
     internal fun `If processing fails and saving the fail fails, throw and do not commit to kafka`() {
-        every { serviceMock.processAndSaveMessage(messageList[0]) } throws JsonParseException(null, "WRONG")
+        every { serviceMock.processAndSaveMessage(spleisMessageList[0]) } throws JsonParseException(null, "WRONG")
         every { failedMessageDaoMock.save(any()) } throws IOException("DATABSE DOWN")
 
         assertThatExceptionOfType(IOException::class.java).isThrownBy {
             processor.doJob()
         }
 
-        verify(exactly = 1) { serviceMock.processAndSaveMessage(messageList[0]) }
+        verify(exactly = 1) { serviceMock.processAndSaveMessage(spleisMessageList[0]) }
         verify(exactly = 1) { failedMessageDaoMock.save(any()) }
         verify(exactly = 0) { kafkaMock.confirmProcessingDone() }
     }

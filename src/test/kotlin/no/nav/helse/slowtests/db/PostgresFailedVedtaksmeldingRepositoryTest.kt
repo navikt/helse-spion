@@ -1,7 +1,9 @@
 package no.nav.helse.slowtests.db
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.helse.spion.db.createLocalHikariConfig
+import no.nav.helse.spion.vedtaksmelding.SpleisMelding
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmelding
 import no.nav.helse.spion.vedtaksmelding.failed.PostgresFailedVedtaksmeldingRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -13,13 +15,13 @@ internal class PostgresFailedVedtaksmeldingRepositoryTest {
     lateinit var repo: PostgresFailedVedtaksmeldingRepository
     lateinit var dataSource: HikariDataSource
 
-    private val failedVedtaksmelding = FailedVedtaksmelding("""{"test": "test"}""",0, "test")
+    private val failedVedtaksmelding = FailedVedtaksmelding(SpleisMelding("FNR", 1000L, "type", "messagebodyJson"), "test")
 
     @BeforeEach
     internal fun setUp() {
         dataSource = HikariDataSource(createLocalHikariConfig())
 
-        repo = PostgresFailedVedtaksmeldingRepository(dataSource)
+        repo = PostgresFailedVedtaksmeldingRepository(dataSource, ObjectMapper())
     }
 
     @Test

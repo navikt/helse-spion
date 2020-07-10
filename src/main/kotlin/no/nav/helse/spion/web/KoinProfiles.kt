@@ -97,11 +97,11 @@ fun localDevConfig(config: ApplicationConfig) = module {
 
     single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
 
-    single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
+    single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
 
-    single { VedtaksmeldingService(get(), get()) }
+    single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get(), get()) }
 
     LocalOIDCWireMock.start()
 }
@@ -138,10 +138,10 @@ fun preprodConfig(config: ApplicationConfig) = module {
     }
 
 
-    single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
-    single { VedtaksmeldingService(get(), get()) }
+    single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
+    single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get(), get()) }
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
 
     single { SpionService(get(), get()) }
@@ -160,13 +160,13 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { DefaultAuthorizer(get()) as Authorizer }
 
     single { generateEmptyMock() as VedtaksmeldingProvider }
-    single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
+    single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
-    single { VedtaksmeldingService(get(), get()) }
+    single { VedtaksmeldingService(get(), get(), get()) }
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get(), get()) }
 }
 
 val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {
@@ -176,11 +176,10 @@ val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvide
                 Arbeidsgiver("JØA OG SEL", "911366940", "711485759")
         )
 
-        val generator = VedtaksmeldingGenerator(arbeidsgivere)
-        override fun getMessagesToProcess(): List <MessageWithOffset> {
-            var offset = 0.toLong()
+        val generator = SpleisVedtaksmeldingGenerator(om, arbeidsgivere)
+        override fun getMessagesToProcess(): List <SpleisMelding> {
             return if (Random.Default.nextDouble() < 0.1)
-                generator.take(Random.Default.nextInt(2, 50)).map { Pair(offset++, om.writeValueAsString(it))}
+                generator.take(Random.Default.nextInt(2, 50))
             else emptyList()
         }
 
@@ -192,7 +191,7 @@ val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvide
 
 val generateEmptyMock = fun(): VedtaksmeldingProvider {
     return object : VedtaksmeldingProvider { // dum mock
-        override fun getMessagesToProcess(): List <MessageWithOffset> {
+        override fun getMessagesToProcess(): List <SpleisMelding> {
             return emptyList()
         }
         override fun confirmProcessingDone() {
