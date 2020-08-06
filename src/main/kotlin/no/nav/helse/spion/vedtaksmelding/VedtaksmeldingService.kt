@@ -28,7 +28,7 @@ class VedtaksmeldingService(
     private fun processVedtak(melding: SpleisMelding) {
         val vedtak = om.readValue(melding.messageBody, SpleisVedtakDto::class.java)
         val person = pdl.person(melding.key)?.hentPerson?.navn?.firstOrNull() ?: PdlPersonNavn("Ukjent",  null, "Ukjent")
-        val virksomhet = vedtak.utbetalinger.map { it.mottaker }.firstOrNull() ?: throw IllegalStateException("Vedtaket har ingen utbetalinger, kan ikke knyttes til virkomshet")
+        val virksomhet = vedtak.utbetalinger.map { it.mottaker }.firstOrNull() ?: throw IllegalStateException("Vedtaket har ingen utbetalinger, kan ikke knyttes til virksomhet")
 
         if (virksomhet.length != 9) return // vedtaket har utbetaling til noe annet enn et organisasjonsnummer
 
@@ -51,14 +51,12 @@ class VedtaksmeldingService(
                 kafkaOffset,
                 Arbeidsforhold("",
                         Person(fornavn, etternavn, fnr),
-                        Arbeidsgiver("TODO?", virksomhet, virksomhet)),
+                        Arbeidsgiver("TODO?", virksomhet)),
                 "UKJENT",
                 beloep,
                 Ytelsesperiode.Status.INNVILGET,
                 vm.snittGrad().toBigDecimal(),
                 vm.snittDagsats().toBigDecimal(),
-                vm.tom,
-                listOf(),
                 Ytelsesperiode.Ytelse.SP,
                 null,
                 LocalDate.now()

@@ -172,8 +172,8 @@ fun prodConfig(config: ApplicationConfig) = module {
 val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {
     return object : VedtaksmeldingProvider { // dum mock
         val arbeidsgivere = mutableListOf(
-                Arbeidsgiver("Eltrode AS", "917346380", "917404437"),
-                Arbeidsgiver("JØA OG SEL", "911366940", "910098898")
+                Arbeidsgiver("Eltrode AS", "917404437"),
+                Arbeidsgiver("JØA OG SEL", "910098898")
         )
 
         val generator = SpleisVedtaksmeldingGenerator(om, arbeidsgivere)

@@ -13,8 +13,6 @@ data class Ytelsesperiode(
         val status: Status,
         val grad: BigDecimal?,
         val dagsats: BigDecimal?,
-        val maxdato: LocalDate?,
-        val ferieperioder: List<Periode>,
         val ytelse: Ytelse,
         val merknad: String?,
         val sistEndret: LocalDate
@@ -27,8 +25,3 @@ data class Ytelsesperiode(
         SP, FP, SVP, PP, OP, OM
     }
 }
-
-
-
-
-

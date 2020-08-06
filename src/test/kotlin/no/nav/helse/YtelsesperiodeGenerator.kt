@@ -57,8 +57,6 @@ class YtelsesperiodeGenerator(
                 periodStateGenerator(),
                 BigDecimal(sykemeldingsGrader.pickRandom()),
                 BigDecimal(Random.Default.nextLong(10, 1000)),
-                periode.tom,
-                listOf(Periode(periode.fom, periode.tom.minusDays(2))),
                 Ytelsesperiode.Ytelse.SP,
                 UUID.randomUUID().toString(),
                 LocalDate.now()

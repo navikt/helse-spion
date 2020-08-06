@@ -44,7 +44,6 @@ class ArbeidsgiverGenerator(
 
             val arbeidsGiver = Arbeidsgiver(
                     faker.funnyName().name(),
-                    orgNr,
                     virkNr
             )
             arbeidsgivere.add(arbeidsGiver)
