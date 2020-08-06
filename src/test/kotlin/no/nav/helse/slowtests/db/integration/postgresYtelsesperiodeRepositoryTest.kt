@@ -35,15 +35,13 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
             arbeidsforhold = Arbeidsforhold(
                     arbeidsforholdId = "1",
                     arbeidstaker = Person("Solan", "Gundersen", "10987654321"),
-                    arbeidsgiver = Arbeidsgiver("Flåklypa Verksted", "666666666", "555555555")
+                    arbeidsgiver = Arbeidsgiver("Flåklypa Verksted", "555555555")
             ),
             vedtaksId = "1",
             refusjonsbeløp = BigDecimal(10000),
             status = Ytelsesperiode.Status.UNDER_BEHANDLING,
             grad = BigDecimal(50),
             dagsats = BigDecimal(200),
-            maxdato = LocalDate.of(2019, 1, 1),
-            ferieperioder = emptyList(),
             ytelse = Ytelsesperiode.Ytelse.SP,
             merknad = "Fritak fra AGP",
             sistEndret = LocalDate.now()
