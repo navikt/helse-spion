@@ -26,7 +26,7 @@ import org.postgresql.util.PSQLException
 import java.math.BigDecimal
 import java.time.LocalDate
 
-internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
+internal class PostgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     lateinit var repo: PostgresYtelsesperiodeRepository;
     val testYtelsesPeriode = Ytelsesperiode(
