@@ -1,6 +1,7 @@
 package no.nav.helse.spion.vedtaksmelding
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.ArbeidsgiverGenerator
@@ -20,7 +21,7 @@ private val periodStateGenerator = {
 }
 
 class SpleisVedtaksmeldingGenerator(
-        private val om: ObjectMapper = ObjectMapper().registerModule(KotlinModule()),
+        private val om: ObjectMapper = ObjectMapper().registerModules(KotlinModule(), JavaTimeModule()),
         fixedListArbeidsgivere: MutableList<Arbeidsgiver>? = null,
         maxUniqueArbeidsgivere: Int = 10,
         maxUniquePersoner: Int = 100,
@@ -52,7 +53,7 @@ class SpleisVedtaksmeldingGenerator(
                 5,
                 listOf(SpleisVedtakDto.SpleisUtbetalingDto(
                         arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!,
-                        "UKJENT",
+                        "SPREF",
                         10000,
                         listOf(SpleisVedtakDto.SpleisUtbetalingDto.SpleisUtbetalingslinjeDto(
                                 periode.fom,
