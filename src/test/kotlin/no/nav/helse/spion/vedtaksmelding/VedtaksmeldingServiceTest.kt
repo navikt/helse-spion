@@ -2,7 +2,8 @@ package no.nav.helse.spion.vedtaksmelding
 
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -20,35 +21,32 @@ internal class VedtaksmeldingServiceTest {
     val ypDaoMock = mockk<YtelsesperiodeRepository>(relaxed = true)
     val pdlMock = mockk<PdlClient>(relaxed = true)
 
-    val omMock = mockk<ObjectMapper>()
-
     val meldingsGenerator = SpleisVedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
-    val service = VedtaksmeldingService(ypDaoMock, omMock, pdlMock)
-
-    private val mockValidJsonMessage = "mock valid message"
-    private val mockInvalidJson = "invalid message"
+    val service = VedtaksmeldingService(ypDaoMock, ObjectMapper().registerModules(KotlinModule(), JavaTimeModule()), pdlMock)
 
     @BeforeEach
     internal fun setUp() {
-        every { omMock.readValue(mockValidJsonMessage, SpleisVedtakDto::class.java) } answers { mockk<SpleisVedtakDto>() }
-        every { omMock.readValue(mockInvalidJson, SpleisVedtakDto::class.java) } throws JsonParseException(null, "error")
         every { pdlMock.person(any()) } returns PdlHentPerson(PdlPerson(listOf(PdlPersonNavn("Ola", "Gunnar", "Normann")), null))
     }
 
     @Test
     internal fun `successful processing saves To Repository`() {
-        service.processAndSaveMessage(SpleisMelding( "fnr", 1, SpleisMeldingstype.Vedtak.name, mockValidJsonMessage))
-        verify(exactly = 1) { omMock.readValue(mockValidJsonMessage, SpleisVedtakDto::class.java) }
+        val melding = meldingsGenerator.next()
+
+        service.processAndSaveMessage(melding)
+        verify(exactly = 1) { pdlMock.person(melding.key) }
         verify(exactly = 1) { ypDaoMock.upsert(any()) }
     }
 
     @Test
     internal fun `If json parsing fails, the error is thrown`() {
+        val corruptMelding = SpleisMelding("123", 1L, SpleisMeldingstype.Vedtak.name, "invalid json")
+
         assertThatExceptionOfType(JsonParseException::class.java).isThrownBy {
-            service.processAndSaveMessage(SpleisMelding("fnr", 1, SpleisMeldingstype.Vedtak.name, mockInvalidJson))
+            service.processAndSaveMessage(corruptMelding)
         }
-        verify(exactly = 1) { omMock.readValue(mockInvalidJson, SpleisVedtakDto::class.java) }
+
         verify(exactly = 0) { ypDaoMock.upsert(any()) }
     }
 
@@ -57,9 +55,8 @@ internal class VedtaksmeldingServiceTest {
         every { ypDaoMock.upsert(any()) } throws IOException()
 
         assertThatExceptionOfType(IOException::class.java).isThrownBy {
-            service.processAndSaveMessage(SpleisMelding("fnr", 1, SpleisMeldingstype.Vedtak.name, mockValidJsonMessage))
+            service.processAndSaveMessage(meldingsGenerator.next())
         }
-        verify(exactly = 1) { omMock.readValue<SpleisVedtakDto>(mockValidJsonMessage) }
         verify(exactly = 1) { ypDaoMock.upsert(any()) }
     }
 }

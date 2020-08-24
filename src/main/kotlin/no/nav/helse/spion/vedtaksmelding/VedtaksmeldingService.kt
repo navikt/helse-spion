@@ -19,7 +19,7 @@ class VedtaksmeldingService(
     fun processAndSaveMessage(melding: SpleisMelding) {
 
         when(melding.type) {
-            SpleisMeldingstype.Behandlingstilstand.name -> processBehandlingstilstand(melding)
+            SpleisMeldingstype.Behandlingstilstand.name -> processBehandlingstilstand()
             SpleisMeldingstype.Vedtak.name -> processVedtak(melding)
             else -> { /* ignorer andre meldingstyper */ }
         }
@@ -28,38 +28,39 @@ class VedtaksmeldingService(
     private fun processVedtak(melding: SpleisMelding) {
         val vedtak = om.readValue(melding.messageBody, SpleisVedtakDto::class.java)
         val person = pdl.person(melding.key)?.hentPerson?.navn?.firstOrNull() ?: PdlPersonNavn("Ukjent",  null, "Ukjent")
-        val virksomhet = vedtak.utbetalinger.map { it.mottaker }.firstOrNull() ?: throw IllegalStateException("Vedtaket har ingen utbetalinger, kan ikke knyttes til virksomhet")
 
-        if (virksomhet.length != 9) return // vedtaket har utbetaling til noe annet enn et organisasjonsnummer
-
-        val mapped = map(vedtak, melding.offset, melding.key, person.fornavn, person.etternavn, virksomhet)
-
-        ypRepo.upsert(mapped)
+        map(vedtak, melding.offset, melding.key, person.fornavn, person.etternavn)
+                .forEach {
+                    ypRepo.upsert(it)
+                }
     }
 
-    private fun processBehandlingstilstand(melding: SpleisMelding) {
+    private fun processBehandlingstilstand() {
         // https://github.com/navikt/helse-sporbar/blob/master/src/main/kotlin/no/nav/helse/sporbar/VedtaksperiodeDto.kt
         // preliminær periode der fom tom er ukjent?
-        // Hvordan mappe til domene uten fom tom?
+        // Bruk Sykepengesøknad-teamet sitt API for å hente ut søknaden og bruk FOM-TOM fra denne
+
     }
 
-    fun map(vm: SpleisVedtakDto, kafkaOffset: Long, fnr: String, fornavn: String, etternavn: String, virksomhet: String): Ytelsesperiode {
-        val beloep = vm.utbetalinger.sumBy { it.totalbeløp }.toBigDecimal()
-
-        return Ytelsesperiode(
-                Periode(vm.fom, vm.tom),
-                kafkaOffset,
-                Arbeidsforhold("",
-                        Person(fornavn, etternavn, fnr),
-                        Arbeidsgiver("TODO?", virksomhet)),
-                "UKJENT",
-                beloep,
-                Ytelsesperiode.Status.INNVILGET,
-                vm.snittGrad().toBigDecimal(),
-                vm.snittDagsats().toBigDecimal(),
-                Ytelsesperiode.Ytelse.SP,
-                null,
-                LocalDate.now()
-        )
+    fun map(vedtak: SpleisVedtakDto, kafkaOffset: Long, fnr: String, fornavn: String, etternavn: String): List<Ytelsesperiode> {
+        return vedtak.utbetalinger
+                .filter {it.fagområde == "SPREF"} // utbetalingen er en refusjon
+                .flatMap {
+                    it.utbetalingslinjer.map { utbetalingslinje ->
+                        Ytelsesperiode(
+                                Periode(utbetalingslinje.fom, utbetalingslinje.tom),
+                                kafkaOffset,
+                                Arbeidsforhold("",
+                                        Person(fornavn, etternavn, fnr),
+                                        Arbeidsgiver(it.mottaker)),
+                                utbetalingslinje.beløp.toBigDecimal(),
+                                Ytelsesperiode.Status.INNVILGET,
+                                utbetalingslinje.grad.toBigDecimal(),
+                                utbetalingslinje.dagsats.toBigDecimal(),
+                                Ytelsesperiode.Ytelse.SP,
+                                LocalDate.now()
+                        )
+                    }
+                }
     }
 }

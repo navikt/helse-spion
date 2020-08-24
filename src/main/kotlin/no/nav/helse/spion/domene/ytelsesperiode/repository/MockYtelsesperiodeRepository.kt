@@ -17,16 +17,14 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
             arbeidsforhold = Arbeidsforhold(
                     arbeidsforholdId = "1",
                     arbeidstaker = Person("Solan", "Gundersen", "10987654321"),
-                    arbeidsgiver = Arbeidsgiver("Flåklypa Verksted", "555555555")
+                    arbeidsgiver = Arbeidsgiver("555555555")
             ),
-            vedtaksId = "1",
             refusjonsbeløp = BigDecimal(10000),
             status = Ytelsesperiode.Status.INNVILGET,
             grad = BigDecimal(50),
             dagsats = BigDecimal(200),
-            ytelse = Ytelsesperiode.Ytelse.SP,
-            merknad = "Fritak fra AGP",
             sistEndret = LocalDate.now(),
+            ytelse = Ytelsesperiode.Ytelse.SP,
             kafkaOffset = 1
     )
 
@@ -37,7 +35,7 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
                 Periode(LocalDate.of(2019, 7, 24), LocalDate.of(2019, 9, 8)),
                 Periode(LocalDate.of(2019, 12, 13), LocalDate.of(2020, 1, 10)))
         ytelsesperioder = perioder.mapIndexed { i: Int, it: Periode ->
-            testYtelsesPeriode.copy(periode = it, vedtaksId = i.toString(), status = if (i % 2 == 0) Ytelsesperiode.Status.INNVILGET else Ytelsesperiode.Status.AVSLÅTT)
+            testYtelsesPeriode.copy(periode = it, status = if (i % 2 == 0) Ytelsesperiode.Status.INNVILGET else Ytelsesperiode.Status.AVSLÅTT)
         }
     }
 

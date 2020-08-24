@@ -8,7 +8,6 @@ import no.nav.helse.spion.domene.ytelsesperiode.PersonGenerator
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
 import kotlin.random.Random
 
 private val periodStateGenerator = {
@@ -52,13 +51,11 @@ class YtelsesperiodeGenerator(
                         personGenerator.getRandomPerson(),
                         arbeidsgiverGenerator.getRandomArbeidsGiver()
                 ),
-                UUID.randomUUID().toString(),
                 BigDecimal(Random.Default.nextLong(100, 10000)),
                 periodStateGenerator(),
                 BigDecimal(sykemeldingsGrader.pickRandom()),
                 BigDecimal(Random.Default.nextLong(10, 1000)),
                 Ytelsesperiode.Ytelse.SP,
-                UUID.randomUUID().toString(),
                 LocalDate.now()
         )
     }

@@ -48,10 +48,4 @@ psql -v ON_ERROR_STOP=1 --username "spion" --dbname "spion" <<-EOSQL
         id uuid NOT NULL
     );
 
-    CREATE TABLE soeknad_periode (
-        id uuid NOT NULL UNIQUE,
-        fom varchar(20) NOT NULL,
-        tom varchar(20) NOT NULL
-    );
-
 EOSQL
