@@ -40,7 +40,7 @@ spec:
         kvPath: /serviceuser/data/prod/srvhelsespion
       - mountPath: /var/run/secrets/nais.io/apigw/altinn
         kvPath: /apikey/apigw/prod/eksternapp.altinn.serviceowner/helse-spion
-  webproxy: truex
+  webproxy: true
   env:
   - name: KOIN_PROFILE
     value: PROD
