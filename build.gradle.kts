@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val ktorVersion = "1.3.2"
+val ktorVersion = "1.4.0"
 val logback_version = "1.2.1"
 val logback_contrib_version = "0.1.5"
 val jacksonVersion = "2.10.3"
@@ -12,16 +12,16 @@ val mainClass = "no.nav.helse.spion.web.AppKt"
 val junitJupiterVersion = "5.5.0-RC2"
 val assertJVersion = "3.12.2"
 val mockKVersion = "1.9.3"
-val tokenSupportVersion = "1.1.6"
+val tokenSupportVersion = "1.3.0"
 val koinVersion = "2.0.1"
 val valiktorVersion = "0.9.0"
-val cxfVersion = "3.3.6"
+val cxfVersion = "3.3.7"
 val jaxwsVersion = "2.3.1"
 val jaxwsToolsVersion = "2.3.1"
 
 
 plugins {
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.4.0"
     id("org.sonarqube") version "2.8"
     id("com.github.ben-manes.versions") version "0.27.0"
     jacoco
@@ -79,7 +79,9 @@ dependencies {
     implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-features-logging:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-transports-http:$cxfVersion")
-    implementation("org.apache.cxf:cxf-rt-ws-security:$cxfVersion")
+    implementation("org.apache.cxf:cxf-rt-ws-security:$cxfVersion") {
+        exclude(group = "commons-collections", module = "commons-collections")
+    }
     implementation("org.apache.ws.xmlschema:xmlschema-core:2.2.4") // Force newer version of XMLSchema to fix illegal reflective access warning
     implementation("com.sun.xml.ws:jaxws-tools:$jaxwsToolsVersion") {
         exclude(group = "com.sun.xml.ws", module = "policy")
@@ -109,7 +111,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("com.github.tomakehurst:wiremock-standalone:2.25.1")
-    implementation("org.postgresql:postgresql:42.2.9")
+    implementation("org.postgresql:postgresql:42.2.13")
 
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
