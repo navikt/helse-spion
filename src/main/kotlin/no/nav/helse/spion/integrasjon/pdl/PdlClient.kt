@@ -1,12 +1,10 @@
 package no.nav.helse.spion.integrasjon.pdl
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.ktor.client.HttpClient
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.url
+import io.ktor.client.*
+import io.ktor.client.request.*
 import io.ktor.http.ContentType
-import io.ktor.http.content.TextContent
+import io.ktor.http.content.*
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
@@ -54,8 +52,8 @@ class PdlClient(
         return person(ident)?.fullName()
     }
 
-    fun isKode6Or7(ident: String): Boolean {
-        return person(ident)?.isKode6Or7() ?: true
+    fun isKode6or7(ident: String): Boolean {
+        return person(ident)?.isKode6or7() ?: true
     }
 
     companion object {

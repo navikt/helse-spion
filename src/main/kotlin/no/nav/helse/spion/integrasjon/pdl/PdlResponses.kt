@@ -70,7 +70,7 @@ fun PdlHentPerson.diskresjonskode(): String {
     }
 }
 
-fun PdlHentPerson.isKode6Or7(): Boolean {
+fun PdlHentPerson.isKode6or7(): Boolean {
     val adressebeskyttelse = this.hentPerson?.adressebeskyttelse
     return if (adressebeskyttelse.isNullOrEmpty()) {
         false
