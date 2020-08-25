@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.nimbusds.jwt.JWT
 import com.nimbusds.jwt.JWTParser
 import org.slf4j.LoggerFactory
-import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URI
 import java.net.http.HttpClient
@@ -49,19 +48,14 @@ class RestStsClient(username: String, password: String, stsEndpoint: String) {
                 .timeout(Duration.ofSeconds(10))
                 .GET()
                 .build()
-        try {
-            val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-            check(response.statusCode() == HttpURLConnection.HTTP_OK) { String.format("Feil oppsto under henting av token fra STS - %s", response.body()) }
 
-            val accessToken = ObjectMapper().readValue(response.body(), STSOidcResponse::class.java).access_token
-                    ?: throw IllegalStateException("Feilet ved kall til STS")
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        check(response.statusCode() == HttpURLConnection.HTTP_OK) { String.format("Feil oppsto under henting av token fra STS - %s", response.body()) }
 
-            return JwtToken(accessToken)
-        } catch (e: InterruptedException) {
-            throw IllegalStateException("Feilet ved kall til STS", e)
-        } catch (e: IOException) {
-            throw IllegalStateException("Feilet ved kall til STS", e)
-        }
+        val accessToken = ObjectMapper().readValue(response.body(), STSOidcResponse::class.java).access_token
+                ?: throw IllegalStateException("Feilet ved kall til STS, ingen access token returnert")
+
+        return JwtToken(accessToken)
     }
 
     private fun basicAuth(username: String, password: String): String {

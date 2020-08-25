@@ -1,38 +1,7 @@
 package no.nav.helse.spion.vedtaksmelding
 
-import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import java.time.LocalDate
 import java.util.*
-
-@Deprecated(message = "Denne modellen er vår gamle 'antagelsesmodell' for melding fra spleis, og erstattes av faktisk melding")
-enum class VedtaksmeldingsYtelse { SP, FP, SVP, PP, OP, OM }
-
-@Deprecated(message = "Denne modellen er vår gamle 'antagelsesmodell' for melding fra spleis, og erstattes av faktisk melding")
-enum class VedtaksmeldingsStatus(val correspondingDomainStatus: Ytelsesperiode.Status) {
-    BEHANDLES(Ytelsesperiode.Status.UNDER_BEHANDLING),
-    INNVILGET(Ytelsesperiode.Status.INNVILGET),
-    AVSLÅTT(Ytelsesperiode.Status.AVSLÅTT),
-    HENLAGT(Ytelsesperiode.Status.HENLAGT)
-}
-
-@Deprecated(message = "Denne modellen er vår gamle 'antagelsesmodell' for melding fra spleis, og erstattes av faktisk melding")
-data class Vedtaksmelding(
-        val identitetsnummer: String,
-        val virksomhetsnummer: String,
-        val status: VedtaksmeldingsStatus,
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val ytelse: VedtaksmeldingsYtelse = VedtaksmeldingsYtelse.SP,
-
-        val fornavn: String,
-        val etternavn: String,
-
-        val sykemeldingsgrad: Int?,
-        val refusjonsbeloep: Double?,
-        val dagsats: Double?,
-        val maksDato: LocalDate?
-
-)
 
 data class SpleisVedtaksperiodeDto(
         val fnr: String,

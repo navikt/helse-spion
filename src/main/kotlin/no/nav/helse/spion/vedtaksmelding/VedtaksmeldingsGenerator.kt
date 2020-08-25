@@ -10,16 +10,6 @@ import no.nav.helse.spion.domene.ytelsesperiode.PersonGenerator
 import java.time.LocalDate
 import kotlin.random.Random
 
-private val periodStateGenerator = {
-    val rand = Random.Default.nextInt(0, 100)
-    when {
-        rand < 5 -> VedtaksmeldingsStatus.AVSLÅTT
-        rand < 25 -> VedtaksmeldingsStatus.BEHANDLES
-        rand < 30 -> VedtaksmeldingsStatus.HENLAGT
-        else -> VedtaksmeldingsStatus.INNVILGET
-    }
-}
-
 class SpleisVedtaksmeldingGenerator(
         private val om: ObjectMapper = ObjectMapper().registerModules(KotlinModule(), JavaTimeModule()),
         fixedListArbeidsgivere: MutableList<Arbeidsgiver>? = null,
