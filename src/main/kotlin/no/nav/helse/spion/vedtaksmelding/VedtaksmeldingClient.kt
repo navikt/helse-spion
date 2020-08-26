@@ -3,6 +3,7 @@ package no.nav.helse.spion.vedtaksmelding
 import no.nav.helse.spion.selfcheck.HealthCheck
 import no.nav.helse.spion.selfcheck.HealthCheckType
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -16,6 +17,7 @@ interface VedtaksmeldingProvider {
 }
 
 class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String) : VedtaksmeldingProvider, HealthCheck {
+    private val missingTypeHeaderDefaultValue = RecordHeader("type", "unknown".toByteArray())
     private var lastThrown: Exception? = null
     private val consumer: KafkaConsumer<String, String>
     override val healthCheckType = HealthCheckType.ALIVENESS
@@ -46,7 +48,8 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String) : 
     override fun getMessagesToProcess(): List<SpleisMelding> {
         try {
             val result = consumer.poll(Duration.ofSeconds(10)).map {
-                val messageType = it.headers().lastHeader("type").value().decodeToString()
+                val typeHeader = it.headers().lastHeader("type") ?: missingTypeHeaderDefaultValue
+                val messageType =  typeHeader.value().decodeToString()
                 SpleisMelding(it.key(), it.offset(), messageType, it.value())
             }.toList()
             lastThrown = null
