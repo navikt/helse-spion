@@ -3,6 +3,8 @@ package no.nav.helse.spion.vedtaksmelding
 import java.time.LocalDate
 import java.util.*
 
+
+/* Behandling
 data class SpleisVedtaksperiodeDto(
         val fnr: String,
         val orgnummer: String,
@@ -19,6 +21,7 @@ data class SpleisVedtaksperiodeDto(
         ManuellBehandling
     }
 }
+*/
 
 data class SpleisVedtakDto(
         val fom: LocalDate,
