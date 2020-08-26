@@ -1,8 +1,8 @@
-package bakgrunnsjobb
+package no.nav.helse.spion.bakgrunnsjobb
 
-import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDateTime
+import java.util.*
 import javax.sql.DataSource
 
 interface BakgrunnsjobbRepository {
@@ -12,7 +12,7 @@ interface BakgrunnsjobbRepository {
 
 class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : BakgrunnsjobbRepository {
 
-    private val tableName = "bakgrunnsjobb"
+    private val tableName = "no/nav/helse/spion/bakgrunnsjobb"
 
     private val insertStatement = """INSERT INTO $tableName
 (jobb_id, type, behandlet, opprettet, status, kjoeretid, forsoek, maks_forsoek, data) VALUES
@@ -20,7 +20,7 @@ class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : Bakgrunnsjob
             .trimIndent()
 
     private val selectStatement = """
-        select * from $tableName
+        select * from $tableName where kjoeretid < ? and field = ANY(?)
     """.trimIndent()
 
 
@@ -41,6 +41,29 @@ class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : Bakgrunnsjob
     }
 
     override fun findByKjoeretidBeforeAndStatusIn(timeout: LocalDateTime, tilstander: Set<BakgrunnsjobbStatus>): List<Bakgrunnsjobb> {
-        TODO("Not yet implemented")
+        dataSource.connection.use {
+            val res = it.prepareStatement(selectStatement).apply {
+                setTimestamp(1, Timestamp.valueOf(timeout))
+                setArray(2, it.createArrayOf("VARCHAR", arrayOf(tilstander.map { status -> status.toString() })))
+            }.executeQuery()
+
+            val resultatListe = mutableListOf<Bakgrunnsjobb>()
+
+            //TODO Null safety
+            while (res.next()) {
+                resultatListe.add(Bakgrunnsjobb(
+                        UUID.fromString(res.getString("jobb_id")),
+                        res.getString("type"),
+                        res.getTimestamp("behandlet").toLocalDateTime(), //Nullable
+                        res.getTimestamp("opprettet").toLocalDateTime(),
+                        BakgrunnsjobbStatus.valueOf(res.getString("status")),
+                        res.getTimestamp("kjoeretid").toLocalDateTime(),
+                        res.getInt("forsoek"),
+                        res.getInt("maks_forsoek"),
+                        res.getString("data")
+                ))
+            }
+            return resultatListe
+        }
     }
 }

@@ -1,4 +1,4 @@
-package bakgrunnsjobb
+package no.nav.helse.spion.bakgrunnsjobb
 
 import java.time.LocalDateTime
 import java.util.*
