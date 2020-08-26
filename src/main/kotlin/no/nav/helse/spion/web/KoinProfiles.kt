@@ -99,10 +99,10 @@ fun localDevConfig(config: ApplicationConfig) = module {
 
     single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
 
-    single { createStaticNamePdlMock() } as NameProvider
+    single { createStaticNamePdlMock() }
     single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get()) }
 
     LocalOIDCWireMock.start()
 }
@@ -125,7 +125,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
         ) as AuthorizationsRepository
     }*/
 
-    single { createStaticNamePdlMock() } as NameProvider
+    single { createStaticNamePdlMock() }
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
 
@@ -143,7 +143,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get()) }
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
 
     single { SpionService(get(), get()) }
@@ -161,7 +161,7 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    single { createStaticNamePdlMock() } as NameProvider
+    single { createStaticNamePdlMock() }
     single { generateEmptyMock() as VedtaksmeldingProvider }
     single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
 
@@ -169,7 +169,7 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingService(get(), get(), get()) }
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get(), get()) }
+    single { FailedVedtaksmeldingProcessor(get(), get()) }
 }
 
 val createStaticNamePdlMock = fun(): NameProvider {
