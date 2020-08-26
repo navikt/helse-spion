@@ -57,9 +57,3 @@ class SpleisDokument(val dokumentId: UUID, val type: Type) {
 enum class SpleisMeldingstype {
     Vedtak, Behandlingstilstand
 }
-
-fun SpleisVedtakDto.snittGrad() = if (utbetalinger.isEmpty()) 0.0 else  utbetalinger.sumByDouble { it.snittGrad() } / utbetalinger.size
-fun SpleisVedtakDto.SpleisUtbetalingDto.snittGrad() = if (utbetalingslinjer.isEmpty()) 0.0 else  utbetalingslinjer.sumByDouble { it.grad } / utbetalingslinjer.size
-
-fun SpleisVedtakDto.snittDagsats() = if (utbetalinger.isEmpty()) 0 else  utbetalinger.sumBy { it.snittDagsats() } / utbetalinger.size
-fun SpleisVedtakDto.SpleisUtbetalingDto.snittDagsats() = if (utbetalingslinjer.isEmpty()) 0 else  utbetalingslinjer.sumBy { it.dagsats } / utbetalingslinjer.size
