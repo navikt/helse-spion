@@ -8,12 +8,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.config.ApplicationConfig
-import io.ktor.util.KtorExperimentalAPI
+import io.ktor.client.*
+import io.ktor.client.engine.apache.*
+import io.ktor.client.features.json.*
+import io.ktor.config.*
+import io.ktor.util.*
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
@@ -23,6 +22,7 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRep
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
+import no.nav.helse.spion.integrasjon.pdl.NameProvider
 import no.nav.helse.spion.vedtaksmelding.*
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
@@ -99,6 +99,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
 
     single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
 
+    single { createStaticNamePdlMock() } as NameProvider
     single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get(), get()) }
@@ -124,6 +125,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
         ) as AuthorizationsRepository
     }*/
 
+    single { createStaticNamePdlMock() } as NameProvider
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
 
@@ -159,6 +161,7 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
+    single { createStaticNamePdlMock() } as NameProvider
     single { generateEmptyMock() as VedtaksmeldingProvider }
     single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
 
@@ -167,6 +170,15 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { VedtaksmeldingProcessor(get(), get(), get()) }
     single { FailedVedtaksmeldingProcessor(get(), get(), get()) }
+}
+
+val createStaticNamePdlMock = fun(): NameProvider {
+    return object : NameProvider {
+        override fun fnrToName(fnr: String): NameProvider.Name? {
+            return NameProvider.Name("Ola", "Dunk")
+        }
+
+    }
 }
 
 val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {

@@ -55,15 +55,15 @@ class PdlClientTest {
 
     @Test
     internal fun `Returnerer en person ved gyldig respons fra PDL`() {
-        val response = pdlClient.person(testFnr)
+        val response = pdlClient.fnrToName(testFnr)
         assertThat(response).isNotNull
-        assertThat(response?.hentPerson?.navn!![0].fornavn).isEqualTo("Ola")
+        assertThat(response?.firstname).isEqualTo("Ola")
     }
 
     @Test
     internal fun `Kaster IOException ved feilrespons fra PDL`() {
         assertThrows<IOException> {
-            pdlClient.person("fail")
+            pdlClient.fnrToName("fail")
         }
     }
 }

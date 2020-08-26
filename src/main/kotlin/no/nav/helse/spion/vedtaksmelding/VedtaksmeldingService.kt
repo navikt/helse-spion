@@ -7,14 +7,13 @@ import no.nav.helse.spion.domene.Person
 import no.nav.helse.spion.domene.ytelsesperiode.Arbeidsforhold
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
-import no.nav.helse.spion.integrasjon.pdl.PdlClient
-import no.nav.helse.spion.integrasjon.pdl.PdlPersonNavn
+import no.nav.helse.spion.integrasjon.pdl.NameProvider
 import java.time.LocalDate
 
 class VedtaksmeldingService(
         private val ypRepo: YtelsesperiodeRepository,
         private val om: ObjectMapper,
-        private val pdl: PdlClient
+        private val pdl: NameProvider
 ) {
     fun processAndSaveMessage(melding: SpleisMelding) {
 
@@ -27,9 +26,9 @@ class VedtaksmeldingService(
 
     private fun processVedtak(melding: SpleisMelding) {
         val vedtak = om.readValue(melding.messageBody, SpleisVedtakDto::class.java)
-        val person = pdl.person(melding.key)?.hentPerson?.navn?.firstOrNull() ?: PdlPersonNavn("Ukjent",  null, "Ukjent")
+        val person = pdl.fnrToName(melding.key) ?: NameProvider.Name("Ukjent",  "Ukjent")
 
-        map(vedtak, melding.offset, melding.key, person.fornavn, person.etternavn)
+        map(vedtak, melding.offset, melding.key, person.firstname, person.lastname)
                 .forEach {
                     ypRepo.upsert(it)
                 }
