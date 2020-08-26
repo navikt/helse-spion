@@ -30,7 +30,7 @@ class PdlClient(
         }
 
         if (pdlPersonReponse.errors != null && pdlPersonReponse.errors.isNotEmpty()) {
-            val errorMessages = pdlPersonReponse.errors.map { it.message }.joinToString()
+            val errorMessages = pdlPersonReponse.errors.map { it.errorMessage() }.joinToString()
             throw IOException("Error while requesting person from PersonDataLosningen: ${errorMessages}")
         }
 
