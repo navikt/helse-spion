@@ -7,37 +7,60 @@ import no.nav.helse.spion.domene.Person
 import no.nav.helse.spion.domene.ytelsesperiode.Arbeidsforhold
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
+import no.nav.helse.spion.integrasjon.pdl.PdlClient
+import no.nav.helse.spion.integrasjon.pdl.PdlPersonNavn
 import java.time.LocalDate
 
 class VedtaksmeldingService(
         private val ypRepo: YtelsesperiodeRepository,
-        private val om: ObjectMapper
+        private val om: ObjectMapper,
+        private val pdl: PdlClient
 ) {
-    fun processAndSaveMessage(melding: MessageWithOffset) {
-        val deserializedKafkaMessage = om.readValue(melding.second, Vedtaksmelding::class.java)
-        val mapped = mapVedtaksMeldingTilYtelsesPeriode(deserializedKafkaMessage, melding.first)
-        ypRepo.upsert(mapped)
+    fun processAndSaveMessage(melding: SpleisMelding) {
+
+        when(melding.type) {
+            SpleisMeldingstype.Behandlingstilstand.name -> processBehandlingstilstand()
+            SpleisMeldingstype.Vedtak.name -> processVedtak(melding)
+            else -> { /* ignorer andre meldingstyper */ }
+        }
     }
 
-    companion object Mapper {
-        fun mapVedtaksMeldingTilYtelsesPeriode(vm: Vedtaksmelding, kafkaOffset: Long): Ytelsesperiode {
-            return Ytelsesperiode(
-                    Periode(vm.fom, vm.tom),
-                    kafkaOffset,
-                    Arbeidsforhold("",
-                            Person(vm.fornavn, vm.etternavn, vm.identitetsnummer),
-                            Arbeidsgiver("TODO?", "TODO?", vm.virksomhetsnummer)),
-                    "UKJENT",
-                    vm.refusjonsbeloep?.toBigDecimal(),
-                    vm.status.correspondingDomainStatus,
-                    vm.sykemeldingsgrad?.toBigDecimal(),
-                    vm.dagsats?.toBigDecimal(),
-                    vm.maksDato,
-                    listOf(),
-                    Ytelsesperiode.Ytelse.SP,
-                    null,
-                    LocalDate.now()
-            )
-        }
+    private fun processVedtak(melding: SpleisMelding) {
+        val vedtak = om.readValue(melding.messageBody, SpleisVedtakDto::class.java)
+        val person = pdl.person(melding.key)?.hentPerson?.navn?.firstOrNull() ?: PdlPersonNavn("Ukjent",  null, "Ukjent")
+
+        map(vedtak, melding.offset, melding.key, person.fornavn, person.etternavn)
+                .forEach {
+                    ypRepo.upsert(it)
+                }
+    }
+
+    private fun processBehandlingstilstand() {
+        // https://github.com/navikt/helse-sporbar/blob/master/src/main/kotlin/no/nav/helse/sporbar/VedtaksperiodeDto.kt
+        // preliminær periode der fom tom er ukjent?
+        // Bruk Sykepengesøknad-teamet sitt API for å hente ut søknaden og bruk FOM-TOM fra denne
+
+    }
+
+    fun map(vedtak: SpleisVedtakDto, kafkaOffset: Long, fnr: String, fornavn: String, etternavn: String): List<Ytelsesperiode> {
+        return vedtak.utbetalinger
+                .filter {it.fagområde == "SPREF"} // utbetalingen er en refusjon
+                .flatMap {
+                    it.utbetalingslinjer.map { utbetalingslinje ->
+                        Ytelsesperiode(
+                                Periode(utbetalingslinje.fom, utbetalingslinje.tom),
+                                kafkaOffset,
+                                Arbeidsforhold("",
+                                        Person(fornavn, etternavn, fnr),
+                                        Arbeidsgiver(it.mottaker)),
+                                utbetalingslinje.beløp.toBigDecimal(),
+                                Ytelsesperiode.Status.INNVILGET,
+                                utbetalingslinje.grad.toBigDecimal(),
+                                utbetalingslinje.dagsats.toBigDecimal(),
+                                Ytelsesperiode.Ytelse.SP,
+                                LocalDate.now()
+                        )
+                    }
+                }
     }
 }

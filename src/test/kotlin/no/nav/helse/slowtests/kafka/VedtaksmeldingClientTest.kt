@@ -1,17 +1,16 @@
 package no.nav.helse.slowtests.kafka
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.spion.vedtaksmelding.Vedtaksmelding
+import no.nav.helse.spion.vedtaksmelding.SpleisMeldingstype
+import no.nav.helse.spion.vedtaksmelding.SpleisVedtaksmeldingGenerator
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingClient
-import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingsStatus
-import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingsYtelse
 import no.nav.helse.spion.web.common
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.KafkaAdminClient
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.serialization.StringSerializer
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.koin.core.KoinApplication
 import org.koin.core.KoinComponent
-import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 
@@ -37,6 +35,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
     private lateinit var adminClient: AdminClient
     val topicName = "topic"
     lateinit var koin: KoinApplication
+    val generator = SpleisVedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
     val testProps = mutableMapOf<String, Any>(
             "bootstrap.servers" to "localhost:9092",
@@ -61,6 +60,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         adminClient.close()
     }
 
+    @ExperimentalStdlibApi
     @Test
     internal fun testHealthCheck() {
         val client = VedtaksmeldingClient(testProps, topicName)
@@ -78,6 +78,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         }
     }
 
+    @ExperimentalStdlibApi
     @Test
     fun getMessages() {
 
@@ -87,23 +88,15 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         assertThat(noMessagesExpected).isEmpty()
 
         val producer = KafkaProducer<String, String>(testProps, StringSerializer(), StringSerializer())
-        val om = koin.koin.get<ObjectMapper>()
-
+        val generatedMessage = generator.next()
         producer.send(
-                ProducerRecord(topicName, om.writeValueAsString(Vedtaksmelding(
-                        "222323",
-                        "323232323",
-                        VedtaksmeldingsStatus.BEHANDLES,
-                        LocalDate.now(),
-                        LocalDate.now(),
-                        VedtaksmeldingsYtelse.SP,
-                        "Hans",
-                        "Ingenmann",
-                        100,
-                        938293.9,
-                        2387.0,
-                        maksDato = LocalDate.now().plusDays(10)
-                )))
+                ProducerRecord(
+                        topicName,
+                        0,
+                        generatedMessage.key,
+                        generatedMessage.messageBody,
+                        listOf(RecordHeader("type", SpleisMeldingstype.Vedtak.name.toByteArray()))
+                )
         ).get(10, TimeUnit.SECONDS)
 
         val oneMessageExpected = client.getMessagesToProcess()

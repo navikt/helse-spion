@@ -8,15 +8,11 @@ data class Ytelsesperiode(
         val periode: Periode,
         val kafkaOffset: Long,
         val arbeidsforhold: Arbeidsforhold,
-        val vedtaksId: String,
         val refusjonsbeløp: BigDecimal?,
         val status: Status,
         val grad: BigDecimal?,
         val dagsats: BigDecimal?,
-        val maxdato: LocalDate?,
-        val ferieperioder: List<Periode>,
         val ytelse: Ytelse,
-        val merknad: String?,
         val sistEndret: LocalDate
 ) {
     enum class Status {
@@ -27,8 +23,3 @@ data class Ytelsesperiode(
         SP, FP, SVP, PP, OP, OM
     }
 }
-
-
-
-
-

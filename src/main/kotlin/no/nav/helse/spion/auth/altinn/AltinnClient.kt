@@ -1,9 +1,9 @@
 package no.nav.helse.spion.auth.altinn
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.readText
-import io.ktor.http.HttpStatusCode
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spion.auth.AuthorizationsRepository
 import no.nav.helse.spion.domene.AltinnOrganisasjon
@@ -51,7 +51,7 @@ class AltinnClient(
         try {
             hentOrgMedRettigheterForPerson("01065500791")
         } catch (ex: io.ktor.client.features.ClientRequestException) {
-            if (!(ex.response.status == HttpStatusCode.BadRequest && ex.response.readText().contains("Invalid social security number"))) {
+            if (!(ex.response?.status == HttpStatusCode.BadRequest && ex.response!!.readText().contains("Invalid social security number"))) {
                 throw ex
             }
         }

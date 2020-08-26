@@ -1,29 +1,22 @@
 package no.nav.helse.spion.vedtaksmelding
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.ArbeidsgiverGenerator
 import no.nav.helse.spion.domene.Periode
 import no.nav.helse.spion.domene.ytelsesperiode.PersonGenerator
 import java.time.LocalDate
 import kotlin.random.Random
-import kotlin.random.Random.Default.nextDouble
 
-private val periodStateGenerator = {
-    val rand = Random.Default.nextInt(0, 100)
-    when {
-        rand < 5 -> VedtaksmeldingsStatus.AVSLÅTT
-        rand < 25 -> VedtaksmeldingsStatus.BEHANDLES
-        rand < 30 -> VedtaksmeldingsStatus.HENLAGT
-        else -> VedtaksmeldingsStatus.INNVILGET
-    }
-}
-
-class VedtaksmeldingGenerator(
+class SpleisVedtaksmeldingGenerator(
+        private val om: ObjectMapper = ObjectMapper().registerModules(KotlinModule(), JavaTimeModule()),
         fixedListArbeidsgivere: MutableList<Arbeidsgiver>? = null,
         maxUniqueArbeidsgivere: Int = 10,
         maxUniquePersoner: Int = 100,
         private val initDate: LocalDate = LocalDate.of(2020, 1, 1)
-) : Iterable<Vedtaksmelding>, Iterator<Vedtaksmelding> {
+) : Iterable<SpleisMelding>, Iterator<SpleisMelding> {
 
     private val arbeidsgiverGenerator = ArbeidsgiverGenerator(fixedListArbeidsgivere, maxUniqueArbeidsgivere)
     private val personGenerator = PersonGenerator(maxUniquePersoner)
@@ -38,29 +31,36 @@ class VedtaksmeldingGenerator(
 
     private val sykemeldingsGrader = listOf(20, 30, 50, 80, 100)
 
-    private fun generate(): Vedtaksmelding {
+    private fun generate(): SpleisMelding {
         val periode = randomPeriode()
         val person = personGenerator.getRandomPerson()
         numGeneratedVedtak++
-        val status = periodStateGenerator()
 
-        return Vedtaksmelding(
-                person.identitetsnummer,
-                arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!,
-                status,
-                periode.fom,
-                periode.tom,
-                VedtaksmeldingsYtelse.SP,
-                person.fornavn,
-                person.etternavn,
-                if (status == VedtaksmeldingsStatus.INNVILGET) sykemeldingsGrader.pickRandom() else null,
-                if (status == VedtaksmeldingsStatus.INNVILGET) nextDouble(10.0, 10000.0) else null,
-                if (status == VedtaksmeldingsStatus.INNVILGET) nextDouble(10.0, 1000.0) else null,
-                periode.tom
-        )
+        val vedtak = SpleisVedtakDto(
+            periode.fom,
+            periode.tom,
+                2,
+                5,
+                listOf(SpleisVedtakDto.SpleisUtbetalingDto(
+                        arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!,
+                        "SPREF",
+                        10000,
+                        listOf(SpleisVedtakDto.SpleisUtbetalingDto.SpleisUtbetalingslinjeDto(
+                                periode.fom,
+                                periode.tom,
+                                10000/7,
+                                10000,
+                                1.0,
+                                2
+                    ))
+                )),
+                emptyList()
+            )
+
+        return SpleisMelding(person.identitetsnummer, numGeneratedVedtak.toLong(), SpleisMeldingstype.Vedtak.name, om.writeValueAsString(vedtak))
     }
 
-    override fun iterator(): Iterator<Vedtaksmelding> {
+    override fun iterator(): Iterator<SpleisMelding> {
         return this
     }
 
@@ -68,7 +68,7 @@ class VedtaksmeldingGenerator(
         return true
     }
 
-    override fun next(): Vedtaksmelding {
+    override fun next(): SpleisMelding {
         return generate()
     }
 }

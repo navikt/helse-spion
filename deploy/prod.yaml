@@ -60,3 +60,5 @@ spec:
     value: aadb2c
   - name: KAFKA_ENDPOINTS
     value: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443
+  - name: VEDTAK_TOPICNAME
+    value: aapen-helse-sporbar

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import no.nav.helse.spion.vedtaksmelding.SpleisVedtaksmeldingGenerator
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,6 +20,7 @@ internal class FailedVedtaksmeldingProcessorTest {
     val failedMessageDaoMock = mockk<FailedVedtaksmeldingRepository>(relaxed = true)
 
     val testCoroutineDispatcher = TestCoroutineDispatcher()
+    val meldingsGenerator = SpleisVedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
     val processor = FailedVedtaksmeldingProcessor(
             failedMessageDaoMock, serviceMock, CoroutineScope(testCoroutineDispatcher)
@@ -30,8 +32,8 @@ internal class FailedVedtaksmeldingProcessorTest {
     internal fun setUp() {
 
         msg = listOf(
-                FailedVedtaksmelding("data", 1, "error"),
-                FailedVedtaksmelding("data", 2, "error")
+                FailedVedtaksmelding(meldingsGenerator.next(), "error"),
+                FailedVedtaksmelding(meldingsGenerator.next(), "error")
         )
 
         every { failedMessageDaoMock.getFailedMessages(any()) } returns msg

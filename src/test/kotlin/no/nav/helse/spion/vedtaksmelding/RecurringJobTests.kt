@@ -2,6 +2,7 @@ package no.nav.helse.spion.vedtaksmelding
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import no.nav.helse.utils.RecurringJob
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.io.IOException

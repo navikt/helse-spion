@@ -1,4 +1,4 @@
-package no.nav.helse.spion.vedtaksmelding
+package no.nav.helse.utils
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
