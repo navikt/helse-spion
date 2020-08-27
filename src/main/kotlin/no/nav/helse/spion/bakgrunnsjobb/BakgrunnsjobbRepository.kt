@@ -38,7 +38,7 @@ class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : Bakgrunnsjob
                 setString(9, bakgrunnsjobb.data)
             }
         }
-        //test
+        //test test
     }
 
     override fun findByKjoeretidBeforeAndStatusIn(timeout: LocalDateTime, tilstander: Set<BakgrunnsjobbStatus>): List<Bakgrunnsjobb> {
