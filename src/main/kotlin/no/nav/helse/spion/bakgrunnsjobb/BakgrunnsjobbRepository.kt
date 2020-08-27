@@ -50,7 +50,7 @@ class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : Bakgrunnsjob
 
             val resultatListe = mutableListOf<Bakgrunnsjobb>()
 
-            //TODO Null safety
+            //TODO Null safety abc
             while (res.next()) {
                 resultatListe.add(Bakgrunnsjobb(
                         UUID.fromString(res.getString("jobb_id")),
