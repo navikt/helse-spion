@@ -12,16 +12,16 @@ interface BakgrunnsjobbRepository {
 
 class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : BakgrunnsjobbRepository {
 
-    private val tableName = "no/nav/helse/spion/bakgrunnsjobb"
+    private val tableName = "bakgrunnsjobb"
 
     private val insertStatement = """INSERT INTO $tableName
 (jobb_id, type, behandlet, opprettet, status, kjoeretid, forsoek, maks_forsoek, data) VALUES
-(?::uuid,?,?,?,?,?,?,? ?::json)"""
+(?::uuid,?,?,?,?,?,?,?,?::json)"""
             .trimIndent()
 
     private val selectStatement = """
-        select * from $tableName where kjoeretid < ? and field = ANY(?)
-    """.trimIndent()
+        select * from $tableName where kjoeretid < ? and status = ANY(?)
+    """.trimIndent() //and
 
 
     override fun save(bakgrunnsjobb: Bakgrunnsjobb) {
@@ -36,7 +36,7 @@ class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : Bakgrunnsjob
                 setInt(7, bakgrunnsjobb.forsoek)
                 setInt(8, bakgrunnsjobb.maksAntallForsoek)
                 setString(9, bakgrunnsjobb.data)
-            }
+            }.executeUpdate()
         }
         //signed SIGNED
     }
@@ -45,7 +45,7 @@ class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : Bakgrunnsjob
         dataSource.connection.use {
             val res = it.prepareStatement(selectStatement).apply {
                 setTimestamp(1, Timestamp.valueOf(timeout))
-                setArray(2, it.createArrayOf("VARCHAR", arrayOf(tilstander.map { status -> status.toString() })))
+                setArray(2, it.createArrayOf("VARCHAR", tilstander.map { it.toString() }.toTypedArray()))
             }.executeQuery()
 
             val resultatListe = mutableListOf<Bakgrunnsjobb>()
