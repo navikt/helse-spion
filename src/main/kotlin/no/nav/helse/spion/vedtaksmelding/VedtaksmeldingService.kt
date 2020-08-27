@@ -8,6 +8,7 @@ import no.nav.helse.spion.domene.ytelsesperiode.Arbeidsforhold
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.integrasjon.pdl.NameProvider
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class VedtaksmeldingService(
@@ -15,8 +16,10 @@ class VedtaksmeldingService(
         private val om: ObjectMapper,
         private val pdl: NameProvider
 ) {
-    fun processAndSaveMessage(melding: SpleisMelding) {
+    val log = LoggerFactory.getLogger(VedtaksmeldingService::class.java)
 
+    fun processAndSaveMessage(melding: SpleisMelding) {
+        log.info(melding.toString())
         when(melding.type) {
             SpleisMeldingstype.Behandlingstilstand.name -> processBehandlingstilstand()
             SpleisMeldingstype.Vedtak.name -> processVedtak(melding)
