@@ -55,10 +55,10 @@ class VedtaksmeldingService(
                                 Arbeidsforhold("",
                                         Person(fornavn, etternavn, fnr),
                                         Arbeidsgiver(it.mottaker)),
-                                utbetalingslinje.beløp.toBigDecimal(),
+                                (utbetalingslinje.beløp * utbetalingslinje.sykedager).toBigDecimal(),
                                 Ytelsesperiode.Status.INNVILGET,
                                 utbetalingslinje.grad.toBigDecimal(),
-                                utbetalingslinje.dagsats.toBigDecimal(),
+                                utbetalingslinje.beløp.toBigDecimal(),
                                 Ytelsesperiode.Ytelse.SP,
                                 LocalDate.now()
                         )
