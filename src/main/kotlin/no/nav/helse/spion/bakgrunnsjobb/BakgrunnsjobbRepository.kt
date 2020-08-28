@@ -8,6 +8,9 @@ import javax.sql.DataSource
 interface BakgrunnsjobbRepository {
     fun save(bakgrunnsjobb: Bakgrunnsjobb)
     fun findByKjoeretidBeforeAndStatusIn(timeout: LocalDateTime, tilstander: Set<BakgrunnsjobbStatus>): List<Bakgrunnsjobb>
+    fun delete(uuid: UUID)
+    fun deleteAll()
+    fun update(bakgrunnsjobb: Bakgrunnsjobb)
 }
 
 class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : BakgrunnsjobbRepository {
@@ -19,17 +22,30 @@ class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : Bakgrunnsjob
 (?::uuid,?,?,?,?,?,?,?,?::json)"""
             .trimIndent()
 
+    private val updateStatement = """UPDATE $tableName
+        SET behandlet = ?
+         , status = ?
+         , kjoeretid = ?
+         , forsoek = ?
+         , data = ?::json
+where jobb_id = ?::uuid
+"""
+            .trimIndent()
+
     private val selectStatement = """
         select * from $tableName where kjoeretid < ? and status = ANY(?)
     """.trimIndent() //and
 
+    private val deleteStatement = "DELETE FROM $tableName where jobb_id = ?::uuid"
+
+    private val deleteAllStatement = "DELETE FROM $tableName"
 
     override fun save(bakgrunnsjobb: Bakgrunnsjobb) {
         dataSource.connection.use {
             it.prepareStatement(insertStatement).apply {
                 setString(1, bakgrunnsjobb.uuid.toString())
                 setString(2, bakgrunnsjobb.type)
-                setTimestamp(3, bakgrunnsjobb.behandlet.let(Timestamp::valueOf))
+                setTimestamp(3, bakgrunnsjobb.behandlet?.let(Timestamp::valueOf))
                 setTimestamp(4, Timestamp.valueOf(bakgrunnsjobb.opprettet))
                 setString(5, bakgrunnsjobb.status.toString())
                 setTimestamp(6, Timestamp.valueOf(bakgrunnsjobb.kjoeretid))
@@ -38,7 +54,19 @@ class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : Bakgrunnsjob
                 setString(9, bakgrunnsjobb.data)
             }.executeUpdate()
         }
-        //signed SIGNED
+    }
+
+    override fun update(bakgrunnsjobb: Bakgrunnsjobb) {
+        dataSource.connection.use {
+            it.prepareStatement(updateStatement).apply {
+                setTimestamp(1, bakgrunnsjobb.behandlet?.let(Timestamp::valueOf))
+                setString(2, bakgrunnsjobb.status.toString())
+                setTimestamp(3, Timestamp.valueOf(bakgrunnsjobb.kjoeretid))
+                setInt(4, bakgrunnsjobb.forsoek)
+                setString(5, bakgrunnsjobb.data)
+                setString(6, bakgrunnsjobb.uuid.toString())
+            }.executeUpdate()
+        }
     }
 
     override fun findByKjoeretidBeforeAndStatusIn(timeout: LocalDateTime, tilstander: Set<BakgrunnsjobbStatus>): List<Bakgrunnsjobb> {
@@ -50,12 +78,11 @@ class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : Bakgrunnsjob
 
             val resultatListe = mutableListOf<Bakgrunnsjobb>()
 
-            //TODO Null safety abc
             while (res.next()) {
                 resultatListe.add(Bakgrunnsjobb(
                         UUID.fromString(res.getString("jobb_id")),
                         res.getString("type"),
-                        res.getTimestamp("behandlet").toLocalDateTime(), //Nullable
+                        res.getTimestamp("behandlet")?.toLocalDateTime(),
                         res.getTimestamp("opprettet").toLocalDateTime(),
                         BakgrunnsjobbStatus.valueOf(res.getString("status")),
                         res.getTimestamp("kjoeretid").toLocalDateTime(),
@@ -67,4 +94,19 @@ class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : Bakgrunnsjob
             return resultatListe
         }
     }
+
+    override fun delete(id: UUID) {
+        dataSource.connection.use {
+            it.prepareStatement(deleteStatement).apply {
+                setString(1, id.toString())
+            }.executeUpdate()
+        }
+    }
+
+    override fun deleteAll() {
+        dataSource.connection.use {
+            it.prepareStatement(deleteAllStatement).executeUpdate()
+        }
+    }
+
 }
