@@ -14,6 +14,8 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
 
     val testYtelsesPeriode = Ytelsesperiode(
             periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
+            gjenståendeSykedager = 2,
+            forbrukteSykedager = 82,
             arbeidsforhold = Arbeidsforhold(
                     arbeidsforholdId = "1",
                     arbeidstaker = Person("Solan", "Gundersen", "10987654321"),

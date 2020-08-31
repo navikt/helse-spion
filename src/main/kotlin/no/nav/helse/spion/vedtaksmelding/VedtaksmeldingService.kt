@@ -52,6 +52,8 @@ class VedtaksmeldingService(
                         Ytelsesperiode(
                                 Periode(utbetalingslinje.fom, utbetalingslinje.tom),
                                 kafkaOffset,
+                                vedtak.forbrukteSykedager,
+                                vedtak.gjenståendeSykedager,
                                 Arbeidsforhold("",
                                         Person(fornavn, etternavn, fnr),
                                         Arbeidsgiver(it.mottaker)),
