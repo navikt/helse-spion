@@ -1,22 +1,57 @@
 package no.nav.helse.spion.bakgrunnsjobb
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 class BakgrunnsjobbService(
-        val bakgrunnsjobbRepository: BakgrunnsjobbRepository
+        val bakgrunnsjobbRepository: BakgrunnsjobbRepository,
+        val delayMillis: Long
 ) {
 
-    fun sjekkOgProsseserVentendeBakgrunnsjobber() {
-        finnVentende()
-                .forEach(this::prosesser)
+    private val prossesserere = HashMap<String, BakgrunnsjobbProsesserer>()
+    private val logger: org.slf4j.Logger = LoggerFactory.getLogger("BakgrunnsjobbService")
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+    init {
+        //TODO Add FailedVedtaksmeldingProcessor
+        //TODO ADD VedtaksmeldingProcessor
+        //TODO Gjør så generisk som mulig så koden kan gjenbrukes mest mulig trivielt
+        sjekkOgProsseserVentendeBakgrunnsjobber()
     }
 
-    private fun prosesser(jobb: Bakgrunnsjobb){
+
+    fun sjekkOgProsseserVentendeBakgrunnsjobber() {
+        coroutineScope.launch {
+            finnVentende()
+                    .also { logger.info("Fant ${it.size} bakgrunnsjobber å kjøre") }
+                    .forEach{prosesser(it)}
+            delay(delayMillis)
+            sjekkOgProsseserVentendeBakgrunnsjobber()
+        }
+    }
+
+    fun prosesser(jobb: Bakgrunnsjobb) {
         jobb.behandlet = LocalDateTime.now()
         jobb.forsoek++
 
-        try{
-            //bla bla
+        try {
+            val prossessorForType = prossesserere[jobb.type]
+                    ?: throw IllegalArgumentException("Det finnes ingen prossessor for typen '${jobb.type}'. Dette må konfigureres.")
+
+            jobb.kjoeretid = prossessorForType.nesteForsoek(jobb.forsoek, LocalDateTime.now())
+            prossessorForType.prosesser(jobb.opprettet, jobb.forsoek, jobb.data)
+            jobb.status = BakgrunnsjobbStatus.OK
+        } catch (ex: Exception) {
+            jobb.status = if (jobb.forsoek >= jobb.maksAntallForsoek) BakgrunnsjobbStatus.STOPPET else BakgrunnsjobbStatus.FEILET
+            if (jobb.status == BakgrunnsjobbStatus.STOPPET) {
+                logger.error("Jobb ${jobb.uuid} feilet permanent", ex)
+            } else {
+                logger.error("Jobb ${jobb.uuid} feilet, forsøker igjen ${jobb.kjoeretid}", ex)
+            }
         } finally {
             bakgrunnsjobbRepository.update(jobb)
         }
@@ -25,5 +60,13 @@ class BakgrunnsjobbService(
 
     fun finnVentende(): List<Bakgrunnsjobb> =
             bakgrunnsjobbRepository.findByKjoeretidBeforeAndStatusIn(LocalDateTime.now(), setOf(BakgrunnsjobbStatus.OPPRETTET, BakgrunnsjobbStatus.FEILET))
+}
 
+
+/**
+ * Interface for en klasse som kan prosessere en bakgrunnsjobbstype
+ */
+interface BakgrunnsjobbProsesserer {
+    fun prosesser(jobbOpprettet: LocalDateTime, forsoek: Int, jobbData: String)
+    fun nesteForsoek(forsoek: Int, forrigeForsoek: LocalDateTime): LocalDateTime
 }
