@@ -25,7 +25,7 @@ class DynamicMockAuthRepo(private val om: ObjectMapper, private val dataSource: 
 
         dataSource.connection.use { connection ->
             val res = connection.prepareStatement(
-                    "select * from ytelsesperiode where random() < 0.05 limit 100")
+                    "select * from ytelsesperiode where random() < 0.5 limit 100")
                     .executeQuery()
 
             val resultatListe = mutableListOf<Ytelsesperiode>()
