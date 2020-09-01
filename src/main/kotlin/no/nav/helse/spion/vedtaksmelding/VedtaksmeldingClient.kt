@@ -8,11 +8,14 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 
-typealias MessageWithOffset = Pair<Long, String>
+data class MessageWithOffset(
+        val offset: Long,
+        val message: String
+)
 
 interface VedtaksmeldingProvider {
 
-    fun getMessagesToProcess(): List<MessageWithOffset>
+    fun getMessagesToProcess(): List<String>
     fun confirmProcessingDone()
 }
 
@@ -43,9 +46,9 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String) : 
 
     fun stop() = consumer.close()
 
-    override fun getMessagesToProcess(): List<MessageWithOffset> {
+    override fun getMessagesToProcess(): List<String> {
         try {
-            val result = consumer.poll(Duration.ofSeconds(10)).map { MessageWithOffset(it.offset(), it.value()) }.toList()
+            val result = consumer.poll(Duration.ofSeconds(10)).map { it.value() }.toList()
             lastThrown = null
             return result
         } catch (e: Exception) {

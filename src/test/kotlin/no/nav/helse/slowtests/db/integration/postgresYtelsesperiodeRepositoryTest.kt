@@ -25,13 +25,13 @@ import org.koin.core.get
 import org.postgresql.util.PSQLException
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     lateinit var repo: PostgresYtelsesperiodeRepository;
     val testYtelsesPeriode = Ytelsesperiode(
             periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
-            kafkaOffset = 2,
             arbeidsforhold = Arbeidsforhold(
                     arbeidsforholdId = "1",
                     arbeidstaker = Person("Solan", "Gundersen", "10987654321"),
@@ -107,7 +107,7 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
 
     @Test
     fun `lagrer en nyere ytelsesperiode`() {
-        val ypNewer = testYtelsesPeriode.copy(kafkaOffset = 5, status = Ytelsesperiode.Status.INNVILGET)
+        val ypNewer = testYtelsesPeriode.copy(sistEndret = LocalDate.now().plusDays(1),status = Ytelsesperiode.Status.INNVILGET)
 
         repo.upsert(ypNewer)
 
@@ -118,9 +118,9 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
     }
 
     @Test
-    fun `lagrer ytelsesperiode kun hvis den har høyere offset enn en eksisterende versjon`() {
-        val ypNewer = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
-        val ypOlder = testYtelsesPeriode.copy(kafkaOffset = 1, status = Ytelsesperiode.Status.HENLAGT)
+    fun `lagrer ytelsesperiode kun hvis den er nyere enn en eksisterende versjon`() {
+        val ypNewer = testYtelsesPeriode.copy(sistEndret = LocalDate.now().plusDays(3), status = Ytelsesperiode.Status.INNVILGET)
+        val ypOlder = testYtelsesPeriode.copy(sistEndret = LocalDate.now().plusDays(1), status = Ytelsesperiode.Status.HENLAGT)
 
         repo.upsert(ypNewer)
         repo.upsert(ypOlder)
@@ -135,7 +135,7 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
     fun `lagrer ikke to ytelsesperioder med samme primærnøkkel`() {
         val con = HikariDataSource(createLocalHikariConfig()).connection
 
-        val yp = testYtelsesPeriode.copy(kafkaOffset = 3, status = Ytelsesperiode.Status.INNVILGET)
+        val yp = testYtelsesPeriode.copy(sistEndret = LocalDate.now().plusDays(3), status = Ytelsesperiode.Status.INNVILGET)
 
         assertThatExceptionOfType(PSQLException::class.java).isThrownBy {
             repo.executeSave(yp, con)
@@ -146,7 +146,7 @@ internal class postgresYtelsesperiodeRepositoryTest : KoinComponent {
     fun `lagrer ikke en ytelsesperiode som mangler del av primærnøkkel`() {
         val ds = HikariDataSource(createLocalHikariConfig())
         val mapperMock = mockk<ObjectMapper>()
-        val validJsonMissingIdentitetsnummer = "{  \"periode\" : {    \"fom\" : \"2019-01-01\",    \"tom\" : \"2019-02-01\"  },  \"kafkaOffset\" : 2,  \"arbeidsforhold\" : {    \"arbeidsforholdId\" : \"1\",    \"arbeidstaker\" : {      \"fornavn\" : \"Solan\",      \"etternavn\" : \"Gundersen\"   },    \"arbeidsgiver\" : {      \"navn\" : \"Flåklypa Verksted\",      \"organisasjonsnummer\" : \"666666666\",      \"arbeidsgiverId\" : \"555555555\"    }  },  \"vedtaksId\" : \"1\",  \"refusjonsbeløp\" : 10000,  \"status\" : \"UNDER_BEHANDLING\",  \"grad\" : 50,  \"dagsats\" : 200,  \"maxdato\" : \"2019-01-01\",  \"ferieperioder\" : [ ],  \"ytelse\" : \"SP\",  \"merknad\" : \"Fritak fra AGP\",  \"sistEndret\" : \"2020-02-26\"}"
+        val validJsonMissingIdentitetsnummer = "{  \"periode\" : {    \"fom\" : \"2019-01-01\",    \"tom\" : \"2019-02-01\"  },  \"arbeidsforhold\" : {    \"arbeidsforholdId\" : \"1\",    \"arbeidstaker\" : {      \"fornavn\" : \"Solan\",      \"etternavn\" : \"Gundersen\"   },    \"arbeidsgiver\" : {      \"navn\" : \"Flåklypa Verksted\",      \"organisasjonsnummer\" : \"666666666\",      \"arbeidsgiverId\" : \"555555555\"    }  },  \"vedtaksId\" : \"1\",  \"refusjonsbeløp\" : 10000,  \"status\" : \"UNDER_BEHANDLING\",  \"grad\" : 50,  \"dagsats\" : 200,  \"maxdato\" : \"2019-01-01\",  \"ferieperioder\" : [ ],  \"ytelse\" : \"SP\",  \"merknad\" : \"Fritak fra AGP\",  \"sistEndret\" : \"2020-02-26\"}"
         every { mapperMock.writeValueAsString(any()) } returns validJsonMissingIdentitetsnummer
 
         repo = PostgresYtelsesperiodeRepository(ds, mapperMock)

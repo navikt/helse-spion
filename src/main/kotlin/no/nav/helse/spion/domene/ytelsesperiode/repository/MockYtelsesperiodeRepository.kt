@@ -28,8 +28,7 @@ class MockYtelsesperiodeRepository : YtelsesperiodeRepository {
             ferieperioder = emptyList(),
             ytelse = Ytelsesperiode.Ytelse.SP,
             merknad = "Fritak fra AGP",
-            sistEndret = LocalDate.now(),
-            kafkaOffset = 1
+            sistEndret = LocalDate.now()
     )
 
     init {

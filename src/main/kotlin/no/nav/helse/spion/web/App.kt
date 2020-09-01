@@ -7,10 +7,8 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
-import no.nav.helse.spion.bakgrunnsjobb.BakgrunnsjobbProsesserer
 import no.nav.helse.spion.bakgrunnsjobb.BakgrunnsjobbService
-import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingConsumer
 import org.koin.ktor.ext.getKoin
 import org.slf4j.LoggerFactory
 
@@ -29,15 +27,11 @@ fun main() {
         val bakgrunnsjobbService = koin.get<BakgrunnsjobbService>()
 
 
-        val vedtaksmeldingProcessor = koin.get<VedtaksmeldingProcessor>()
-        //vedtaksmeldingProcessor.startAsync(retryOnFail = true)
-
-        val failedVedtaksmeldingProcessor = koin.get<FailedVedtaksmeldingProcessor>()
-        //failedVedtaksmeldingProcessor.startAsync(retryOnFail = true)
+        val vedtaksmeldingConsumer = koin.get<VedtaksmeldingConsumer>()
+        vedtaksmeldingConsumer.startAsync(retryOnFail = true)
 
         Runtime.getRuntime().addShutdownHook(Thread {
-            vedtaksmeldingProcessor.stop()
-            failedVedtaksmeldingProcessor.stop()
+            vedtaksmeldingConsumer.stop()
             app.stop(1000, 1000)
         })
     }

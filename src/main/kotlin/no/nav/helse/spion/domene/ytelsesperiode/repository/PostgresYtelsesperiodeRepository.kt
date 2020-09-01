@@ -98,18 +98,18 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
                 con.autoCommit = false
                 val existingYp = getExistingYtelsesperiode(con, yp)
                 existingYp?.let {
-                    if (existingYp.kafkaOffset > yp.kafkaOffset)
+                    if (existingYp.sistEndret.isAfter(yp.sistEndret)) //TODO Det kommer en timestamp her
                         return
                     delete(existingYp)
                 }
                 executeSave(yp, con)
                 con.commit()
             } catch (e: SQLException) {
-                logger.error("Ruller tilbake ytelsesperiode med offset ${yp.kafkaOffset}", e)
+                logger.error("Ruller tilbake ytelsesperiode med id ${yp.vedtaksId}", e)
                 try {
                     con.rollback()
                 } catch (ex: Exception) {
-                    logger.error("Klarte ikke rulle tilbake ytelsesperiode med offset ${yp.kafkaOffset}", e)
+                    logger.error("Klarte ikke rulle tilbake ytelsesperiode med id ${yp.vedtaksId}", e)
                 }
             }
         }

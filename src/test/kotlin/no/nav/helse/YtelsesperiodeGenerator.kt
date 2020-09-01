@@ -47,7 +47,6 @@ class YtelsesperiodeGenerator(
         numGeneratedPerioder++
         return Ytelsesperiode(
                 periode,
-                offset++,
                 Arbeidsforhold("",
                         personGenerator.getRandomPerson(),
                         arbeidsgiverGenerator.getRandomArbeidsGiver()

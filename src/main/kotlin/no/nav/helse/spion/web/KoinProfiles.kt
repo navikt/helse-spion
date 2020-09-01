@@ -8,13 +8,15 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.config.ApplicationConfig
-import io.ktor.util.KtorExperimentalAPI
+import io.ktor.client.*
+import io.ktor.client.engine.apache.*
+import io.ktor.client.features.json.*
+import io.ktor.config.*
+import io.ktor.util.*
 import no.nav.helse.spion.auth.*
+import no.nav.helse.spion.bakgrunnsjobb.BakgrunnsjobbRepository
+import no.nav.helse.spion.bakgrunnsjobb.MockBakgrunnsjobbRepository
+import no.nav.helse.spion.bakgrunnsjobb.PostgresBakgrunnsjobbRepository
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
 import no.nav.helse.spion.db.getDataSource
@@ -24,9 +26,6 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiod
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.vedtaksmelding.*
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
-import no.nav.helse.spion.vedtaksmelding.failed.PostgresFailedVedtaksmeldingRepository
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
 import org.koin.core.Koin
@@ -80,6 +79,7 @@ val common = module {
 
 fun buildAndTestConfig() = module {
     single { MockYtelsesperiodeRepository() as YtelsesperiodeRepository }
+    single { MockBakgrunnsjobbRepository() as BakgrunnsjobbRepository }
     single { StaticMockAuthRepo(get()) as AuthorizationsRepository } bind StaticMockAuthRepo::class
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
@@ -91,17 +91,15 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { getDataSource(createLocalHikariConfig(), "spion", null) as DataSource }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
+    single { PostgresBakgrunnsjobbRepository(get()) as BakgrunnsjobbRepository }
     single { StaticMockAuthRepo(get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
 
     single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
 
-    single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
-
     single { VedtaksmeldingService(get(), get()) }
-    single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { VedtaksmeldingConsumer(get(), get(), get()) }
 
     LocalOIDCWireMock.start()
 }
@@ -138,11 +136,10 @@ fun preprodConfig(config: ApplicationConfig) = module {
     }
 
 
-    single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingService(get(), get()) }
-    single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { VedtaksmeldingConsumer(get(), get(), get()) }
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
+    single { PostgresBakgrunnsjobbRepository(get()) as BakgrunnsjobbRepository }
 
     single { SpionService(get(), get()) }
 }
@@ -160,13 +157,12 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { DefaultAuthorizer(get()) as Authorizer }
 
     single { generateEmptyMock() as VedtaksmeldingProvider }
-    single { PostgresFailedVedtaksmeldingRepository(get()) as FailedVedtaksmeldingRepository }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
+    single { PostgresBakgrunnsjobbRepository(get()) as BakgrunnsjobbRepository }
     single { VedtaksmeldingService(get(), get()) }
 
-    single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { VedtaksmeldingConsumer(get(), get(), get()) }
 }
 
 val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {
@@ -177,10 +173,10 @@ val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvide
         )
 
         val generator = VedtaksmeldingGenerator(arbeidsgivere)
-        override fun getMessagesToProcess(): List <MessageWithOffset> {
+        override fun getMessagesToProcess(): List<MessageWithOffset> {
             var offset = 0.toLong()
             return if (Random.Default.nextDouble() < 0.1)
-                generator.take(Random.Default.nextInt(2, 50)).map { Pair(offset++, om.writeValueAsString(it))}
+                generator.take(Random.Default.nextInt(2, 50)).map { MessageWithOffset(offset++, om.writeValueAsString(it)) }
             else emptyList()
         }
 
@@ -192,9 +188,10 @@ val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvide
 
 val generateEmptyMock = fun(): VedtaksmeldingProvider {
     return object : VedtaksmeldingProvider { // dum mock
-        override fun getMessagesToProcess(): List <MessageWithOffset> {
+        override fun getMessagesToProcess(): List<MessageWithOffset> {
             return emptyList()
         }
+
         override fun confirmProcessingDone() {
         }
     }

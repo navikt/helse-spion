@@ -4,12 +4,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 class BakgrunnsjobbService(
         val bakgrunnsjobbRepository: BakgrunnsjobbRepository,
-        val delayMillis: Long
+        val delayMillis: Long,
+        vedtaksmeldingProcessor: VedtaksmeldingProcessor
 ) {
 
     private val prossesserere = HashMap<String, BakgrunnsjobbProsesserer>()
@@ -17,9 +19,7 @@ class BakgrunnsjobbService(
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     init {
-        //TODO Add FailedVedtaksmeldingProcessor
-        //TODO ADD VedtaksmeldingProcessor
-        //TODO Gjør så generisk som mulig så koden kan gjenbrukes mest mulig trivielt
+        prossesserere[VedtaksmeldingProcessor.JOBB_TYPE] = vedtaksmeldingProcessor
         sjekkOgProsseserVentendeBakgrunnsjobber()
     }
 
@@ -43,7 +43,7 @@ class BakgrunnsjobbService(
                     ?: throw IllegalArgumentException("Det finnes ingen prossessor for typen '${jobb.type}'. Dette må konfigureres.")
 
             jobb.kjoeretid = prossessorForType.nesteForsoek(jobb.forsoek, LocalDateTime.now())
-            prossessorForType.prosesser(jobb.opprettet, jobb.forsoek, jobb.data)
+            prossessorForType.prosesser(jobb.data)
             jobb.status = BakgrunnsjobbStatus.OK
         } catch (ex: Exception) {
             jobb.status = if (jobb.forsoek >= jobb.maksAntallForsoek) BakgrunnsjobbStatus.STOPPET else BakgrunnsjobbStatus.FEILET
@@ -67,6 +67,6 @@ class BakgrunnsjobbService(
  * Interface for en klasse som kan prosessere en bakgrunnsjobbstype
  */
 interface BakgrunnsjobbProsesserer {
-    fun prosesser(jobbOpprettet: LocalDateTime, forsoek: Int, jobbData: String)
+    fun prosesser(jobbData: String)
     fun nesteForsoek(forsoek: Int, forrigeForsoek: LocalDateTime): LocalDateTime
 }

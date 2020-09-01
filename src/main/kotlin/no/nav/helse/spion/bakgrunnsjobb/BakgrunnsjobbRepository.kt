@@ -13,6 +13,33 @@ interface BakgrunnsjobbRepository {
     fun update(bakgrunnsjobb: Bakgrunnsjobb)
 }
 
+class MockBakgrunnsjobbRepository : BakgrunnsjobbRepository {
+
+    private val jobs =  mutableListOf<Bakgrunnsjobb>()
+
+    override fun save(bakgrunnsjobb: Bakgrunnsjobb) {
+        jobs.add(bakgrunnsjobb)
+    }
+
+    override fun findByKjoeretidBeforeAndStatusIn(timeout: LocalDateTime, tilstander: Set<BakgrunnsjobbStatus>): List<Bakgrunnsjobb> {
+        return jobs.filter { tilstander.contains(it.status) }
+                .filter { it.kjoeretid.isBefore(timeout) }
+    }
+
+    override fun delete(uuid: UUID) {
+        jobs.removeIf{ it.uuid == uuid}
+    }
+
+    override fun deleteAll() {
+        jobs.removeAll { true }
+    }
+
+    override fun update(bakgrunnsjobb: Bakgrunnsjobb) {
+        delete(bakgrunnsjobb.uuid)
+        save(bakgrunnsjobb)
+    }
+}
+
 class PostgresBakgrunnsjobbRepository(val dataSource: DataSource) : BakgrunnsjobbRepository {
 
     private val tableName = "bakgrunnsjobb"

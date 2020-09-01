@@ -6,7 +6,6 @@ import java.time.LocalDate
 
 data class Ytelsesperiode(
         val periode: Periode,
-        val kafkaOffset: Long,
         val arbeidsforhold: Arbeidsforhold,
         val vedtaksId: String,
         val refusjonsbeløp: BigDecimal?,
@@ -17,7 +16,7 @@ data class Ytelsesperiode(
         val ferieperioder: List<Periode>,
         val ytelse: Ytelse,
         val merknad: String?,
-        val sistEndret: LocalDate
+        val sistEndret: LocalDate //TODO Det kommer en timestamp i tillegg
 ) {
     enum class Status {
         INNVILGET, AVSLÅTT, UNDER_BEHANDLING, HENLAGT

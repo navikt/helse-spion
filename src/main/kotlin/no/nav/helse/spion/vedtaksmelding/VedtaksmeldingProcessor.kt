@@ -1,40 +1,24 @@
 package no.nav.helse.spion.vedtaksmelding
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmelding
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
-import java.time.Duration
-import java.util.*
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.spion.bakgrunnsjobb.BakgrunnsjobbProsesserer
+import java.time.LocalDateTime
 
 class VedtaksmeldingProcessor(
-        private val kafkaVedtaksProvider: VedtaksmeldingProvider,
-        private val service: VedtaksmeldingService,
-        private val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
-        coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-        waitTimeWhenEmptyQueue: Duration = Duration.ofSeconds(30)
-) : RecurringJob(coroutineScope, waitTimeWhenEmptyQueue) {
+        val vedtaksmeldingService: VedtaksmeldingService,
+        val om: ObjectMapper
+): BakgrunnsjobbProsesserer {
 
-    override fun doJob() {
-        do {
-            val wasEmpty = kafkaVedtaksProvider
-                    .getMessagesToProcess()
-                    .onEach { tryProcessOneMessage(it) }
-                    .isEmpty()
+companion object {
+    val JOBB_TYPE = "vedtaksmelding"
+}
 
-            if (!wasEmpty) {
-                kafkaVedtaksProvider.confirmProcessingDone()
-            }
-        } while (!wasEmpty)
+    override fun prosesser(jobbData: String) {
+        vedtaksmeldingService.processAndSaveMessage(om.readValue(jobbData, MessageWithOffset::class.java))
     }
 
-    private fun tryProcessOneMessage(melding: MessageWithOffset) {
-        try {
-            service.processAndSaveMessage(melding)
-        } catch (t: Throwable) {
-            val errorId = UUID.randomUUID()
-            logger.error("Feilet vedtaksmelding, Database ID: $errorId", t)
-            failedVedtaksmeldingRepository.save(FailedVedtaksmelding(melding.second, melding.first, t.message, errorId))
-        }
+    override fun nesteForsoek(forsoek: Int, forrigeForsoek: LocalDateTime): LocalDateTime {
+        return LocalDateTime.now().plusHours((forsoek * forsoek).toLong())
     }
 }
