@@ -2,6 +2,7 @@ package no.nav.helse.spion.web
 
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -58,6 +59,7 @@ val common = module {
     om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     om.configure(SerializationFeature.INDENT_OUTPUT, true)
     om.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+    om.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
     om.setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
         indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
