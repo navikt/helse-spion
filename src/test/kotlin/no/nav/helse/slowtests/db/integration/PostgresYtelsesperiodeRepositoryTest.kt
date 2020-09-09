@@ -32,8 +32,8 @@ internal class PostgresYtelsesperiodeRepositoryTest : KoinComponent {
     val testYtelsesPeriode = Ytelsesperiode(
             periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
             kafkaOffset = 2,
-            gjenståendeSykedager = 3,
-            forbrukteSykedager = 72,
+            forbrukteSykedager = 2,
+            gjenståendeSykedager = 5,
             arbeidsforhold = Arbeidsforhold(
                     arbeidsforholdId = "1",
                     arbeidstaker = Person("Solan", "Gundersen", "10987654321"),
