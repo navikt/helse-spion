@@ -1,20 +1,24 @@
 package no.nav.helse.spion.vedtaksmelding
 
-import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import io.mockk.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.io.IOException
 
 open class VedtaksmeldingProcessorTests {
 
+    val serviceMock = mockk<VedtaksmeldingService>(relaxed = true)
+    val generator = SpleisVedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
+    val om = ObjectMapper().registerModules(KotlinModule(), JavaTimeModule())
+    val processor = VedtaksmeldingProcessor(serviceMock, om)
 
+    @Test
+    internal fun `normal melding prosesseres ok`() {
+        processor.prosesser(om.writeValueAsString(generator.next()))
+        verify(exactly = 1) { serviceMock.processAndSaveMessage(any()) }
+    }
 }
 
