@@ -39,15 +39,6 @@ psql -v ON_ERROR_STOP=1 --username "spion" --dbname "spion" <<-EOSQL
     ('{"grad": 100, "status": "INNVILGET", "ytelse": "SP", "dagsats": 209, "maxdato": "2020-01-20", "merknad": "", "periode": {"fom": "2020-04-05", "tom": "2020-06-07"}, "vedtaksId": "9170f712-68f8-43f2-92dd-c08f1ba12e95", "sistEndret": "2020-05-06", "kafkaOffset": 0, "ferieperioder": [], "arbeidsforhold": {"arbeidsgiver": {"navn": "JØA OG SEL", "arbeidsgiverId": "711485759", "organisasjonsnummer": "911366940"}, "arbeidstaker": {"fornavn": "Solan", "etternavn": "Gundersen", "identitetsnummer": "15077921467"}, "arbeidsforholdId": ""}, "refusjonsbeløp": 1234}'),
     ('{"grad": 80, "status": "INNVILGET", "ytelse": "SP", "dagsats": 765, "maxdato": "2020-01-20", "merknad": "", "periode": {"fom": "2020-01-01", "tom": "2020-01-20"}, "vedtaksId": "9170f712-68f8-43f2-92dd-c08f1ba12e95", "sistEndret": "2020-01-01", "kafkaOffset": 0, "ferieperioder": [], "arbeidsforhold": {"arbeidsgiver": {"navn": "JØA OG SEL", "arbeidsgiverId": "711485759", "organisasjonsnummer": "911366940"}, "arbeidstaker": {"fornavn": "Solan", "etternavn": "Gundersen", "identitetsnummer": "15077921467"}, "arbeidsforholdId": ""}, "refusjonsbeløp": 3684}');
 
-
-
-
-    CREATE TABLE failedvedtaksmelding (
-        messageData jsonb NOT NULL,
-        errorMessage text,
-        id uuid NOT NULL
-    );
-
     create table bakgrunnsjobb (
     jobb_id uuid unique not null,
     type VARCHAR(100) not null,
