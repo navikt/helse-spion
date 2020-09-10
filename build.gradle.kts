@@ -117,7 +117,7 @@ dependencies {
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
-    implementation("no.nav.helsearbeidsgiver:helse-arbeidsgiver-felles-backend:2020.09.09-11-09-35652")
+    implementation("no.nav.helsearbeidsgiver:helse-arbeidsgiver-felles-backend:2020.09.10-11-52-d4037")
 
     testImplementation("org.koin:koin-test:$koinVersion")
     implementation("com.github.javafaker:javafaker:1.0.1") // flytt denne til test når generatorene ikke er nødvendige i prod-koden lenger

@@ -89,7 +89,7 @@ fun buildAndTestConfig() = module {
     single { SpionService(get(), get()) }
     single { VedtaksmeldingService(get(), get(), createStaticNamePdlMock()) }
     single { VedtaksmeldingProcessor(get(), get()) }
-    single { BakgrunnsjobbService(get(), 300) as BakgrunnsjobbService }
+    single { BakgrunnsjobbService(get()) as BakgrunnsjobbService }
 
     LocalOIDCWireMock.start()
 }
@@ -103,7 +103,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { StaticMockAuthRepo(get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
-    single { BakgrunnsjobbService(get(), 300) }
+    single { BakgrunnsjobbService(get()) }
 
     single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
 
@@ -154,7 +154,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingProcessor(get(), get()) }
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
     single { PostgresBakgrunnsjobbRepository(get()) as BakgrunnsjobbRepository }
-    single { BakgrunnsjobbService(get(), 300) }
+    single { BakgrunnsjobbService(get()) }
 
     single { SpionService(get(), get()) }
 }
@@ -177,7 +177,7 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
     single { PostgresBakgrunnsjobbRepository(get()) as BakgrunnsjobbRepository }
     single { VedtaksmeldingService(get(), get(), get()) }
-    single { BakgrunnsjobbService(get(), 300) }
+    single { BakgrunnsjobbService(get()) }
 
     single { VedtaksmeldingConsumer(get(), get(), get()) }
     single { VedtaksmeldingProcessor(get(), get()) }
