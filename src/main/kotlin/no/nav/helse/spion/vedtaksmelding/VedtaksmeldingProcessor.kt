@@ -18,6 +18,6 @@ class VedtaksmeldingProcessor(
     }
 
     override fun nesteForsoek(forsoek: Int, forrigeForsoek: LocalDateTime): LocalDateTime {
-        return LocalDateTime.now().plusHours((forsoek * forsoek).toLong())
+        return LocalDateTime.now().plusHours(2)
     }
 }

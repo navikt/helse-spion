@@ -32,7 +32,8 @@ class VedtaksmeldingConsumer(
     {
         bakgrunnsjobbRepository.save(Bakgrunnsjobb(
                 type = VedtaksmeldingProcessor.JOBB_TYPE,
-                data = om.writeValueAsString(melding)
+                data = om.writeValueAsString(melding),
+                maksAntallForsoek = 14
         ))
     }
 }
