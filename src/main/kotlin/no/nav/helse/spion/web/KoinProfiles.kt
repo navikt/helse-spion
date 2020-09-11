@@ -14,6 +14,10 @@ import io.ktor.client.engine.apache.*
 import io.ktor.client.features.json.*
 import io.ktor.config.*
 import io.ktor.util.*
+import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbRepository
+import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
+import no.nav.helse.arbeidsgiver.bakgrunnsjobb.MockBakgrunnsjobbRepository
+import no.nav.helse.arbeidsgiver.bakgrunnsjobb.PostgresBakgrunnsjobbRepository
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
@@ -25,9 +29,6 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeReposit
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.integrasjon.pdl.NameProvider
 import no.nav.helse.spion.vedtaksmelding.*
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
-import no.nav.helse.spion.vedtaksmelding.failed.PostgresFailedVedtaksmeldingRepository
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
 import org.koin.core.Koin
@@ -82,29 +83,35 @@ val common = module {
 
 fun buildAndTestConfig() = module {
     single { MockYtelsesperiodeRepository() as YtelsesperiodeRepository }
+    single { MockBakgrunnsjobbRepository() as BakgrunnsjobbRepository }
     single { StaticMockAuthRepo(get()) as AuthorizationsRepository } bind StaticMockAuthRepo::class
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
+    single { VedtaksmeldingService(get(), get(), createStaticNamePdlMock()) }
+    single { VedtaksmeldingProcessor(get(), get()) }
+    single { BakgrunnsjobbService(get()) as BakgrunnsjobbService }
 
     LocalOIDCWireMock.start()
 }
 
+@KtorExperimentalAPI
 fun localDevConfig(config: ApplicationConfig) = module {
     single { getDataSource(createLocalHikariConfig(), "spion", null) as DataSource }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
+    single { PostgresBakgrunnsjobbRepository(get()) as BakgrunnsjobbRepository }
     single { StaticMockAuthRepo(get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
+    single { BakgrunnsjobbService(get()) }
 
     single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
 
-    single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
-
     single { createStaticNamePdlMock() }
     single { VedtaksmeldingService(get(), get(), get()) }
-    single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { VedtaksmeldingConsumer(get(), get(), get()) }
+    single { VedtaksmeldingProcessor(get(), get()) }
+
 
     LocalOIDCWireMock.start()
 }
@@ -142,11 +149,12 @@ fun preprodConfig(config: ApplicationConfig) = module {
     }
 
 
-    single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
     single { VedtaksmeldingService(get(), get(), get()) }
-    single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { VedtaksmeldingConsumer(get(), get(), get()) }
+    single { VedtaksmeldingProcessor(get(), get()) }
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
+    single { PostgresBakgrunnsjobbRepository(get()) as BakgrunnsjobbRepository }
+    single { BakgrunnsjobbService(get()) }
 
     single { SpionService(get(), get()) }
 }
@@ -165,13 +173,15 @@ fun prodConfig(config: ApplicationConfig) = module {
 
     single { createStaticNamePdlMock() }
     single { generateEmptyMock() as VedtaksmeldingProvider }
-    single { PostgresFailedVedtaksmeldingRepository(get(), get()) as FailedVedtaksmeldingRepository }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
+    single { PostgresBakgrunnsjobbRepository(get()) as BakgrunnsjobbRepository }
     single { VedtaksmeldingService(get(), get(), get()) }
+    single { BakgrunnsjobbService(get()) }
 
-    single { VedtaksmeldingProcessor(get(), get(), get()) }
-    single { FailedVedtaksmeldingProcessor(get(), get()) }
+    single { VedtaksmeldingConsumer(get(), get(), get()) }
+    single { VedtaksmeldingProcessor(get(), get()) }
+
 }
 
 val createStaticNamePdlMock = fun(): NameProvider {
@@ -186,12 +196,12 @@ val createStaticNamePdlMock = fun(): NameProvider {
 val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvider {
     return object : VedtaksmeldingProvider { // dum mock
         val arbeidsgivere = mutableListOf(
-                Arbeidsgiver( "917404437"),
+                Arbeidsgiver("917404437"),
                 Arbeidsgiver("711485759")
         )
 
         val generator = SpleisVedtaksmeldingGenerator(om, arbeidsgivere)
-        override fun getMessagesToProcess(): List <SpleisMelding> {
+        override fun getMessagesToProcess(): List<SpleisMelding> {
             return if (Random.Default.nextDouble() < 0.1)
                 generator.take(Random.Default.nextInt(2, 50))
             else emptyList()
@@ -205,9 +215,10 @@ val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvide
 
 val generateEmptyMock = fun(): VedtaksmeldingProvider {
     return object : VedtaksmeldingProvider { // dum mock
-        override fun getMessagesToProcess(): List <SpleisMelding> {
+        override fun getMessagesToProcess(): List<SpleisMelding> {
             return emptyList()
         }
+
         override fun confirmProcessingDone() {
         }
     }

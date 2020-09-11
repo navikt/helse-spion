@@ -19,6 +19,7 @@ val cxfVersion = "3.3.7"
 val jaxwsVersion = "2.3.1"
 val jaxwsToolsVersion = "2.3.1"
 
+val githubPassword: String by project
 
 plugins {
     kotlin("jvm") version "1.4.0"
@@ -116,6 +117,8 @@ dependencies {
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
+    implementation("no.nav.helsearbeidsgiver:helse-arbeidsgiver-felles-backend:2020.09.10-12-08-8f320")
+
     testImplementation("org.koin:koin-test:$koinVersion")
     implementation("com.github.javafaker:javafaker:1.0.1") // flytt denne til test når generatorene ikke er nødvendige i prod-koden lenger
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2")
@@ -148,6 +151,13 @@ repositories {
     jcenter()
     mavenCentral()
     maven("https://kotlin.bintray.com/ktor")
+    maven {
+        credentials {
+            username = "x-access-token"
+            password = githubPassword
+        }
+        setUrl("https://maven.pkg.github.com/navikt/helse-arbeidsgiver-felles-backend")
+    }
 }
 
 tasks.named<Jar>("jar") {

@@ -5,8 +5,9 @@ import io.ktor.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.*
+import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingConsumer
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingProcessor
 import org.koin.ktor.ext.getKoin
 import org.slf4j.LoggerFactory
 
@@ -15,22 +16,23 @@ import org.slf4j.LoggerFactory
 fun main() {
     Thread.currentThread().setUncaughtExceptionHandler { thread, err ->
         LoggerFactory.getLogger("main")
-            .error("uncaught exception in thread ${thread.name}: ${err.message}", err)
+                .error("uncaught exception in thread ${thread.name}: ${err.message}", err)
     }
 
     embeddedServer(Netty, createApplicationEnvironment()).let { app ->
         app.start(wait = false)
 
         val koin = app.application.getKoin()
-        val vedtaksmeldingProcessor = koin.get<VedtaksmeldingProcessor>()
-        vedtaksmeldingProcessor.startAsync(retryOnFail = true)
+        val bakgrunnsjobbService = koin.get<BakgrunnsjobbService>()
+        bakgrunnsjobbService.leggTilBakgrunnsjobbProsesserer(VedtaksmeldingProcessor.JOBB_TYPE, koin.get<VedtaksmeldingProcessor>())
+        bakgrunnsjobbService.startAsync(true)
 
-        val failedVedtaksmeldingProcessor = koin.get<FailedVedtaksmeldingProcessor>()
-        //failedVedtaksmeldingProcessor.startAsync(retryOnFail = true)
+
+        val vedtaksmeldingConsumer = koin.get<VedtaksmeldingConsumer>()
+        vedtaksmeldingConsumer.startAsync(true)
 
         Runtime.getRuntime().addShutdownHook(Thread {
-            vedtaksmeldingProcessor.stop()
-            failedVedtaksmeldingProcessor.stop()
+            vedtaksmeldingConsumer.stop()
             app.stop(1000, 1000)
         })
     }

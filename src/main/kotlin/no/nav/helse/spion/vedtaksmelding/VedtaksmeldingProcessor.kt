@@ -1,41 +1,23 @@
 package no.nav.helse.spion.vedtaksmelding
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmelding
-import no.nav.helse.spion.vedtaksmelding.failed.FailedVedtaksmeldingRepository
-import no.nav.helse.utils.RecurringJob
-import java.time.Duration
-import java.util.*
+import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbProsesserer
+import java.time.LocalDateTime
 
 class VedtaksmeldingProcessor(
-        private val kafkaVedtaksProvider: VedtaksmeldingProvider,
-        private val service: VedtaksmeldingService,
-        private val failedVedtaksmeldingRepository: FailedVedtaksmeldingRepository,
-        coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-        waitTimeWhenEmptyQueue: Duration = Duration.ofSeconds(30)
-) : RecurringJob(coroutineScope, waitTimeWhenEmptyQueue) {
+        val vedtaksmeldingService: VedtaksmeldingService,
+        val om: ObjectMapper
+) : BakgrunnsjobbProsesserer {
 
-    override fun doJob() {
-        do {
-            val wasEmpty = kafkaVedtaksProvider
-                    .getMessagesToProcess()
-                    .onEach { tryProcessOneMessage(it) }
-                    .isEmpty()
-
-            if (!wasEmpty) {
-                kafkaVedtaksProvider.confirmProcessingDone()
-            }
-        } while (!wasEmpty)
+    companion object {
+        val JOBB_TYPE = "vedtaksmelding"
     }
 
-    private fun tryProcessOneMessage(melding: SpleisMelding) {
-        try {
-            service.processAndSaveMessage(melding)
-        } catch (t: Throwable) {
-            val errorId = UUID.randomUUID()
-            logger.error("Feilet vedtaksmelding, Database ID: $errorId", t)
-            failedVedtaksmeldingRepository.save(FailedVedtaksmelding(melding, t.message, errorId))
-        }
+    override fun prosesser(jobbData: String) {
+        vedtaksmeldingService.processAndSaveMessage(om.readValue(jobbData, SpleisMelding::class.java))
+    }
+
+    override fun nesteForsoek(forsoek: Int, forrigeForsoek: LocalDateTime): LocalDateTime {
+        return LocalDateTime.now().plusHours(2)
     }
 }
