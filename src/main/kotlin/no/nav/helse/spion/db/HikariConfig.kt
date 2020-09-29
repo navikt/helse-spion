@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariConfig
 fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
     HikariConfig().apply {
         this.jdbcUrl = jdbcUrl
-        maximumPoolSize = 3
+        maximumPoolSize = 6
         minimumIdle = 1
         idleTimeout = 10001
         connectionTimeout = 1000
