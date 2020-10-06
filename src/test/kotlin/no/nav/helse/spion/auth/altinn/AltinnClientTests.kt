@@ -65,17 +65,17 @@ class AltinnClientTests {
     }
 
     @Test
-    internal fun `timeout from altinn fails the health check`() {
+    internal fun `timeout from altinn fails the readiness check`() {
         val altinnClient = AltinnClient("http://timeout", "api-gw-key", "altinn-key", serviceCode, client)
 
         assertThrows(ServerResponseException::class.java) {
-            runBlocking { altinnClient.doHealthCheck() }
+            runBlocking { altinnClient.runReadynessCheck() }
         }
     }
 
     @Test
-    internal suspend fun `healthcheck passes with valid response from altinn`() {
+    internal suspend fun `readiness passes with valid response from altinn`() {
         val altinnClient = AltinnClient("http://juice", "api-gw-key", "altinn-key", serviceCode, client)
-        altinnClient.doHealthCheck()
+        altinnClient.runReadynessCheck()
     }
 }

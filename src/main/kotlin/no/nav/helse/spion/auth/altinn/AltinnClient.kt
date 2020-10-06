@@ -5,10 +5,9 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.arbeidsgiver.kubernetes.ReadynessComponent
 import no.nav.helse.spion.auth.AuthorizationsRepository
 import no.nav.helse.spion.domene.AltinnOrganisasjon
-import no.nav.helse.spion.selfcheck.HealthCheck
-import no.nav.helse.spion.selfcheck.HealthCheckType
 import org.slf4j.LoggerFactory
 
 class AltinnClient(
@@ -16,8 +15,7 @@ class AltinnClient(
         private val apiGwApiKey : String,
         private val altinnApiKey : String,
         serviceCode : String,
-        private val httpClient: HttpClient) : AuthorizationsRepository, HealthCheck {
-    override val healthCheckType = HealthCheckType.READYNESS
+        private val httpClient: HttpClient) : AuthorizationsRepository, ReadynessComponent {
 
     private val logger: org.slf4j.Logger =  LoggerFactory.getLogger("AltinnClient")
 
@@ -47,7 +45,7 @@ class AltinnClient(
         }
     }
 
-    override suspend fun doHealthCheck() {
+    override suspend fun runReadynessCheck() {
         try {
             hentOrgMedRettigheterForPerson("01065500791")
         } catch (ex: io.ktor.client.features.ClientRequestException) {

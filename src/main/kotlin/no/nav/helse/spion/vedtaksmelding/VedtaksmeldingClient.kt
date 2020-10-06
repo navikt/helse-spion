@@ -1,7 +1,6 @@
 package no.nav.helse.spion.vedtaksmelding
 
-import no.nav.helse.spion.selfcheck.HealthCheck
-import no.nav.helse.spion.selfcheck.HealthCheckType
+import no.nav.helse.arbeidsgiver.kubernetes.LivenessComponent
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -16,11 +15,10 @@ interface VedtaksmeldingProvider {
     fun confirmProcessingDone()
 }
 
-class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String) : VedtaksmeldingProvider, HealthCheck {
+class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String) : VedtaksmeldingProvider, LivenessComponent {
     private val missingTypeHeaderDefaultValue = RecordHeader("type", "unknown".toByteArray())
     private var lastThrown: Exception? = null
     private val consumer: KafkaConsumer<String, String>
-    override val healthCheckType = HealthCheckType.ALIVENESS
 
     private val log = LoggerFactory.getLogger(VedtaksmeldingClient::class.java)
 
@@ -64,7 +62,7 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String) : 
         consumer.commitSync()
     }
 
-    override suspend fun doHealthCheck() {
+    override suspend fun runLivenessCheck() {
         lastThrown?.let { throw lastThrown as Exception }
     }
 }

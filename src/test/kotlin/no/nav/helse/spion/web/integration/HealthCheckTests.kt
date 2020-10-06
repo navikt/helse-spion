@@ -4,6 +4,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.handleRequest
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.arbeidsgiver.kubernetes.KubernetesProbeManager
 import no.nav.helse.spion.auth.StaticMockAuthRepo
 import no.nav.helse.spion.web.spionModule
 import org.junit.jupiter.api.Test
@@ -19,6 +20,8 @@ class HealthCheckTests : ControllerIntegrationTestBase() {
             get<StaticMockAuthRepo>().failSelfCheck = true
 
         }) {
+            val probeManager = application.get<KubernetesProbeManager>()
+            probeManager.registerReadynessComponent(application.get<StaticMockAuthRepo>())
             handleRequest(HttpMethod.Get, "/healthcheck") {
             }.apply {
                 assertEquals(HttpStatusCode.InternalServerError, response.status())
@@ -33,12 +36,12 @@ class HealthCheckTests : ControllerIntegrationTestBase() {
             get<StaticMockAuthRepo>().failSelfCheck = false
 
         }) {
+            val probeManager = application.get<KubernetesProbeManager>()
+            probeManager.registerReadynessComponent(application.get<StaticMockAuthRepo>())
             handleRequest(HttpMethod.Get, "/healthcheck") {
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
             }
         }
     }
-
-
 }

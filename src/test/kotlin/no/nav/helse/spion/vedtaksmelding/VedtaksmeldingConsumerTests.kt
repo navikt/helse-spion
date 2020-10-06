@@ -11,7 +11,6 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Duration
 
 open class VedtaksmeldingConsumerTests {
 
@@ -23,8 +22,10 @@ open class VedtaksmeldingConsumerTests {
 
     val meldingsGenerator = SpleisVedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     val processor = VedtaksmeldingConsumer(
             kafkaMock, repoMock, mapper, CoroutineScope(testCoroutineDispatcher)
     )
@@ -42,6 +43,7 @@ open class VedtaksmeldingConsumerTests {
     }
 
     @Test
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     internal fun `successful processingMessages saves To Repository and commits To the Queue`() {
         processor.doJob()
 

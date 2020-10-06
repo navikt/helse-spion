@@ -18,6 +18,7 @@ import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.MockBakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.PostgresBakgrunnsjobbRepository
+import no.nav.helse.arbeidsgiver.kubernetes.KubernetesProbeManager
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
@@ -68,6 +69,8 @@ val common = module {
     })
 
     single { om }
+
+    single { KubernetesProbeManager() }
 
     val httpClient = HttpClient(Apache) {
         install(JsonFeature) {

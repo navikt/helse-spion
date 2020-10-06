@@ -62,10 +62,10 @@ internal class VedtaksmeldingClientTest : KoinComponent {
 
     @ExperimentalStdlibApi
     @Test
-    internal fun testHealthCheck() {
+    internal fun testLivenessCheck() {
         val client = VedtaksmeldingClient(testProps, topicName)
 
-        runBlocking { client.doHealthCheck() }
+        runBlocking { client.runLivenessCheck() }
 
         client.stop()
 
@@ -74,7 +74,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         }
 
         assertThatExceptionOfType(Exception::class.java).isThrownBy {
-            runBlocking { client.doHealthCheck() }
+            runBlocking { client.runLivenessCheck() }
         }
     }
 

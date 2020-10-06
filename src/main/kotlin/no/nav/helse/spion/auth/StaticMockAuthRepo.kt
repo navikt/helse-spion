@@ -2,13 +2,11 @@ package no.nav.helse.spion.auth
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.arbeidsgiver.kubernetes.ReadynessComponent
 import no.nav.helse.spion.domene.AltinnOrganisasjon
-import no.nav.helse.spion.selfcheck.HealthCheck
-import no.nav.helse.spion.selfcheck.HealthCheckType
 import no.nav.helse.utils.loadFromResources
 
-class StaticMockAuthRepo(om: ObjectMapper) : AuthorizationsRepository, HealthCheck {
-    override val healthCheckType = HealthCheckType.READYNESS
+class StaticMockAuthRepo(om: ObjectMapper) : AuthorizationsRepository, ReadynessComponent {
 
     private var acl: Set<AltinnOrganisasjon> = setOf(AltinnOrganisasjon("Kjellesen AS", "Enterprise", null, "AS", "1", null, null))
     var failSelfCheck = false
@@ -27,7 +25,7 @@ class StaticMockAuthRepo(om: ObjectMapper) : AuthorizationsRepository, HealthChe
         this.acl = acl
     }
 
-    override suspend fun doHealthCheck() {
+    override suspend fun runReadynessCheck() {
         if(failSelfCheck) throw Error("Feiler selfchecken")
     }
 }
