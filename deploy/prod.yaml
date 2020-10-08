@@ -64,8 +64,6 @@ spec:
     value: aapen-helse-sporbar
   - name: PDL_URL
     value: https://pdl-api.nais.adeo.no/graphql
-  - name: SECURITYTOKENSERVICE_URL
-    value: https://sts.adeo.no/SecurityTokenServiceProvider/
   - name: SECURITYTOKENSERVICE_REST_URL
     value: https://security-token-service.nais.adeo.no/rest/v1/sts/token
 
