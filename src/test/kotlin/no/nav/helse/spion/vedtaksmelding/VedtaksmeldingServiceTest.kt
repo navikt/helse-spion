@@ -8,7 +8,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
-import no.nav.helse.spion.integrasjon.pdl.NameProvider
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClient
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPerson
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPersonNavn
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,7 +18,7 @@ import java.io.IOException
 
 internal class VedtaksmeldingServiceTest {
     val ypDaoMock = mockk<YtelsesperiodeRepository>(relaxed = true)
-    val pdlMock = mockk<NameProvider>(relaxed = true)
+    val pdlMock = mockk<PdlClient>(relaxed = true)
 
     val meldingsGenerator = SpleisVedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
@@ -24,7 +26,7 @@ internal class VedtaksmeldingServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { pdlMock.fnrToName(any()) } returns NameProvider.Name("Ola", "Normann")
+        every { pdlMock.person(any()) } returns PdlPerson( listOf( PdlPersonNavn("Ola", null, "Normann")), null)
     }
 
     @Test
@@ -32,7 +34,7 @@ internal class VedtaksmeldingServiceTest {
         val melding = meldingsGenerator.next()
 
         service.processAndSaveMessage(melding)
-        verify(exactly = 1) { pdlMock.fnrToName(melding.key) }
+        verify(exactly = 1) { pdlMock.person(melding.key)}
         verify(exactly = 1) { ypDaoMock.upsert(any()) }
     }
 

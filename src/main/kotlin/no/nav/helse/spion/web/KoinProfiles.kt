@@ -19,6 +19,9 @@ import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.MockBakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.PostgresBakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.kubernetes.KubernetesProbeManager
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClient
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPerson
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPersonNavn
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
@@ -28,7 +31,6 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRep
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
-import no.nav.helse.spion.integrasjon.pdl.NameProvider
 import no.nav.helse.spion.vedtaksmelding.*
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
@@ -90,7 +92,7 @@ fun buildAndTestConfig() = module {
     single { StaticMockAuthRepo(get()) as AuthorizationsRepository } bind StaticMockAuthRepo::class
     single { DefaultAuthorizer(get()) as Authorizer }
     single { SpionService(get(), get()) }
-    single { VedtaksmeldingService(get(), get(), createStaticNamePdlMock()) }
+    single { VedtaksmeldingService(get(), get(), createStaticPdlMock()) }
     single { VedtaksmeldingProcessor(get(), get()) }
     single { BakgrunnsjobbService(get()) as BakgrunnsjobbService }
 
@@ -110,7 +112,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
 
     single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
 
-    single { createStaticNamePdlMock() }
+    single { createStaticPdlMock() as PdlClient }
     single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingConsumer(get(), get(), get()) }
     single { VedtaksmeldingProcessor(get(), get()) }
@@ -137,7 +139,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
         ) as AuthorizationsRepository
     }*/
 
-    single { createStaticNamePdlMock() }
+    single { createStaticPdlMock() }
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
 
@@ -174,7 +176,7 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    single { createStaticNamePdlMock() }
+    single { createStaticPdlMock() as PdlClient}
     single { generateEmptyMock() as VedtaksmeldingProvider }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
@@ -187,10 +189,10 @@ fun prodConfig(config: ApplicationConfig) = module {
 
 }
 
-val createStaticNamePdlMock = fun(): NameProvider {
-    return object : NameProvider {
-        override fun fnrToName(fnr: String): NameProvider.Name? {
-            return NameProvider.Name("Ola", "Dunk")
+val createStaticPdlMock = fun(): PdlClient {
+    return object : PdlClient {
+        override fun person(ident: String): PdlPerson? {
+            return PdlPerson(listOf(PdlPersonNavn("Ola", null, "Dunk")),null)
         }
 
     }

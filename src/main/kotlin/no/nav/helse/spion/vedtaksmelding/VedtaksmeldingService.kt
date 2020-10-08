@@ -7,14 +7,14 @@ import no.nav.helse.spion.domene.Person
 import no.nav.helse.spion.domene.ytelsesperiode.Arbeidsforhold
 import no.nav.helse.spion.domene.ytelsesperiode.Ytelsesperiode
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
-import no.nav.helse.spion.integrasjon.pdl.NameProvider
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class VedtaksmeldingService(
         private val ypRepo: YtelsesperiodeRepository,
         private val om: ObjectMapper,
-        private val pdl: NameProvider
+        private val pdlClient: PdlClient
 ) {
     val log = LoggerFactory.getLogger(VedtaksmeldingService::class.java)
 
@@ -29,9 +29,9 @@ class VedtaksmeldingService(
 
     private fun processVedtak(melding: SpleisMelding) {
         val vedtak = om.readValue(melding.messageBody, SpleisVedtakDto::class.java)
-        val person = pdl.fnrToName(melding.key) ?: NameProvider.Name("Ukjent",  "Ukjent")
+        val pdlResponse = pdlClient.person(melding.key)?.navn?.firstOrNull()
 
-        map(vedtak, melding.offset, melding.key, person.firstname, person.lastname)
+        map(vedtak, melding.offset, melding.key, pdlResponse?.fornavn ?: "Ukjent", pdlResponse?.etternavn ?: "Ukjent")
                 .forEach {
                     ypRepo.upsert(it)
                 }
