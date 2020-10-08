@@ -18,6 +18,8 @@ import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.MockBakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.PostgresBakgrunnsjobbRepository
+import no.nav.helse.arbeidsgiver.integrasjoner.RestStsClient
+import no.nav.helse.arbeidsgiver.integrasjoner.RestStsClientImpl
 import no.nav.helse.arbeidsgiver.kubernetes.KubernetesProbeManager
 import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClient
 import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPerson
@@ -112,6 +114,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
 
     single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
 
+    single { object : RestStsClient { override fun getOidcToken(): String { return "fake token"} } as RestStsClient }
     single { createStaticPdlMock() as PdlClient }
     single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingConsumer(get(), get(), get()) }
@@ -139,6 +142,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
         ) as AuthorizationsRepository
     }*/
 
+    single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
     single { createStaticPdlMock() }
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
@@ -176,6 +180,7 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
+    single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
     single { createStaticPdlMock() as PdlClient}
     single { generateEmptyMock() as VedtaksmeldingProvider }
 
