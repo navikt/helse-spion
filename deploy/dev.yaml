@@ -42,6 +42,9 @@ spec:
       - mountPath: /var/run/secrets/nais.io/apigw/altinn
         kvPath: /apikey/apigw/dev/eksternapp.altinn.serviceowner/helse-spion_q1
   webproxy: true
+  envFrom:
+    - configmap: loginservice-idporten # tilgjengeliggjør LOGINSERVICE_IDPORTEN_DISCOVERY_URL og LOGINSERVICE_IDPORTEN_AUDIENCE
+
   env:
   - name: KOIN_PROFILE
     value: PREPROD
@@ -53,12 +56,6 @@ spec:
     value: helse-spion
   - name: VAULT_MOUNTPATH
     value: postgresql/preprod-fss/
-  - name: OIDC_ISSUER_NAME
-    value: aadb2c
-  - name: OIDC_DISCOVERY_URL
-    value: "https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1"
-  - name: OIDC_ACCEPTED_AUDIENCE
-    value: 0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5
   - name: ALTINN_SERVICE_OWNER_GW_URL
     value: https://api-gw-q1.adeo.no/ekstern/altinn/api/serviceowner
   - name: VEDTAK_TOPICNAME
