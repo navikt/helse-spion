@@ -1,18 +1,18 @@
 package no.nav.helse.spion.web.integration
 
+//import no.nav.security.token.support.test.JwkGenerator
+//import no.nav.security.token.support.test.JwtTokenGenerator
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.ktor.application.Application
-import io.ktor.config.ApplicationConfig
-import io.ktor.config.MapApplicationConfig
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
+import io.ktor.application.*
+import io.ktor.config.*
+import io.ktor.http.*
 import io.ktor.server.testing.*
-import io.ktor.util.KtorExperimentalAPI
+import io.ktor.util.*
 import no.nav.helse.TestData
-import no.nav.security.token.support.test.JwkGenerator
-import no.nav.security.token.support.test.JwtTokenGenerator
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.token.OAuth2TokenProvider
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.koin.test.KoinTest
@@ -23,7 +23,8 @@ open class ControllerIntegrationTestBase : KoinTest {
     protected val defaultSubject = TestData.validIdentitetsnummer
     private val testConfig: ApplicationConfig
     protected val idTokenCookieName = "selvbetjening-idtoken"
-
+    val ISS = "iss-localhost"
+    val AUD = "aud-localhost"
     init {
         testConfig = MapApplicationConfig()
         addIntegrationTestConfigValues(testConfig)
@@ -45,14 +46,17 @@ open class ControllerIntegrationTestBase : KoinTest {
     ): TestApplicationCall = handleRequest {
         this.uri = uri
         this.method = method
-        val token = JwtTokenGenerator.createSignedJWT(authenticatedSubject)
+        val server = MockOAuth2Server()
+        server.start()
+        val token = server.issueToken(authenticatedSubject)
+        server.shutdown()
         addHeader(HttpHeaders.Cookie, "$idTokenCookieName=${token.serialize()}")
         setup()
     }
 
 
     @KtorExperimentalAPI
-    private fun addIntegrationTestConfigValues(config : MapApplicationConfig, acceptedIssuer:String = JwtTokenGenerator.ISS, acceptedAudience:String = JwtTokenGenerator.AUD) {
+    private fun addIntegrationTestConfigValues(config: MapApplicationConfig, acceptedIssuer: String = ISS, acceptedAudience: String = AUD) {
         config.apply {
             put("koin.profile", "TEST")
             put("no.nav.security.jwt.issuers.size", "1")
@@ -79,13 +83,14 @@ open class ControllerIntegrationTestBase : KoinTest {
         }
 
         fun stubOIDCProvider() {
+
             WireMock.stubFor(WireMock.any(WireMock.urlPathEqualTo("/.well-known/openid-configuration")).willReturn(
                     WireMock.okJson("{\"jwks_uri\": \"${server.baseUrl()}/keys\", " +
                             "\"subject_types_supported\": [\"pairwise\"], " +
-                            "\"issuer\": \"${JwtTokenGenerator.ISS}\"}")))
+                            "\"issuer\": \"iss-localhost")))
 
             WireMock.stubFor(WireMock.any(WireMock.urlPathEqualTo("/keys")).willReturn(
-                    WireMock.okJson(JwkGenerator.getJWKSet().toPublicJWKSet().toString())))
+                    WireMock.okJson(OAuth2TokenProvider().publicJwkSet().toString())))
         }
     }
 }

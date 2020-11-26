@@ -13,6 +13,7 @@ val junitJupiterVersion = "5.5.0-RC2"
 val assertJVersion = "3.12.2"
 val mockKVersion = "1.9.3"
 val tokenSupportVersion = "1.3.1"
+val mockOAuth2ServerVersion = "0.2.1"
 val koinVersion = "2.0.1"
 val valiktorVersion = "0.9.0"
 val cxfVersion = "3.3.7"
@@ -92,7 +93,8 @@ dependencies {
     implementation("org.koin:koin-core:$koinVersion")
     implementation("org.koin:koin-ktor:$koinVersion")
     implementation("no.nav.security:token-validation-ktor:$tokenSupportVersion")
-    implementation("no.nav.security:token-validation-test-support:$tokenSupportVersion")
+    implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
+    implementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
 
     implementation(kotlin("stdlib"))
 

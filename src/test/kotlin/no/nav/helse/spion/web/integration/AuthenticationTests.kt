@@ -11,7 +11,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.web.dto.PersonOppslagDto
 import no.nav.helse.spion.web.spionModule
 import no.nav.helse.validWithoutPeriode
-import no.nav.security.token.support.test.JwtTokenGenerator
+import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.koin.core.get
@@ -66,8 +66,10 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
         }) {
             handleRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
                 val objectMapper = get<ObjectMapper>()
-
-                addHeader("Authorization", "Bearer ${JwtTokenGenerator.createSignedJWT("header-test").serialize()}")
+                val server = MockOAuth2Server()
+                server.start()
+                addHeader("Authorization", "Bearer ${server.issueToken("header-test").serialize()}")
+                server.shutdown()
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(objectMapper.writeValueAsString(oppslag))
             }.apply {
