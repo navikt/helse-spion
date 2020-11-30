@@ -73,6 +73,7 @@ dependencies {
 
     implementation("org.valiktor:valiktor-core:$valiktorVersion")
     implementation("org.valiktor:valiktor-javatime:$valiktorVersion")
+    implementation("no.nav.common:log:2.2020.10.15_11.43-b1f02e7bd6ae")
 
     implementation("no.nav.tjenestespesifikasjoner:altinn-correspondence-agency-external-basic:1.2019.09.25-00.21-49b69f0625e0")
 
