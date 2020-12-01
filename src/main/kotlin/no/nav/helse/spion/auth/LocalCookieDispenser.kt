@@ -15,8 +15,8 @@ import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.hotspot.DefaultExports
-import no.nav.security.token.support.test.JwkGenerator
-import no.nav.security.token.support.test.JwtTokenGenerator
+import no.nav.security.mock.oauth2.MockOAuth2Server
+
 
 @KtorExperimentalAPI
 fun Application.localCookieDispenser(config: ApplicationConfig) {
@@ -26,8 +26,12 @@ fun Application.localCookieDispenser(config: ApplicationConfig) {
     routing {
         get("/local/cookie-please") {
             if (config.property("koin.profile").getString() == "LOCAL") {
+                val server = MockOAuth2Server()
+                server.start()
+                val token = server.issueToken(call.request.queryParameters["subject"].toString())
+                server.shutdown()
                 val cookieName = config.configList("no.nav.security.jwt.issuers")[0].property("cookie_name").getString()
-                call.response.cookies.append(Cookie(cookieName, JwtTokenGenerator.createSignedJWT(call.request.queryParameters["subject"]).serialize(), CookieEncoding.RAW, domain = "localhost", path = "/"))
+                call.response.cookies.append(Cookie(cookieName, token.serialize(), CookieEncoding.RAW, domain = "localhost", path = "/"))
             }
 
             if (call.request.queryParameters["redirect"] != null) {
@@ -39,33 +43,4 @@ fun Application.localCookieDispenser(config: ApplicationConfig) {
     }
 }
 
-
-class LocalOIDCWireMock() {
-    companion object {
-        var started = false
-
-        fun start() {
-            if (started) return
-
-            fun stubOIDCProvider(server: WireMockServer) {
-                WireMock.stubFor(WireMock.any(WireMock.urlPathEqualTo("/.well-known/openid-configuration")).willReturn(
-                        WireMock.okJson("{\"jwks_uri\": \"${server.baseUrl()}/keys\", " +
-                                "\"subject_types_supported\": [\"pairwise\"], " +
-                                "\"issuer\": \"${JwtTokenGenerator.ISS}\"}")))
-
-                WireMock.stubFor(WireMock.any(WireMock.urlPathEqualTo("/keys")).willReturn(
-                        WireMock.okJson(JwkGenerator.getJWKSet().toPublicJWKSet().toString())))
-            }
-
-            val server = WireMockServer(WireMockConfiguration.options().port(6666))
-
-            server.start()
-            WireMock.configureFor(server.port())
-            stubOIDCProvider(server)
-            started = true
-        }
-
-
-    }
-}
 
