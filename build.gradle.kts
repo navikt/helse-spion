@@ -106,10 +106,6 @@ dependencies {
     implementation("no.nav.security:token-validation-ktor:$tokenSupportVersion")
     implementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
 
-    implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
-    implementation("org.springframework.boot:spring-boot-starter-jersey:2.3.4.RELEASE")
-
-
     implementation(kotlin("stdlib"))
 
     implementation("org.slf4j:slf4j-api:1.7.30")
