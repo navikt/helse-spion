@@ -117,6 +117,9 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingConsumer(get(), get(), get()) }
     single { VedtaksmeldingProcessor(get(), get()) }
+
+
+
 }
 
 @KtorExperimentalAPI

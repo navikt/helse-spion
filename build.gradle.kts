@@ -72,8 +72,6 @@ dependencies {
     implementation("com.google.guava:guava:30.0-jre") // overstyrer transiente 29.0-jre
     //Snyk fikser slutt
 
-
-
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")

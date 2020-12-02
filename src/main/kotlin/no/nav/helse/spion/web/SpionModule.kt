@@ -163,8 +163,6 @@ fun Application.spionModule(config: ApplicationConfig = environment.config) {
 
     nais()
 
-    localCookieDispenser(config)
-
     routing {
         authenticate {
             spion(get(), get())
