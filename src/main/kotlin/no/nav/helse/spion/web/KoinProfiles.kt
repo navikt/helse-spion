@@ -97,8 +97,6 @@ fun buildAndTestConfig() = module {
     single { VedtaksmeldingService(get(), get(), createStaticPdlMock()) }
     single { VedtaksmeldingProcessor(get(), get()) }
     single { BakgrunnsjobbService(get()) as BakgrunnsjobbService }
-
-    LocalOIDCWireMock.start()
 }
 
 @KtorExperimentalAPI
@@ -121,7 +119,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
     single { VedtaksmeldingProcessor(get(), get()) }
 
 
-    LocalOIDCWireMock.start()
+
 }
 
 @KtorExperimentalAPI

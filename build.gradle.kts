@@ -13,9 +13,10 @@ val junitJupiterVersion = "5.5.0-RC2"
 val assertJVersion = "3.12.2"
 val mockKVersion = "1.9.3"
 val tokenSupportVersion = "1.3.1"
+val mockOAuth2ServerVersion = "0.2.1"
 val koinVersion = "2.0.1"
 val valiktorVersion = "0.9.0"
-val cxfVersion = "3.3.7"
+val cxfVersion = "3.3.8"
 val jaxwsVersion = "2.3.1"
 val jaxwsToolsVersion = "2.3.1"
 
@@ -61,6 +62,16 @@ buildscript {
 }
 
 dependencies {
+
+    //Snyk fikser
+    implementation("org.eclipse.jetty:jetty-server:9.4.35.v20201120") //overstyrer
+    implementation("org.apache.httpcomponents:httpclient:4.5.13") // overstyrer transiente 4.5.6 via ktor-client-apache
+    implementation("io.netty:netty-codec-http:4.1.53.Final") // overstyrer transiente 4.1.51.Final
+    implementation("org.glassfish.jersey.media:jersey-media-jaxb:2.31") // overstyrer transiente 2.30.1
+    implementation("junit:junit:4.13.1") // overstyrer transiente 4.12
+    implementation("com.google.guava:guava:30.0-jre") // overstyrer transiente 29.0-jre
+    //Snyk fikser slutt
+
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
@@ -93,7 +104,7 @@ dependencies {
     implementation("org.koin:koin-core:$koinVersion")
     implementation("org.koin:koin-ktor:$koinVersion")
     implementation("no.nav.security:token-validation-ktor:$tokenSupportVersion")
-    implementation("no.nav.security:token-validation-test-support:$tokenSupportVersion")
+    implementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
 
     implementation(kotlin("stdlib"))
 
