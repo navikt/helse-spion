@@ -24,7 +24,7 @@ import java.net.InetAddress
 fun Application.localCookieDispenser(config: ApplicationConfig) {
 
         val server = MockOAuth2Server()
-        server.start(InetAddress.getLocalHost(), 6666)
+        server.start(port = 6666)
 
     DefaultExports.initialize()
 
