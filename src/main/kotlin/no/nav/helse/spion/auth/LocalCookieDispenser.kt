@@ -31,8 +31,14 @@ fun Application.localCookieDispenser(config: ApplicationConfig) {
     routing {
         get("/local/cookie-please") {
             if (config.property("koin.profile").getString() == "LOCAL") {
-                val token = server.issueToken(call.request.queryParameters["subject"].toString())
                 val cookieName = config.configList("no.nav.security.jwt.issuers")[0].property("cookie_name").getString()
+                val issuerName = config.configList("no.nav.security.jwt.issuers")[0].property("issuer_name").getString()
+                val audience = config.configList("no.nav.security.jwt.issuers")[0].property("accepted_audience").getString()
+                val token = server.issueToken(
+                        subject = call.request.queryParameters["subject"].toString(),
+                        issuerId = issuerName,
+                        audience = audience
+                )
                 call.response.cookies.append(Cookie(cookieName, token.serialize(), CookieEncoding.RAW, domain = "localhost", path = "/"))
             }
 
