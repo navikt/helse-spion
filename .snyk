@@ -2,16 +2,8 @@
 version: v1.14.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  SNYK-JAVA-COMGOOGLEGUAVA-32236:
+   'SNYK-JAVA-IONETTY-1042268':
     - '*':
-        reason: Apache CXF-transient dep. Sjekk om ny versjon fikser problemet senere.
-        expires: 2020-09-24T08:24:11.018Z
-  'SNYK-JAVA-IONETTY-564897':
-    - '*':
-        reason: KTOR bruker en sårbar versjon av netty, oppdater ktor fra 1.4.0 til hva enn de har fiksa dette med
-        expires: 2020-09-14T08:28:25.620Z
-  'SNYK-JAVA-ORGGLASSFISHJERSEYMEDIA-595972':
-    - '*':
-        reason: Denne brukes kun i test via nav sin token validering
-        expires: 2020-12-14T08:28:25.620Z
+        reason: Improper certificate handling
+        expires: 2021-03-19T08:28:25.620Z
 patch: {}
