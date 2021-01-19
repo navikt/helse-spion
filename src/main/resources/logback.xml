@@ -34,6 +34,6 @@
     <logger name="ch.qos.logback" level="${log.level.ch.qos.logback:-WARN}"/>
 
     <root level="INFO">
-        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="secureLog"/>
     </root>
 </configuration>
