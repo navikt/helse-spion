@@ -49,4 +49,4 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: --configuration-matching=runtimeClasspath --fail-on=all
+          args: --fail-on=all
