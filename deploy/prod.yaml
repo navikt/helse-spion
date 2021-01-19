@@ -41,6 +41,8 @@ spec:
       - mountPath: /var/run/secrets/nais.io/apigw/altinn
         kvPath: /apikey/apigw/prod/eksternapp.altinn.serviceowner/helse-spion
   webproxy: true
+  secureLogs:
+    enabled: true
   envFrom:
     - configmap: loginservice-idporten # tilgjengeliggjør LOGINSERVICE_IDPORTEN_DISCOVERY_URL og LOGINSERVICE_IDPORTEN_AUDIENCE
 

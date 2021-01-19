@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val ktorVersion = "1.4.1"
 val logback_version = "1.2.1"
 val logback_contrib_version = "0.1.5"
-val jacksonVersion = "2.10.3"
+val jacksonVersion = "2.11.0"
 val prometheusVersion = "0.6.0"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
@@ -68,6 +68,7 @@ dependencies {
     implementation("org.apache.httpcomponents:httpclient:4.5.13") // overstyrer transiente 4.5.6 via ktor-client-apache
     implementation("io.netty:netty-codec-http:4.1.53.Final") // overstyrer transiente 4.1.51.Final
     implementation("org.glassfish.jersey.media:jersey-media-jaxb:2.31") // overstyrer transiente 2.30.1
+    implementation("org.yaml:snakeyaml:1.26")
     implementation("junit:junit:4.13.1") // overstyrer transiente 4.12
     implementation("com.google.guava:guava:30.0-jre") // overstyrer transiente 29.0-jre
     //Snyk fikser slutt
@@ -84,7 +85,7 @@ dependencies {
 
     implementation("org.valiktor:valiktor-core:$valiktorVersion")
     implementation("org.valiktor:valiktor-javatime:$valiktorVersion")
-    implementation("no.nav.common:log:2.2020.10.15_11.43-b1f02e7bd6ae")
+    implementation("no.nav.common:log:2.2021.01.05_08.07-2c586ccadf95")
 
     implementation("no.nav.tjenestespesifikasjoner:altinn-correspondence-agency-external-basic:1.2019.09.25-00.21-49b69f0625e0")
 
@@ -115,7 +116,7 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:4.9")
     implementation("org.codehaus.janino:janino:3.0.6")
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.+")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
