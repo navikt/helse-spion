@@ -18,4 +18,5 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         with:
-          command: monitor --configuration-matching=runtimeClasspath
+          command: monitor
+          args: --configuration-matching=runtimeClasspath --fail-on=all --org=helsearbeidsgiver
