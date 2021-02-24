@@ -6,4 +6,9 @@ ignore:
     - '*':
         reason: Improper certificate handling
         expires: 2021-03-19T08:28:25.620Z
+    'SNYK-JAVA-NETMINIDEV-1078499':
+    - '*':
+        reason: None Given
+        expires: 2021-05-24T12:39:32.328Z
 patch: {}
+
