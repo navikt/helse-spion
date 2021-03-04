@@ -12,8 +12,8 @@ env:
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+  IMAGE_BASE: docker.pkg.github.com/${{ github.repository }}/vtp-pensjon
+  IMAGE_BASE_GHCR: ghcr.io/${{ github.repository }}/vtp-pensjon
 jobs:
   buildAndTest:
     runs-on: ubuntu-latest
@@ -43,7 +43,35 @@ jobs:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONARTOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONARTOKEN }}- name: Build Docker image
+        run: |
+          TIME=$(TZ="Europe/Oslo" date +%Y.%m.%d-%H.%M)
+          COMMIT=$(git rev-parse --short=12 HEAD)
+          export VERSION="$TIME-$COMMIT"
+          echo "Building version $VERSION"
+          docker build --pull \
+            --tag ${IMAGE_BASE}:${VERSION} \
+            --tag ${IMAGE_BASE}:latest \
+            --tag ${IMAGE_BASE_GHCR}:${VERSION} \
+            --tag ${IMAGE_BASE_GHCR}:latest \
+            .
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Push Docker image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker push ${IMAGE_BASE}:latest
+          docker push ${IMAGE_BASE}:${VERSION}
+          docker login ghcr.io -u ${GHCR_PUSH_USERNAME} -p ${GHCR_PUSH_TOKEN}
+          docker push ${IMAGE_BASE_GHCR}:latest
+          docker push ${IMAGE_BASE_GHCR}:${VERSION}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_PUSH_USERNAME: ${{ secrets.GHCR_PUSH_USERNAME }}
+          GHCR_PUSH_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
+          VERSION: ${{ env.VERSION }}
+
+          
 
   slowTests:
     runs-on: ubuntu-latest
@@ -89,24 +117,4 @@ jobs:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: --fail-on=all
-  deploy:
-    name: Deploy til produksjon
-    needs: [buildAndTest,slowTests,snyk]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-      - uses: actions/download-artifact@v2
-        with:
-          name: helse-spion-artifact
-          path: build
-      - run: |
-          git config --global user.email "helsearbeidsgiver@nav.no"
-          git config --global user.name "HelseArbeidsgiver"
-          npm version ${{ github.event.release.tag_name }}
-          git push origin HEAD:master
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-sbs
-          RESOURCE: deploy/prod.yaml
+      
