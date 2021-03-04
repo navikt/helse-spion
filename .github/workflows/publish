@@ -14,6 +14,7 @@ env:
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
   IMAGE_BASE: docker.pkg.github.com/${{ github.repository }}/helse-spion
   IMAGE_BASE_GHCR: ghcr.io/${{ github.repository }}/helse-spion
+  
 jobs:
   buildAndTest:
     runs-on: ubuntu-latest
@@ -39,11 +40,7 @@ jobs:
             ${{ runner.os }}-gradle-cache-
       - name: test and build
         run: ./gradlew --console=plain build test
-        env:
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONARTOKEN }}
+
       - name: Build Docker image
         run: |
           TIME=$(TZ="Europe/Oslo" date +%Y.%m.%d-%H.%M)
@@ -71,8 +68,8 @@ jobs:
           GHCR_PUSH_USERNAME: ${{ secrets.GHCR_PUSH_USERNAME }}
           GHCR_PUSH_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
           VERSION: ${{ env.VERSION }}
-
-          
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
   slowTests:
     runs-on: ubuntu-latest
