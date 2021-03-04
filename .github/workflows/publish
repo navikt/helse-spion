@@ -12,8 +12,8 @@ env:
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  IMAGE_BASE: docker.pkg.github.com/${{ github.repository }}/vtp-pensjon
-  IMAGE_BASE_GHCR: ghcr.io/${{ github.repository }}/vtp-pensjon
+  IMAGE_BASE: docker.pkg.github.com/${{ github.repository }}/helse-spion
+  IMAGE_BASE_GHCR: ghcr.io/${{ github.repository }}/helse-spion
 jobs:
   buildAndTest:
     runs-on: ubuntu-latest
