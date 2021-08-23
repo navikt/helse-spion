@@ -36,6 +36,10 @@ jobs:
         run: cd docker/local && docker-compose up -d && sleep 10
       - name: test and build
         run: ./gradlew --console=plain build test
+        env:
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and publish Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
