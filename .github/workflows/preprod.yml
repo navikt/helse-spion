@@ -52,13 +52,6 @@ jobs:
           docker build --tag ${IMAGE} .
           docker push ${IMAGE}
 
-      - name: test and build
-        run: ./gradlew --console=plain jacocoTestReport sonarqube
-        env:
-          SONAR_TOKEN: ${{ secrets.sonartoken }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     name: Deploy to PREPROD
