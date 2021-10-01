@@ -54,6 +54,8 @@ jobs:
         run: |
           docker build --tag ${IMAGE} .
           docker push ${IMAGE}
+          docker build --tag{IMAGE_BASE_GHCR} .
+          docker push ${IMAGE_BASE_GHCR}
 
 
   deploy:
