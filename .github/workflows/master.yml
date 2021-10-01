@@ -54,8 +54,7 @@ jobs:
         run: |
           docker build --tag ${IMAGE} .
           docker push ${IMAGE}
-            --tag ${IMAGE_BASE_GHCR}:${VERSION} \
-            --tag ${IMAGE_BASE_GHCR}:latest \
+
 
   deploy:
     name: Deploy to PREPROD
