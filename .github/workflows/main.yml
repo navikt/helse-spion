@@ -53,8 +53,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${IMAGE}:latest
-            ${IMAGE}:${{ github.sha }}
+            ${{ IMAGE }}:latest
+            ${{ IMAGE }}:${{ github.sha }}
           # cache-from: type=registry,ref=${{ github.repository }}:latest
           # cache-to: type=inline
 
