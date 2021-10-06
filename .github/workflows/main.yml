@@ -6,8 +6,7 @@ on:
       - main
 
 env:
-  IMAGE: ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}:${{ github.sha }}
-  IMAGE_BASE_GHCR: ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}
+  IMAGE: ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}
 
 jobs:
   test:
@@ -41,7 +40,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ github.repository }}
+          images: ${IMAGE}
           flavor: latest=true
           tags: type=sha
 
@@ -63,8 +62,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ github.repository }}:latest
-          cache-to: type=inline
+          # cache-from: type=registry,ref=${{ github.repository }}:latest
+          # cache-to: type=inline
 
   deploy:
     name: Deploy to PREPROD (dev-ffs)
@@ -72,12 +71,15 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+
       - uses: actions/checkout@v1
+
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
           RESOURCE: deploy/dev.yaml
+
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
