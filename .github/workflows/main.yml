@@ -40,7 +40,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${IMAGE}
+          images: ${{ github.repository }}
           flavor: latest=true
           tags: type=sha
 
