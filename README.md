@@ -7,7 +7,7 @@ Refusjonsportalen gir arbeidsgiverne en løpende oversikt over refusjoner som er
 
 # Komme i gang
 
-For å kjøre lokalt kan du starte  `docker-compose up` fra docker/local før du starter prosjektet. 
+For å kjøre lokalt kan du starte  `docker-compose up` fra `docker/local` før du starter prosjektet. 
 
 # Henvendelser
 
