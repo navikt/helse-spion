@@ -1,9 +1,9 @@
-name: Bygg og deploy
+name: Bygg og deploy til PREPROD (dev-ffs)
 
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/helse-spion:${{ github.sha }}
@@ -119,7 +119,7 @@ jobs:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    name: Deploy to PREPROD
+    name: Deploy to PREPROD (dev-ffs)
     needs: [test, slowTest]
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
