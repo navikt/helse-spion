@@ -53,8 +53,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ IMAGE }}:latest
-            ${{ IMAGE }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}:latest
+            ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}:${{ github.sha }}
           # cache-from: type=registry,ref=${{ github.repository }}:latest
           # cache-to: type=inline
 
