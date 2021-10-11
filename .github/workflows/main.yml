@@ -1,4 +1,4 @@
-name: Bygg og deploy til PREPROD (dev-ffs)
+name: Deploy dev-ffs
 
 on:
   push:
@@ -9,7 +9,8 @@ env:
   IMAGE: ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}
 
 jobs:
-  test:
+  buildAndTest:
+    name: Build and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -55,17 +56,24 @@ jobs:
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ github.sha }}
-          # cache-from: type=registry,ref=${{ github.repository }}:latest
-          # cache-to: type=inline
+          cache-from: type=registry,ref=${{ env.IMAGE }}:latest
+          cache-to: type=inline
+          
+      - name: Cleanup Gradle Cache
+        # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
+        # Restoring these files from a GitHub Actions cache might cause problems for future builds.
+        run: |
+          rm -f ~/.gradle/caches/modules-2/modules-2.lock
+          rm -f ~/.gradle/caches/modules-2/gc.properties
 
   deploy:
-    name: Deploy to PREPROD (dev-ffs)
-    needs: [test]
+    name: Deploy dev-ffs
+    needs: [buildAndTest]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - uses: nais/deploy/actions/deploy@v1
         env:
