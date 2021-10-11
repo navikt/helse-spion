@@ -1,6 +1,7 @@
 Refusjonsportalen 
 [![Actions Status](https://github.com/navikt/helse-spion/workflows/Bygg%20og%20deploy/badge.svg)](https://github.com/navikt/helse-spion/actions)
-[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=navikt_helse-spion)](https://sonarcloud.io/dashboard?id=navikt_helse-spion)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=navikt_helse-spion&metric=alert_status&branch=main)](https://sonarcloud.io/dashboard?id=navikt_helse-spion&branch=main)
+
 ================
 
 Refusjonsportalen gir arbeidsgiverne en løpende oversikt over refusjoner som er tilkjent dem, for deres egne arbeidstakere.
