@@ -9,19 +9,19 @@ spec:
   image: {{image}}
   port: 8080
   liveness:
-    path: isalive
+    path: /health/isalive
     initialDelay: 10
     timeout: 1
-    periodSeconds: 3
+    periodSeconds: 30
     failureThreshold: 10
   readiness:
-    path: isready
+    path: /health/isready
     initialDelay: 10
     timeout: 1
-    periodSeconds: 3
+    periodSeconds: 5
     failureThreshold: 10
   ingresses:
-    - https://helse-spion.nais.preprod.local
+    - https://helse-spion.dev.nav.no
   replicas:
     max: 1
     min: 1
@@ -46,7 +46,10 @@ spec:
     enabled: true
   envFrom:
     - configmap: loginservice-idporten # tilgjengeliggjør LOGINSERVICE_IDPORTEN_DISCOVERY_URL og LOGINSERVICE_IDPORTEN_AUDIENCE
-
+    # servicebrukerens passord som er  hentet fra vault og lagt inn slik: https://doc.nais.io/security/secrets/kubernetes-secrets/
+    - secret: service-user-password
+    - secret: altinn-user-password
+    - secret: altinn-api-gw-keys
   env:
   - name: KOIN_PROFILE
     value: PREPROD
@@ -66,3 +69,10 @@ spec:
     value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
   - name: SECURITYTOKENSERVICE_REST_URL
     value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
+
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_11
+        databases:
+          - name: helse-spion-db
+            diskAutoresize: true
