@@ -42,12 +42,8 @@ spec:
   env:
   - name: KOIN_PROFILE
     value: PREPROD
-  - name: DATABASE_HOST
-    value: b27dbvl008.preprod.local
-  - name: DATABASE_PORT
-    value: "5432"
   - name: DATABASE_NAME
-    value: helse-spion
+    value: helse-spion-db
   - name: ALTINN_SERVICE_OWNER_GW_URL
     value: https://api-gw-q1.adeo.no/ekstern/altinn/api/serviceowner
   - name: VEDTAK_TOPICNAME
@@ -63,3 +59,6 @@ spec:
         databases:
           - name: helse-spion-db
             diskAutoresize: true
+
+  kafka:
+    pool: nav-dev    # enum of nav-dev, nav-prod
