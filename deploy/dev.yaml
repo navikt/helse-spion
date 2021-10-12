@@ -32,24 +32,13 @@ spec:
     requests:
       cpu: 200m
       memory: 64Mi
-  vault:
-    enabled: true
-    paths:
-      - mountPath: /var/run/secrets/nais.io/vault
-        kvPath: /kv/preprod/fss/helse-spion/default
-      - mountPath: /var/run/secrets/nais.io/service_user
-        kvPath: /serviceuser/data/dev/srvhelsespion
-      - mountPath: /var/run/secrets/nais.io/apigw/altinn
-        kvPath: /apikey/apigw/dev/eksternapp.altinn.serviceowner/helse-spion_q1
-  webproxy: true
   secureLogs:
     enabled: true
   envFrom:
     - configmap: loginservice-idporten # tilgjengeliggjør LOGINSERVICE_IDPORTEN_DISCOVERY_URL og LOGINSERVICE_IDPORTEN_AUDIENCE
     # servicebrukerens passord som er  hentet fra vault og lagt inn slik: https://doc.nais.io/security/secrets/kubernetes-secrets/
-    - secret: service-user-password
-    - secret: altinn-user-password
-    - secret: altinn-api-gw-keys
+    - secret: helse-spion-altinn
+    - secret: helse-spion-serviceuser
   env:
   - name: KOIN_PROFILE
     value: PREPROD
@@ -59,8 +48,6 @@ spec:
     value: "5432"
   - name: DATABASE_NAME
     value: helse-spion
-  - name: VAULT_MOUNTPATH
-    value: postgresql/preprod-fss/
   - name: ALTINN_SERVICE_OWNER_GW_URL
     value: https://api-gw-q1.adeo.no/ekstern/altinn/api/serviceowner
   - name: VEDTAK_TOPICNAME
