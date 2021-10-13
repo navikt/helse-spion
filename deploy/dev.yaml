@@ -52,8 +52,6 @@ spec:
   env:
   - name: KOIN_PROFILE
     value: PREPROD
-  - name: DATABASE_NAME
-    value: helse-spion-db
   - name: ALTINN_SERVICE_OWNER_GW_URL
     value: https://api-gw-q1.adeo.no/ekstern/altinn/api/serviceowner
   - name: VEDTAK_TOPICNAME
