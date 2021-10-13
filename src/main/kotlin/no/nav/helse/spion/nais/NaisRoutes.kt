@@ -30,14 +30,14 @@ fun Application.nais() {
     val log = LoggerFactory.getLogger("Metrics Routes")
 
     routing {
-        get("/isalive") {
+        get("/health/is-alive") {
             val kubernetesProbeManager = this@routing.get<KubernetesProbeManager>()
             val checkResults = kubernetesProbeManager.runLivenessProbe()
             log.info(checkResults.toString())
             returnResultOfChecks(checkResults)
         }
 
-        get("/isready") {
+        get("/health/is-ready") {
             //returnResultOfChecks(this@routing, HealthCheckType.READYNESS, this)
             val kubernetesProbeManager = this@routing.get<KubernetesProbeManager>()
             val checkResults = kubernetesProbeManager.runReadynessProbe()
