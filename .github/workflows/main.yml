@@ -75,14 +75,17 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@master
         env:
+          TEAM: helsearbeidsgiver
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
+          CLUSTER: dev-gcp
           RESOURCE: deploy/dev.yaml
+          REF: ${{ env.COMMIT }}
+          IMAGE: ${{ env.IMAGE }}:${{ github.sha }}
 
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
-          RESOURCE: deploy/prod.yaml
+      # - uses: nais/deploy/actions/deploy@v1
+      #   env:
+      #     APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+      #     CLUSTER: prod-fss
+      #     RESOURCE: deploy/prod.yaml
