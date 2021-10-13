@@ -9,19 +9,21 @@ spec:
   image: {{image}}
   port: 8080
   liveness:
-    path: /health/isalive
+    path: /health/is-alive
     initialDelay: 10
     timeout: 1
     periodSeconds: 30
     failureThreshold: 10
   readiness:
-    path: /health/isready
+    path: /health/is-ready
     initialDelay: 10
     timeout: 1
     periodSeconds: 5
     failureThreshold: 10
   ingresses:
     - https://helse-spion.dev.nav.no
+  # prometheus:
+  #   enabled: true
   replicas:
     max: 1
     min: 1
@@ -34,6 +36,14 @@ spec:
       memory: 64Mi
   secureLogs:
     enabled: true
+  # azure:
+  #   application:
+  #     enabled: true
+
+  # accessPolicy:
+  #   outbound:
+  #     external:
+
   envFrom:
     - configmap: loginservice-idporten # tilgjengeliggjør LOGINSERVICE_IDPORTEN_DISCOVERY_URL og LOGINSERVICE_IDPORTEN_AUDIENCE
     # servicebrukerens passord som er  hentet fra vault og lagt inn slik: https://doc.nais.io/security/secrets/kubernetes-secrets/
