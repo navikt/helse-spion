@@ -39,7 +39,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
         configuredTestApplication({
             spionModule()
         }) {
-            handleRequest(HttpMethod.Get, "/isalive") {
+            handleRequest(HttpMethod.Get, "/health/is-alive") {
             }.apply {
                 assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
             }
@@ -51,7 +51,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
         configuredTestApplication({
             spionModule()
         }) {
-            handleRequest(HttpMethod.Get, "/isready") {
+            handleRequest(HttpMethod.Get, "/health/is-ready") {
             }.apply {
                 assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
             }
