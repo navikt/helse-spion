@@ -15,6 +15,12 @@ fun createHikariConfig(jdbcUrl: String, username: String? = null, password: Stri
         password?.let { this.password = it }
     }
 
+enum class Role {
+    admin, user, readonly;
+
+    override fun toString() = name.toLowerCase()
+}
+
 
 fun createLocalHikariConfig() =
         createHikariConfig("jdbc:postgresql://localhost:5432/spion", "spion", "spion")

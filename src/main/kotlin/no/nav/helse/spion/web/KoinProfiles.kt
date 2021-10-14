@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.client.features.json.*
@@ -27,7 +28,6 @@ import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPersonNavn
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
-import no.nav.helse.spion.db.getDataSource
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
@@ -101,7 +101,16 @@ fun buildAndTestConfig() = module {
 
 @KtorExperimentalAPI
 fun localDevConfig(config: ApplicationConfig) = module {
-    single { getDataSource(createLocalHikariConfig(), "spion", null) as DataSource }
+    single {
+        HikariDataSource(
+            createHikariConfig(
+                config.getjdbcUrlFromProperties(),
+                config.getString("database.username"),
+                config.getString("database.password")
+
+            )
+        )
+    } bind DataSource::class
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
     single { PostgresBakgrunnsjobbRepository(get()) as BakgrunnsjobbRepository }
@@ -125,10 +134,15 @@ fun localDevConfig(config: ApplicationConfig) = module {
 @KtorExperimentalAPI
 fun preprodConfig(config: ApplicationConfig) = module {
     single {
-        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties()),
-                config.getString("database.name"),
-                config.getString("database.vault.mountpath")) as DataSource
-    }
+        HikariDataSource(
+            createHikariConfig(
+                config.getjdbcUrlFromProperties(),
+                config.getString("database.username"),
+                config.getString("database.password")
+
+            )
+        )
+    } bind DataSource::class
 
     /*single {
         AltinnClient(
@@ -169,10 +183,15 @@ fun preprodConfig(config: ApplicationConfig) = module {
 @KtorExperimentalAPI
 fun prodConfig(config: ApplicationConfig) = module {
     single {
-        getDataSource(createHikariConfig(config.getjdbcUrlFromProperties()),
-                config.getString("database.name"),
-                config.getString("database.vault.mountpath")) as DataSource
-    }
+        HikariDataSource(
+            createHikariConfig(
+                config.getjdbcUrlFromProperties(),
+                config.getString("database.username"),
+                config.getString("database.password")
+
+            )
+        )
+    } bind DataSource::class
 
     single { StaticMockAuthRepo(get()) as AuthorizationsRepository } bind StaticMockAuthRepo::class
     single { SpionService(get(), get()) }
