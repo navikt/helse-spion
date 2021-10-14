@@ -67,7 +67,7 @@ jobs:
           rm -f ~/.gradle/caches/modules-2/gc.properties
 
   deploy:
-    name: Deploy dev-ffs
+    name: Deploy dev-gcp
     needs: [buildAndTest]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
