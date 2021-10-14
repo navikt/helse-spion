@@ -1,4 +1,4 @@
-name: Deploy dev-ffs
+name: Deploy dev-gcp
 
 on:
   push:
