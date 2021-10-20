@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val ktorVersion = "1.4.1"
+val ktorVersion = "1.5.0"
 val logback_version = "1.2.1"
 val logback_contrib_version = "0.1.5"
 val jacksonVersion = "2.11.0"
@@ -11,7 +11,7 @@ val kafkaVersion = "2.1.1"
 val mainClass = "no.nav.helse.spion.web.AppKt"
 val junitJupiterVersion = "5.5.0-RC2"
 val assertJVersion = "3.12.2"
-val mockKVersion = "1.9.3"
+val mockKVersion = "1.11.0"
 val tokenSupportVersion = "1.3.1"
 val mockOAuth2ServerVersion = "0.2.1"
 val koinVersion = "3.1.2"
@@ -104,7 +104,7 @@ dependencies {
 
 
     implementation("io.insert-koin:koin-core:$koinVersion")
-    implementation("io.insert-koin:koin-core-jvm:$koinVersion")
+    //implementation("io.insert-koin:koin-core-jvm:$koinVersion")
     implementation("io.insert-koin:koin-ktor:$koinVersion")
     testImplementation("io.insert-koin:koin-test:$koinVersion")
     implementation("no.nav.security:token-validation-ktor:$tokenSupportVersion")
@@ -145,6 +145,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:$assertJVersion")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+    testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
 }
 
 tasks.named<KotlinCompile>("compileKotlin")

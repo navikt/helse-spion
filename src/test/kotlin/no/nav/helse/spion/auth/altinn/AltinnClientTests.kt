@@ -2,8 +2,7 @@ package no.nav.helse.spion.auth.altinn
 
 import com.fasterxml.jackson.databind.MapperFeature
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
+import io.ktor.client.engine.mock.*
 import io.ktor.client.features.ServerResponseException
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
