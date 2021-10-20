@@ -14,7 +14,7 @@ val assertJVersion = "3.12.2"
 val mockKVersion = "1.9.3"
 val tokenSupportVersion = "1.3.1"
 val mockOAuth2ServerVersion = "0.2.1"
-val koinVersion = "2.0.1"
+val koinVersion = "3.1.2"
 val valiktorVersion = "0.9.0"
 val cxfVersion = "3.3.8"
 val jaxwsVersion = "2.3.1"
@@ -103,8 +103,10 @@ dependencies {
     }
 
 
-    implementation("org.koin:koin-core:$koinVersion")
-    implementation("org.koin:koin-ktor:$koinVersion")
+    implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("io.insert-koin:koin-core-jvm:$koinVersion")
+    implementation("io.insert-koin:koin-ktor:$koinVersion")
+    testImplementation("io.insert-koin:koin-test:$koinVersion")
     implementation("no.nav.security:token-validation-ktor:$tokenSupportVersion")
     implementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
 
@@ -133,7 +135,6 @@ dependencies {
 
     implementation("no.nav.helsearbeidsgiver:helse-arbeidsgiver-felles-backend:2021.08.27-15-00-1d672")
 
-    testImplementation("org.koin:koin-test:$koinVersion")
     implementation("com.github.javafaker:javafaker:1.0.1") // flytt denne til test når generatorene ikke er nødvendige i prod-koden lenger
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2")
     testImplementation("io.mockk:mockk:$mockKVersion")
@@ -162,28 +163,24 @@ java {
 }
 
 repositories {
-
+    mavenCentral()
+    google()
+    maven(url = "https://packages.confluent.io/maven/")
     maven {
         credentials {
             username = "x-access-token"
-            password = "GITHUB_TOKEN"
+            password = githubPassword
+        }
+        setUrl("https://maven.pkg.github.com/navikt/inntektsmelding-kontrakt")
+    }
+    maven {
+        credentials {
+            username = "x-access-token"
+            password = githubPassword
         }
         setUrl("https://maven.pkg.github.com/navikt/helse-arbeidsgiver-felles-backend")
     }
-
-    jcenter{
-        content {
-            excludeGroup("no.nav.helsearbeidsgiver")
-        }
-    }
-    mavenCentral{
-        content {
-            excludeGroup("no.nav.helsearbeidsgiver")
-        }
-    }
-    maven("https://kotlin.bintray.com/ktor")
 }
-
 tasks.named<Jar>("jar") {
     baseName = ("app")
 

@@ -19,12 +19,8 @@ import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.MockBakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.PostgresBakgrunnsjobbRepository
-import no.nav.helse.arbeidsgiver.integrasjoner.RestStsClient
-import no.nav.helse.arbeidsgiver.integrasjoner.RestStsClientImpl
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.*
 import no.nav.helse.arbeidsgiver.kubernetes.KubernetesProbeManager
-import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClient
-import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPerson
-import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPersonNavn
 import no.nav.helse.spion.auth.*
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.db.createLocalHikariConfig
@@ -121,7 +117,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
 
     single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
 
-    single { object : RestStsClient { override fun getOidcToken(): String { return "fake token"} } as RestStsClient }
+    //single { object : RestStsClient { override fun getOidcToken(): String { return "fake token"} } as RestStsClient }
     single { createStaticPdlMock() as PdlClient }
     single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingConsumer(get(), get(), get()) }
@@ -154,7 +150,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
         ) as AuthorizationsRepository
     }*/
 
-    single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
+    //single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
     single { createStaticPdlMock() }
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
@@ -197,7 +193,7 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
+    //single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
     single { createStaticPdlMock() as PdlClient}
     single { generateEmptyMock() as VedtaksmeldingProvider }
 
@@ -213,9 +209,39 @@ fun prodConfig(config: ApplicationConfig) = module {
 
 val createStaticPdlMock = fun(): PdlClient {
     return object : PdlClient {
-        override fun person(ident: String): PdlPerson? {
-            return PdlPerson(listOf(PdlPersonNavn("Ola", null, "Dunk")),null)
-        }
+        override fun fullPerson(ident: String) =
+            PdlHentFullPerson(
+                PdlHentFullPerson.PdlFullPersonliste(
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList()
+                ),
+
+                PdlHentFullPerson.PdlIdentResponse(listOf(PdlIdent("aktør-id", PdlIdent.PdlIdentGruppe.AKTORID))),
+
+                PdlHentFullPerson.PdlGeografiskTilknytning(
+                    PdlHentFullPerson.PdlGeografiskTilknytning.PdlGtType.UTLAND,
+                    null,
+                    null,
+                    "SWE"
+                )
+            )
+
+        override fun personNavn(ident: String) =
+            PdlHentPersonNavn.PdlPersonNavneliste(
+                listOf(
+                    PdlHentPersonNavn.PdlPersonNavneliste.PdlPersonNavn(
+                        "Ola",
+                        "M",
+                        "Avsender",
+                        PdlPersonNavnMetadata("freg")
+                    )
+                )
+            )
 
     }
 }
@@ -265,11 +291,3 @@ fun ApplicationConfig.getjdbcUrlFromProperties(): String {
             this.property("database.name").getString())
 }
 
-inline fun <reified T : Any> Koin.getAllOfType(): Collection<T> =
-        let { koin ->
-            koin.rootScope.beanRegistry
-                    .getAllDefinitions()
-                    .filter { it.kind == Kind.Single }
-                    .map { koin.get<Any>(clazz = it.primaryType, qualifier = null, parameters = null) }
-                    .filterIsInstance<T>()
-        }

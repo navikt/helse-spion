@@ -10,7 +10,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.web.dto.PersonOppslagDto
 import no.nav.helse.spion.web.spionModule
 import org.junit.jupiter.api.Test
-import org.koin.core.get
+import org.koin.core.component.get
 import kotlin.test.assertEquals
 
 
