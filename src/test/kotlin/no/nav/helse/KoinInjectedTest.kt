@@ -11,8 +11,8 @@ abstract class KoinInjectedTest {
 
     internal lateinit var koin: Koin
 
-    @BeforeAll
+    /*@BeforeAll
     internal fun createKoinApplicationEnvironmentWithCommonModule() {
         koin = KoinApplication.create().modules(common).koin
-    }
+    }*/
 }

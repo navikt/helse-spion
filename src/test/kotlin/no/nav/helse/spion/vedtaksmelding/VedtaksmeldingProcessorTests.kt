@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.arbeidsgiver.bakgrunnsjobb.Bakgrunnsjobb
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -17,7 +18,8 @@ open class VedtaksmeldingProcessorTests {
 
     @Test
     internal fun `normal melding prosesseres ok`() {
-        processor.prosesser(om.writeValueAsString(generator.next()))
+        val jobb = Bakgrunnsjobb(data = om.writeValueAsString(generator.next()), type = "test")
+        processor.prosesser(jobb)
         verify(exactly = 1) { serviceMock.processAndSaveMessage(any()) }
     }
 }

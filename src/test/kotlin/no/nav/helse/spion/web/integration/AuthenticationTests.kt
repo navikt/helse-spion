@@ -13,7 +13,7 @@ import no.nav.helse.spion.web.spionModule
 import no.nav.helse.validWithoutPeriode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.koin.core.get
+import org.koin.core.component.get
 
 @KtorExperimentalAPI
 class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
