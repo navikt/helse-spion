@@ -131,7 +131,7 @@ dependencies {
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
-    implementation("no.nav.helsearbeidsgiver:helse-arbeidsgiver-felles-backend:2020.09.29-12-47-cf76e")
+    implementation("no.nav.helsearbeidsgiver:helse-arbeidsgiver-felles-backend:2021.08.27-15-00-1d672")
 
     testImplementation("org.koin:koin-test:$koinVersion")
     implementation("com.github.javafaker:javafaker:1.0.1") // flytt denne til test når generatorene ikke er nødvendige i prod-koden lenger
@@ -162,16 +162,26 @@ java {
 }
 
 repositories {
-    jcenter()
-    mavenCentral()
-    maven("https://kotlin.bintray.com/ktor")
+
     maven {
         credentials {
             username = "x-access-token"
-            password = githubPassword
+            password = "GITHUB_TOKEN"
         }
         setUrl("https://maven.pkg.github.com/navikt/helse-arbeidsgiver-felles-backend")
     }
+
+    jcenter{
+        content {
+            excludeGroup("no.nav.helsearbeidsgiver")
+        }
+    }
+    mavenCentral{
+        content {
+            excludeGroup("no.nav.helsearbeidsgiver")
+        }
+    }
+    maven("https://kotlin.bintray.com/ktor")
 }
 
 tasks.named<Jar>("jar") {
