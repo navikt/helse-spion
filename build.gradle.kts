@@ -62,6 +62,14 @@ buildscript {
 }
 
 dependencies {
+    constraints {
+        implementation("com.nimbusds:nimbus-jose-jwt") {
+            version {
+                strictly("8.20.1")
+            }
+            because("JWT validation")
+        }
+    }
 
     //Snyk fikser
     implementation("org.eclipse.jetty:jetty-server:9.4.35.v20201120") //overstyrer
