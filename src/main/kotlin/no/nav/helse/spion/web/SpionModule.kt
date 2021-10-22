@@ -36,7 +36,7 @@ import org.valiktor.i18n.toMessage
 import java.lang.reflect.InvocationTargetException
 import java.net.URI
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import javax.ws.rs.ForbiddenException
 
 @KtorExperimentalAPI

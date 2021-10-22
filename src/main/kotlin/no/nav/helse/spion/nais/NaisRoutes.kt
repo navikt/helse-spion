@@ -19,7 +19,7 @@ import no.nav.helse.arbeidsgiver.kubernetes.ProbeResult
 import no.nav.helse.arbeidsgiver.kubernetes.ProbeState
 import org.koin.ktor.ext.get
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.Collections
 
 private val collectorRegistry = CollectorRegistry.defaultRegistry
 

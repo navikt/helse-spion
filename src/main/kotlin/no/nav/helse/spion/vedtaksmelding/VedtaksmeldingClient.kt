@@ -6,7 +6,7 @@ import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.util.*
+import java.util.Collections
 
 data class SpleisMelding(val key: String, val offset: Long, val type: String, val messageBody: String)
 

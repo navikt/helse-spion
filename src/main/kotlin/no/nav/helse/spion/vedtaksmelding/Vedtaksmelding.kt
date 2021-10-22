@@ -1,7 +1,7 @@
 package no.nav.helse.spion.vedtaksmelding
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 /* Behandling
 data class SpleisVedtaksperiodeDto(
