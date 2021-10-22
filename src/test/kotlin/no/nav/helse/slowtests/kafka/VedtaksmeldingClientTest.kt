@@ -22,7 +22,6 @@ import org.koin.core.KoinApplication
 import org.koin.core.KoinComponent
 import java.util.concurrent.TimeUnit
 
-
 /**
  * Disse testene krever en kjørende Kafka broker på localhost:9092
  * For å kjøre opp en kan du gjøre
@@ -38,8 +37,8 @@ internal class VedtaksmeldingClientTest : KoinComponent {
     val generator = SpleisVedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
     val testProps = mutableMapOf<String, Any>(
-            "bootstrap.servers" to "localhost:9092",
-            "max.poll.interval.ms" to "30000"
+        "bootstrap.servers" to "localhost:9092",
+        "max.poll.interval.ms" to "30000"
     )
 
     @BeforeAll
@@ -49,9 +48,9 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         adminClient = KafkaAdminClient.create(testProps)
 
         adminClient
-                .createTopics(mutableListOf(NewTopic(topicName, 1, 1)))
-                .all()
-                .get(20, TimeUnit.SECONDS)
+            .createTopics(mutableListOf(NewTopic(topicName, 1, 1)))
+            .all()
+            .get(20, TimeUnit.SECONDS)
     }
 
     @AfterAll
@@ -90,13 +89,13 @@ internal class VedtaksmeldingClientTest : KoinComponent {
         val producer = KafkaProducer<String, String>(testProps, StringSerializer(), StringSerializer())
         val generatedMessage = generator.next()
         producer.send(
-                ProducerRecord(
-                        topicName,
-                        0,
-                        generatedMessage.key,
-                        generatedMessage.messageBody,
-                        listOf(RecordHeader("type", SpleisMeldingstype.Vedtak.name.toByteArray()))
-                )
+            ProducerRecord(
+                topicName,
+                0,
+                generatedMessage.key,
+                generatedMessage.messageBody,
+                listOf(RecordHeader("type", SpleisMeldingstype.Vedtak.name.toByteArray()))
+            )
         ).get(10, TimeUnit.SECONDS)
 
         val oneMessageExpected = client.getMessagesToProcess()

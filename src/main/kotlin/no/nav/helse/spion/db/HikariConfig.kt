@@ -21,6 +21,5 @@ enum class Role {
     override fun toString() = name.toLowerCase()
 }
 
-
 fun createLocalHikariConfig() =
-        createHikariConfig("jdbc:postgresql://localhost:5432/spion", "spion", "spion")
+    createHikariConfig("jdbc:postgresql://localhost:5432/spion", "spion", "spion")

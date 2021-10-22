@@ -5,8 +5,9 @@ import no.nav.helse.spion.web.dto.validation.OrganisasjonsnummerValidator
 import kotlin.random.Random
 
 class ArbeidsgiverGenerator(
-        fixedList: MutableList<Arbeidsgiver>? = null,
-        private var maxUniqueArbeidsgivere: Int = 1000) {
+    fixedList: MutableList<Arbeidsgiver>? = null,
+    private var maxUniqueArbeidsgivere: Int = 1000
+) {
 
     private val faker = Faker()
     private val arbeidsgivere = fixedList ?: mutableListOf()
@@ -26,12 +27,12 @@ class ArbeidsgiverGenerator(
             var virkNr = Random.Default.nextLong(11111111, 99999999).toString()
             var knrVirk = OrganisasjonsnummerValidator.checksum(OrganisasjonsnummerValidator.Companion.tabeller.weights, virkNr)
 
-            while(knrOrg == 10) {
+            while (knrOrg == 10) {
                 orgNr = Random.Default.nextLong(11111111, 99999999).toString()
                 knrOrg = OrganisasjonsnummerValidator.checksum(OrganisasjonsnummerValidator.Companion.tabeller.weights, orgNr)
             }
 
-            while(knrVirk == 10) {
+            while (knrVirk == 10) {
                 virkNr = Random.Default.nextLong(11111111, 99999999).toString()
                 knrVirk = OrganisasjonsnummerValidator.checksum(OrganisasjonsnummerValidator.Companion.tabeller.weights, virkNr)
             }
@@ -39,11 +40,8 @@ class ArbeidsgiverGenerator(
             orgNr += knrOrg
             virkNr += knrVirk
 
-
-
-
             val arbeidsGiver = Arbeidsgiver(
-                    virkNr
+                virkNr
             )
             arbeidsgivere.add(arbeidsGiver)
             arbeidsGiver

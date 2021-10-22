@@ -4,7 +4,6 @@ import no.nav.helse.spion.web.dto.validation.FoedselsNrValidator.Companion.tabel
 import no.nav.helse.spion.web.dto.validation.FoedselsNrValidator.Companion.tabeller.kontrollsiffer2
 import no.nav.helse.spion.web.dto.validation.OrganisasjonsnummerValidator.Companion.tabeller.weights
 
-
 class FoedselsNrValidator(input: String?) {
     val asString: String
 
@@ -87,7 +86,6 @@ class OrganisasjonsnummerValidator(input: String?) {
     companion object {
         object tabeller {
             val weights: List<Int> = listOf(3, 2, 7, 6, 5, 4, 3, 2)
-
         }
 
         fun isValid(asString: String?): Boolean {

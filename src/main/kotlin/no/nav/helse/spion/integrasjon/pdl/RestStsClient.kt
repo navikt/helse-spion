@@ -11,8 +11,8 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
 import java.time.Instant
-import java.util.*
-
+import java.util.Base64
+import java.util.Date
 
 class RestStsClient(username: String, password: String, stsEndpoint: String) {
 
@@ -29,7 +29,6 @@ class RestStsClient(username: String, password: String, stsEndpoint: String) {
         currentToken = requestToken()
     }
 
-
     fun getOidcToken(): String {
         if (isExpired(currentToken, Date.from(Instant.now().plusSeconds(300)))) {
             log.info("OIDC Token is expired, getting a new one from the STS")
@@ -42,18 +41,18 @@ class RestStsClient(username: String, password: String, stsEndpoint: String) {
     private fun requestToken(): JwtToken {
         log.info("sts endpoint uri: $endpointURI")
         val request = HttpRequest.newBuilder()
-                .uri(endpointURI)
-                .header("Authorization", basicAuth)
-                .header("Accept", "application/json")
-                .timeout(Duration.ofSeconds(10))
-                .GET()
-                .build()
+            .uri(endpointURI)
+            .header("Authorization", basicAuth)
+            .header("Accept", "application/json")
+            .timeout(Duration.ofSeconds(10))
+            .GET()
+            .build()
 
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
         check(response.statusCode() == HttpURLConnection.HTTP_OK) { String.format("Feil oppsto under henting av token fra STS - %s", response.body()) }
 
         val accessToken = ObjectMapper().readValue(response.body(), STSOidcResponse::class.java).access_token
-                ?: throw IllegalStateException("Feilet ved kall til STS, ingen access token returnert")
+            ?: throw IllegalStateException("Feilet ved kall til STS, ingen access token returnert")
 
         return JwtToken(accessToken)
     }
@@ -70,9 +69,8 @@ class RestStsClient(username: String, password: String, stsEndpoint: String) {
 
 fun isExpired(jwtToken: JwtToken, date: Date): Boolean {
     return date.after(jwtToken.expirationTime) &&
-            jwtToken.expirationTime.before(date)
+        jwtToken.expirationTime.before(date)
 }
-
 
 class STSOidcResponse {
     var access_token: String? = null

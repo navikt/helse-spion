@@ -8,16 +8,16 @@ interface Authorizer {
      * En arbeidsgiverId kan være en virksomhet, en hovedenhet, et identitetsnummer på en privatperson eller et
      * organisasjonsledd.
      */
-    fun hasAccess(identitetsnummer : String, arbeidsgiverId : String) : Boolean
+    fun hasAccess(identitetsnummer: String, arbeidsgiverId: String): Boolean
 }
 
-class DefaultAuthorizer(private val authListRepo : AuthorizationsRepository) : Authorizer {
-    override fun hasAccess(identitetsnummer : String, arbeidsgiverId: String): Boolean {
+class DefaultAuthorizer(private val authListRepo: AuthorizationsRepository) : Authorizer {
+    override fun hasAccess(identitetsnummer: String, arbeidsgiverId: String): Boolean {
         return authListRepo.hentOrgMedRettigheterForPerson(identitetsnummer)
-                .any { (it.organizationNumber ?: it.socialSecurityNumber) == arbeidsgiverId }
+            .any { (it.organizationNumber ?: it.socialSecurityNumber) == arbeidsgiverId }
     }
 }
 
 interface AuthorizationsRepository {
-    fun hentOrgMedRettigheterForPerson(identitetsnummer : String) : Set<AltinnOrganisasjon>
+    fun hentOrgMedRettigheterForPerson(identitetsnummer: String): Set<AltinnOrganisasjon>
 }

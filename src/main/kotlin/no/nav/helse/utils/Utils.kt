@@ -1,5 +1,5 @@
 package no.nav.helse.utils
 
-fun String.loadFromResources() : String {
+fun String.loadFromResources(): String {
     return ClassLoader.getSystemResource(this).readText()
 }

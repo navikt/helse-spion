@@ -13,9 +13,8 @@ import org.junit.jupiter.api.Test
 import org.koin.core.get
 import kotlin.test.assertEquals
 
-
 @KtorExperimentalAPI
-class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
+class AuthorizationTests : ControllerIntegrationTestBase() {
 
     val noAccessToThisOrg = PersonOppslagDto("20015001543", "123456785")
     val hasAccessToThisOrg = PersonOppslagDto("20015001543", "910020102")
@@ -37,7 +36,7 @@ class ApplicationAuthorizationTest : ControllerIntegrationTestBase() {
 
     @Test
     fun `saksOppslag when logged in and authorized for the given Virksomhet returns 200 OK`() {
-        configuredTestApplication( {
+        configuredTestApplication({
             spionModule()
         }) {
             doAuthenticatedRequest(HttpMethod.Post, "/api/v1/ytelsesperioder/oppslag") {

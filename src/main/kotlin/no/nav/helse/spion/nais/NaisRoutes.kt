@@ -19,7 +19,7 @@ import no.nav.helse.arbeidsgiver.kubernetes.ProbeResult
 import no.nav.helse.arbeidsgiver.kubernetes.ProbeState
 import org.koin.ktor.ext.get
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.Collections
 
 private val collectorRegistry = CollectorRegistry.defaultRegistry
 
@@ -38,7 +38,7 @@ fun Application.nais() {
         }
 
         get("/health/is-ready") {
-            //returnResultOfChecks(this@routing, HealthCheckType.READYNESS, this)
+            // returnResultOfChecks(this@routing, HealthCheckType.READYNESS, this)
             val kubernetesProbeManager = this@routing.get<KubernetesProbeManager>()
             val checkResults = kubernetesProbeManager.runReadynessProbe()
             log.info(checkResults.toString())
@@ -57,10 +57,10 @@ fun Application.nais() {
             val readyResults = kubernetesProbeManager.runReadynessProbe()
             val liveResults = kubernetesProbeManager.runLivenessProbe()
             val combinedResults = ProbeResult(
-                    liveResults.healthyComponents +
-                            liveResults.unhealthyComponents +
-                            readyResults.healthyComponents +
-                            readyResults.unhealthyComponents
+                liveResults.healthyComponents +
+                    liveResults.unhealthyComponents +
+                    readyResults.healthyComponents +
+                    readyResults.unhealthyComponents
             )
             returnResultOfChecks(combinedResults)
         }
@@ -74,5 +74,3 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.returnResultOfChecks(
     }
     call.respond(httpResult, checkResults)
 }
-
-

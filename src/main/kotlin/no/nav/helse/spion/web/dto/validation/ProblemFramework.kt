@@ -2,7 +2,6 @@ package no.nav.helse.spion.web.dto.validation
 
 import java.net.URI
 
-
 /**
  * Tilbakemeldings-standard basert på
  *
@@ -13,11 +12,11 @@ import java.net.URI
  * er et eksempel på dette som inneholder valideringsfeil.
  */
 open class Problem(
-        val type: URI = URI.create("about:blank"),
-        val title: String,
-        val status: Int? = 500,
-        val detail: String? = null,
-        val instance: URI = URI.create("about:blank")
+    val type: URI = URI.create("about:blank"),
+    val title: String,
+    val status: Int? = 500,
+    val detail: String? = null,
+    val instance: URI = URI.create("about:blank")
 )
 
 /**
@@ -25,13 +24,17 @@ open class Problem(
  * Inneholder en liste over properties som feilet validering
  */
 class ValidationProblem(
-        val violations: Set<ValidationProblemDetail>
+    val violations: Set<ValidationProblemDetail>
 ) : Problem(
-        URI.create("urn:spion:validation-error"),
-        "Valideringen av input feilet",
-        422,
-        "Ett eller flere felter har feil."
+    URI.create("urn:spion:validation-error"),
+    "Valideringen av input feilet",
+    422,
+    "Ett eller flere felter har feil."
 )
 
 class ValidationProblemDetail(
-        val validationType: String, val message: String, val propertyPath: String, val invalidValue: Any?)
+    val validationType: String,
+    val message: String,
+    val propertyPath: String,
+    val invalidValue: Any?
+)

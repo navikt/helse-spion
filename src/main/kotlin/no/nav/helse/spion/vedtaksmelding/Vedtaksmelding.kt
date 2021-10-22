@@ -1,8 +1,7 @@
 package no.nav.helse.spion.vedtaksmelding
 
 import java.time.LocalDate
-import java.util.*
-
+import java.util.UUID
 
 /* Behandling
 data class SpleisVedtaksperiodeDto(
@@ -24,26 +23,26 @@ data class SpleisVedtaksperiodeDto(
 */
 
 data class SpleisVedtakDto(
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val forbrukteSykedager: Int,
-        val gjenståendeSykedager: Int,
-        val utbetalinger: List<SpleisUtbetalingDto>,
-        val dokumenter: List<SpleisDokument>
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val forbrukteSykedager: Int,
+    val gjenståendeSykedager: Int,
+    val utbetalinger: List<SpleisUtbetalingDto>,
+    val dokumenter: List<SpleisDokument>
 ) {
     data class SpleisUtbetalingDto(
-            val mottaker: String,
-            val fagområde: String,
-            val totalbeløp: Int,
-            val utbetalingslinjer: List<SpleisUtbetalingslinjeDto>
+        val mottaker: String,
+        val fagområde: String,
+        val totalbeløp: Int,
+        val utbetalingslinjer: List<SpleisUtbetalingslinjeDto>
     ) {
         data class SpleisUtbetalingslinjeDto(
-                val fom: LocalDate,
-                val tom: LocalDate,
-                val dagsats: Int,
-                val beløp: Int,
-                val grad: Double,
-                val sykedager: Int
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val dagsats: Int,
+            val beløp: Int,
+            val grad: Double,
+            val sykedager: Int
         )
     }
 }

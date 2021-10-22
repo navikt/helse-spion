@@ -1,15 +1,17 @@
 package no.nav.helse.spion.web
 
 import com.typesafe.config.ConfigFactory
-import io.ktor.config.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.util.*
+import io.ktor.config.HoconApplicationConfig
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.arbeidsgiver.kubernetes.KubernetesProbeManager
 import no.nav.helse.arbeidsgiver.kubernetes.LivenessComponent
 import no.nav.helse.arbeidsgiver.kubernetes.ReadynessComponent
-import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.spion.auth.localCookieDispenser
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingConsumer
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
@@ -38,10 +40,12 @@ fun main() {
         val vedtaksmeldingConsumer = koin.get<VedtaksmeldingConsumer>()
         vedtaksmeldingConsumer.startAsync(true)
 
-        Runtime.getRuntime().addShutdownHook(Thread {
-            vedtaksmeldingConsumer.stop()
-            app.stop(1000, 1000)
-        })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                vedtaksmeldingConsumer.stop()
+                app.stop(1000, 1000)
+            }
+        )
     }
 }
 
@@ -49,10 +53,10 @@ private suspend fun autoDetectProbeableComponents(koin: org.koin.core.Koin) {
     val kubernetesProbeManager = koin.get<KubernetesProbeManager>()
 
     koin.getAllOfType<LivenessComponent>()
-            .forEach { kubernetesProbeManager.registerLivenessComponent(it) }
+        .forEach { kubernetesProbeManager.registerLivenessComponent(it) }
 
     koin.getAllOfType<ReadynessComponent>()
-            .forEach { kubernetesProbeManager.registerReadynessComponent(it) }
+        .forEach { kubernetesProbeManager.registerReadynessComponent(it) }
 }
 
 @KtorExperimentalAPI
@@ -66,7 +70,5 @@ fun createApplicationEnvironment() = applicationEngineEnvironment {
     module {
         localCookieDispenser(config)
         spionModule(config)
-
     }
 }
-

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 import org.koin.core.get
 
 @KtorExperimentalAPI
-class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
+class AuthenticationTests : ControllerIntegrationTestBase() {
 
     val oppslag = PersonOppslagDto.validWithoutPeriode()
 
@@ -27,7 +27,6 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
         }) {
 
             handleRequest(HttpMethod.Post, "/api/v1/ytelsesperioder/oppslag") {
-
             }.apply {
                 assertThat(response.status()).isEqualTo(HttpStatusCode.Unauthorized)
             }
@@ -60,7 +59,7 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
 
     @Test
     fun `saksOppslag with Valid JWT in Header does not return 401 Unauthorized`() {
-        configuredTestApplication( {
+        configuredTestApplication({
             spionModule()
         }) {
             handleRequest(HttpMethod.Post, "/api/v1/saker/oppslag") {
@@ -80,7 +79,6 @@ class ApplicationAuthenticationTest : ControllerIntegrationTestBase() {
             spionModule()
         }) {
             doAuthenticatedRequest(HttpMethod.Get, "/api/v1/saker/oppslag") {
-
             }.apply {
                 assertThat(response.status()).isNotEqualTo(HttpStatusCode.Unauthorized)
             }

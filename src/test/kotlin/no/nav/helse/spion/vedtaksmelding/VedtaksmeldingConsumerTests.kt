@@ -17,8 +17,8 @@ open class VedtaksmeldingConsumerTests {
     val kafkaMock = mockk<VedtaksmeldingProvider>(relaxed = true)
     val repoMock = mockk<BakgrunnsjobbRepository>(relaxed = true)
     val mapper = ObjectMapper()
-            .registerModule(KotlinModule())
-            .registerModule(JavaTimeModule())
+        .registerModule(KotlinModule())
+        .registerModule(JavaTimeModule())
 
     val meldingsGenerator = SpleisVedtaksmeldingGenerator(maxUniqueArbeidsgivere = 10, maxUniquePersoner = 10)
 
@@ -27,7 +27,7 @@ open class VedtaksmeldingConsumerTests {
 
     @kotlinx.coroutines.ExperimentalCoroutinesApi
     val processor = VedtaksmeldingConsumer(
-            kafkaMock, repoMock, mapper, CoroutineScope(testCoroutineDispatcher)
+        kafkaMock, repoMock, mapper, CoroutineScope(testCoroutineDispatcher)
     )
 
     private lateinit var messageList: List<SpleisMelding>
@@ -35,8 +35,8 @@ open class VedtaksmeldingConsumerTests {
     @BeforeEach
     internal fun setUp() {
         messageList = listOf(
-                meldingsGenerator.next(),
-                meldingsGenerator.next()
+            meldingsGenerator.next(),
+            meldingsGenerator.next()
         )
 
         every { kafkaMock.getMessagesToProcess() } returnsMany listOf(messageList, emptyList())
@@ -48,8 +48,7 @@ open class VedtaksmeldingConsumerTests {
         processor.doJob()
 
         verify(exactly = 2) { kafkaMock.getMessagesToProcess() }
-        verify(exactly = 2 ) { repoMock.save(any())}
+        verify(exactly = 2) { repoMock.save(any()) }
         verify(exactly = 1) { kafkaMock.confirmProcessingDone() }
     }
 }
-

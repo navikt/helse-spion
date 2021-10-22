@@ -21,11 +21,11 @@ class StaticMockAuthRepo(om: ObjectMapper) : AuthorizationsRepository, Readyness
         return acl
     }
 
-    fun setAccessList(acl : Set<AltinnOrganisasjon>) {
+    fun setAccessList(acl: Set<AltinnOrganisasjon>) {
         this.acl = acl
     }
 
     override suspend fun runReadynessCheck() {
-        if(failSelfCheck) throw Error("Feiler selfchecken")
+        if (failSelfCheck) throw Error("Feiler selfchecken")
     }
 }

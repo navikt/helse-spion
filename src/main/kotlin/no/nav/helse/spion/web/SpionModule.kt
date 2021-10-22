@@ -22,7 +22,6 @@ import io.ktor.response.respond
 import io.ktor.routing.routing
 import io.ktor.util.DataConversionException
 import io.ktor.util.KtorExperimentalAPI
-import no.nav.helse.spion.auth.localCookieDispenser
 import no.nav.helse.spion.nais.nais
 import no.nav.helse.spion.web.api.spion
 import no.nav.helse.spion.web.dto.validation.Problem
@@ -37,9 +36,8 @@ import org.valiktor.i18n.toMessage
 import java.lang.reflect.InvocationTargetException
 import java.net.URI
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import javax.ws.rs.ForbiddenException
-
 
 @KtorExperimentalAPI
 fun Application.spionModule(config: ApplicationConfig = environment.config) {
@@ -84,10 +82,10 @@ fun Application.spionModule(config: ApplicationConfig = environment.config) {
             val errorId = UUID.randomUUID()
             LOGGER.error("Uventet feil, $errorId", cause)
             val problem = Problem(
-                    type = URI.create("urn:spion:uventet-feil"),
-                    title = "Uventet feil",
-                    detail = cause.message,
-                    instance = URI.create("urn:spion:uventent-feil:$errorId")
+                type = URI.create("urn:spion:uventet-feil"),
+                title = "Uventet feil",
+                detail = cause.message,
+                instance = URI.create("urn:spion:uventent-feil:$errorId")
             )
             call.respond(HttpStatusCode.InternalServerError, problem)
         }
@@ -109,8 +107,8 @@ fun Application.spionModule(config: ApplicationConfig = environment.config) {
 
         exception<ForbiddenException> { cause ->
             call.respond(
-                    HttpStatusCode.Forbidden,
-                    Problem(URI.create("urn:spion:forbidden"), "Ingen tilgang", HttpStatusCode.Forbidden.value)
+                HttpStatusCode.Forbidden,
+                Problem(URI.create("urn:spion:forbidden"), "Ingen tilgang", HttpStatusCode.Forbidden.value)
             )
         }
 
@@ -120,19 +118,23 @@ fun Application.spionModule(config: ApplicationConfig = environment.config) {
 
         exception<ParameterConversionException> { cause ->
             call.respond(
-                    HttpStatusCode.BadRequest,
-                    ValidationProblem(setOf(
-                            ValidationProblemDetail("ParameterConversion", "Paramteret kunne konverteres til ${cause.type}", cause.parameterName, null))
+                HttpStatusCode.BadRequest,
+                ValidationProblem(
+                    setOf(
+                        ValidationProblemDetail("ParameterConversion", "Paramteret kunne konverteres til ${cause.type}", cause.parameterName, null)
                     )
+                )
             )
         }
 
         exception<MissingKotlinParameterException> { cause ->
             call.respond(
-                    HttpStatusCode.BadRequest,
-                    ValidationProblem(setOf(
-                            ValidationProblemDetail("NotNull", cause.message ?: "uknown", cause.path.joinToString(".") { it.fieldName }, "null"))
+                HttpStatusCode.BadRequest,
+                ValidationProblem(
+                    setOf(
+                        ValidationProblemDetail("NotNull", cause.message ?: "uknown", cause.path.joinToString(".") { it.fieldName }, "null")
                     )
+                )
             )
         }
 
@@ -147,9 +149,9 @@ fun Application.spionModule(config: ApplicationConfig = environment.config) {
                     val errorId = UUID.randomUUID()
                     LOGGER.warn(errorId.toString(), cause)
                     val problem = Problem(
-                            title = "Feil ved prosessering av JSON-dataene som ble oppgitt",
-                            detail = cause.message,
-                            instance = URI.create("urn:spion:json-mapping-error:$errorId")
+                        title = "Feil ved prosessering av JSON-dataene som ble oppgitt",
+                        detail = cause.message,
+                        instance = URI.create("urn:spion:json-mapping-error:$errorId")
                     )
                     call.respond(HttpStatusCode.BadRequest, problem)
                 }

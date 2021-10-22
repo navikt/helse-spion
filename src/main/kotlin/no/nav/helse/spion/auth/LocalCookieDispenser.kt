@@ -1,8 +1,5 @@
 package no.nav.helse.spion.auth
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.config.ApplicationConfig
@@ -17,14 +14,11 @@ import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.hotspot.DefaultExports
 import no.nav.security.mock.oauth2.MockOAuth2Server
 
-import java.net.InetAddress
-
-
 @KtorExperimentalAPI
 fun Application.localCookieDispenser(config: ApplicationConfig) {
 
-        val server = MockOAuth2Server()
-        server.start(port = 6666)
+    val server = MockOAuth2Server()
+    server.start(port = 6666)
 
     DefaultExports.initialize()
 
@@ -35,9 +29,9 @@ fun Application.localCookieDispenser(config: ApplicationConfig) {
                 val issuerName = config.configList("no.nav.security.jwt.issuers")[0].property("issuer_name").getString()
                 val audience = config.configList("no.nav.security.jwt.issuers")[0].property("accepted_audience").getString()
                 val token = server.issueToken(
-                        subject = call.request.queryParameters["subject"].toString(),
-                        issuerId = issuerName,
-                        audience = audience
+                    subject = call.request.queryParameters["subject"].toString(),
+                    issuerId = issuerName,
+                    audience = audience
                 )
                 call.response.cookies.append(Cookie(cookieName, token.serialize(), CookieEncoding.RAW, domain = "localhost", path = "/"))
             }
@@ -50,7 +44,3 @@ fun Application.localCookieDispenser(config: ApplicationConfig) {
         }
     }
 }
-
-
-
-

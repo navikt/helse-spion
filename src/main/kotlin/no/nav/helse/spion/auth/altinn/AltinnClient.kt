@@ -1,9 +1,9 @@
 package no.nav.helse.spion.auth.altinn
 
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.readText
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.arbeidsgiver.kubernetes.ReadynessComponent
 import no.nav.helse.spion.auth.AuthorizationsRepository
@@ -11,21 +11,24 @@ import no.nav.helse.spion.domene.AltinnOrganisasjon
 import org.slf4j.LoggerFactory
 
 class AltinnClient(
-        altinnBaseUrl : String,
-        private val apiGwApiKey : String,
-        private val altinnApiKey : String,
-        serviceCode : String,
-        private val httpClient: HttpClient) : AuthorizationsRepository, ReadynessComponent {
+    altinnBaseUrl: String,
+    private val apiGwApiKey: String,
+    private val altinnApiKey: String,
+    serviceCode: String,
+    private val httpClient: HttpClient
+) : AuthorizationsRepository, ReadynessComponent {
 
-    private val logger: org.slf4j.Logger =  LoggerFactory.getLogger("AltinnClient")
+    private val logger: org.slf4j.Logger = LoggerFactory.getLogger("AltinnClient")
 
     init {
-        logger.debug("""Altinn Config:
+        logger.debug(
+            """Altinn Config:
                     altinnBaseUrl: $altinnBaseUrl
                     apiGwApiKey: ${apiGwApiKey.take(1)}.....
                     altinnApiKey: ${altinnApiKey.take(1)}.....
                     serviceCode: $serviceCode
-        """.trimIndent())
+            """.trimIndent()
+        )
     }
 
     private val baseUrl = "$altinnBaseUrl/reportees/?ForceEIAuthentication&serviceEdition=1&serviceCode=$serviceCode&subject="
