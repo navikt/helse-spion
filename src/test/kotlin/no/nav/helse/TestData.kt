@@ -11,6 +11,5 @@ object TestData {
     val notValidOrgNr = "123456789"
 }
 
-
 fun PersonOppslagDto.Companion.validWithoutPeriode() = PersonOppslagDto(TestData.validIdentitetsnummer, TestData.validOrgNr)
 fun PersonOppslagDto.Companion.validWithPeriode(fom: LocalDate, tom: LocalDate) = PersonOppslagDto(TestData.validIdentitetsnummer, TestData.validOrgNr, Periode(fom, tom))

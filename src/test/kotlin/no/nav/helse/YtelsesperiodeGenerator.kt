@@ -21,16 +21,16 @@ private val periodStateGenerator = {
 }
 
 class YtelsesperiodeGenerator(
-        fixedListArbeidsgivere: MutableList<Arbeidsgiver>? = null,
-        maxUniqueArbeidsgivere: Int,
-        maxUniquePersoner: Int,
-        private val initDate: LocalDate = LocalDate.of(2020, 1, 1)
+    fixedListArbeidsgivere: MutableList<Arbeidsgiver>? = null,
+    maxUniqueArbeidsgivere: Int,
+    maxUniquePersoner: Int,
+    private val initDate: LocalDate = LocalDate.of(2020, 1, 1)
 ) : Iterable<Ytelsesperiode>, Iterator<Ytelsesperiode> {
 
-    private val arbeidsgiverGenerator = ArbeidsgiverGenerator(fixedListArbeidsgivere,maxUniqueArbeidsgivere)
+    private val arbeidsgiverGenerator = ArbeidsgiverGenerator(fixedListArbeidsgivere, maxUniqueArbeidsgivere)
     private val personGenerator = PersonGenerator(maxUniquePersoner)
     private var numGeneratedPerioder = 0
-    private val maxPeriodeLength = 31L;
+    private val maxPeriodeLength = 31L
     private var offset = 0.toLong()
 
     private fun randomPeriode(): Periode {
@@ -41,24 +41,25 @@ class YtelsesperiodeGenerator(
 
     private val sykemeldingsGrader = listOf(20, 30, 50, 80, 100)
 
-    private fun nextYtelsesperiode() : Ytelsesperiode {
+    private fun nextYtelsesperiode(): Ytelsesperiode {
         val periode = randomPeriode()
         numGeneratedPerioder++
         return Ytelsesperiode(
-                periode,
-                offset++,
-                2,
-                5,
-                Arbeidsforhold("",
-                        personGenerator.getRandomPerson(),
-                        arbeidsgiverGenerator.getRandomArbeidsGiver()
-                ),
-                BigDecimal(Random.Default.nextLong(100, 10000)),
-                periodStateGenerator(),
-                BigDecimal(sykemeldingsGrader.pickRandom()),
-                BigDecimal(Random.Default.nextLong(10, 1000)),
-                Ytelsesperiode.Ytelse.SP,
-                LocalDate.now()
+            periode,
+            offset++,
+            2,
+            5,
+            Arbeidsforhold(
+                "",
+                personGenerator.getRandomPerson(),
+                arbeidsgiverGenerator.getRandomArbeidsGiver()
+            ),
+            BigDecimal(Random.Default.nextLong(100, 10000)),
+            periodStateGenerator(),
+            BigDecimal(sykemeldingsGrader.pickRandom()),
+            BigDecimal(Random.Default.nextLong(10, 1000)),
+            Ytelsesperiode.Ytelse.SP,
+            LocalDate.now()
         )
     }
 
@@ -75,9 +76,6 @@ class YtelsesperiodeGenerator(
     }
 }
 
-
-
-
-private fun <E> List<E>.pickRandom() : E {
+private fun <E> List<E>.pickRandom(): E {
     return this[Random.Default.nextInt(0, this.size)]!!
 }

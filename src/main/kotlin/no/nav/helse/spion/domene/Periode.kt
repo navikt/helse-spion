@@ -6,5 +6,5 @@ data class Periode(
     val fom: LocalDate,
     val tom: LocalDate
 ) {
-    constructor(fomString: String, tomString: String): this(LocalDate.parse(fomString), LocalDate.parse(tomString))
+    constructor(fomString: String, tomString: String) : this(LocalDate.parse(fomString), LocalDate.parse(tomString))
 }

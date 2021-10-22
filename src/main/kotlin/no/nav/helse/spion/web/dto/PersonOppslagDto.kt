@@ -7,11 +7,10 @@ import org.valiktor.functions.isGreaterThanOrEqualTo
 import org.valiktor.functions.validate
 import org.valiktor.validate
 
-
 class PersonOppslagDto(
-        val identitetsnummer: String,
-        val arbeidsgiverId: String,
-        val periode: Periode? = null
+    val identitetsnummer: String,
+    val arbeidsgiverId: String,
+    val periode: Periode? = null
 ) {
     companion object;
 
@@ -25,5 +24,4 @@ class PersonOppslagDto(
             }
         }
     }
-
 }

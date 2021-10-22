@@ -18,7 +18,6 @@ class HealthCheckTests : ControllerIntegrationTestBase() {
         configuredTestApplication({
             spionModule()
             get<StaticMockAuthRepo>().failSelfCheck = true
-
         }) {
             val probeManager = application.get<KubernetesProbeManager>()
             probeManager.registerReadynessComponent(application.get<StaticMockAuthRepo>())
@@ -34,7 +33,6 @@ class HealthCheckTests : ControllerIntegrationTestBase() {
         configuredTestApplication({
             spionModule()
             get<StaticMockAuthRepo>().failSelfCheck = false
-
         }) {
             val probeManager = application.get<KubernetesProbeManager>()
             probeManager.registerReadynessComponent(application.get<StaticMockAuthRepo>())

@@ -35,7 +35,6 @@ class ArbeidsgiverApiTests : ControllerIntegrationTestBase() {
             spionModule()
         }) {
             doAuthenticatedRequest(HttpMethod.Get, "/api/v1/arbeidsgivere") {
-
             }.apply {
                 val mapper = get<ObjectMapper>()
                 assertNotNull(response.content)

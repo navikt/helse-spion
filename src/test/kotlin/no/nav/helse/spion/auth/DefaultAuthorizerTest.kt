@@ -3,12 +3,12 @@ package no.nav.helse.spion.auth
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.spion.domene.AltinnOrganisasjon
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.assertj.core.api.Assertions.assertThat
 
 internal class DefaultAuthorizerTest {
-    lateinit var authorizer : DefaultAuthorizer
+    lateinit var authorizer: DefaultAuthorizer
 
     private val subjectWithAccess = "02038509876"
     private val doesNotHaveAccess = "xxxxxxxxxx"
@@ -17,12 +17,12 @@ internal class DefaultAuthorizerTest {
     internal fun setUp() {
         val authRepoMock = mockk<AuthorizationsRepository>()
         every { authRepoMock.hentOrgMedRettigheterForPerson(subjectWithAccess) } returns setOf(
-                AltinnOrganisasjon("test", "Enterprise", organizationNumber = "123"),
-                AltinnOrganisasjon("test 2", "Enterprise", organizationNumber =  "567"),
-                AltinnOrganisasjon("person ", "Person", socialSecurityNumber = "01028454321")
+            AltinnOrganisasjon("test", "Enterprise", organizationNumber = "123"),
+            AltinnOrganisasjon("test 2", "Enterprise", organizationNumber = "567"),
+            AltinnOrganisasjon("person ", "Person", socialSecurityNumber = "01028454321")
         )
 
-        every {authRepoMock.hentOrgMedRettigheterForPerson(doesNotHaveAccess)} returns setOf()
+        every { authRepoMock.hentOrgMedRettigheterForPerson(doesNotHaveAccess) } returns setOf()
 
         authorizer = DefaultAuthorizer(authRepoMock)
     }

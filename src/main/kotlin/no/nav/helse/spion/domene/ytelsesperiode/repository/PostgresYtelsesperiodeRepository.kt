@@ -46,7 +46,6 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
             AND data -> 'periode' ->> 'fom' = ?
             AND data -> 'periode' ->> 'tom' = ?;"""
 
-
     override fun getYtelserForPerson(identitetsnummer: String, virksomhetsnummer: String, periode: Periode?): List<Ytelsesperiode> {
         ds.connection.use { con ->
             val resultList = ArrayList<Ytelsesperiode>()
@@ -113,7 +112,6 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
                 }
             }
         }
-
     }
 
     fun executeSave(yp: Ytelsesperiode, con: Connection): Int {
@@ -153,5 +151,4 @@ class PostgresYtelsesperiodeRepository(val ds: DataSource, val mapper: ObjectMap
             return deletedCount
         }
     }
-
 }

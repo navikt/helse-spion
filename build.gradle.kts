@@ -25,6 +25,7 @@ val githubPassword: String by project
 plugins {
     kotlin("jvm") version "1.4.0"
     id("org.sonarqube") version "2.8"
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
     id("com.github.ben-manes.versions") version "0.27.0"
     jacoco
 }
@@ -49,9 +50,9 @@ tasks.jacocoTestReport {
 
 tasks.withType<JacocoReport> {
     classDirectories.setFrom(
-            sourceSets.main.get().output.asFileTree.matching {
-                exclude("**/Koin**", "**/App**", "**Mock**")
-            }
+        sourceSets.main.get().output.asFileTree.matching {
+            exclude("**/Koin**", "**/App**", "**Mock**")
+        }
     )
 }
 
@@ -63,8 +64,8 @@ buildscript {
 
 dependencies {
 
-    //Snyk fikser
-    implementation("org.eclipse.jetty:jetty-server:9.4.35.v20201120") //overstyrer
+    // Snyk fikser
+    implementation("org.eclipse.jetty:jetty-server:9.4.35.v20201120") // overstyrer
     implementation("org.apache.httpcomponents:httpclient:4.5.13") // overstyrer transiente 4.5.6 via ktor-client-apache
     implementation("org.glassfish.jersey.media:jersey-media-jaxb:2.31") // overstyrer transiente 2.30.1
     implementation("org.yaml:snakeyaml:1.26")
@@ -72,7 +73,7 @@ dependencies {
     implementation("com.google.guava:guava:30.0-jre") // overstyrer transiente 29.0-jre
     implementation("io.netty:netty-codec:4.1.59.Final") // overstyrer transiente 4.1.44
     implementation("io.netty:netty-codec-http:4.1.59.Final") // overstyrer transiente 4.1.51.Final gjennom ktor-server-netty    
-    //Snyk fikser slutt
+    // Snyk fikser slutt
 
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
@@ -101,7 +102,6 @@ dependencies {
     implementation("com.sun.xml.ws:jaxws-tools:$jaxwsToolsVersion") {
         exclude(group = "com.sun.xml.ws", module = "policy")
     }
-
 
     implementation("org.koin:koin-core:$koinVersion")
     implementation("org.koin:koin-ktor:$koinVersion")

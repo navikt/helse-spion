@@ -10,6 +10,22 @@ Refusjonsportalen gir arbeidsgiverne en løpende oversikt over refusjoner som er
 
 For å kjøre lokalt kan du starte  `docker-compose up` fra docker/local før du starter prosjektet. 
 
+## Formatering
+
+Prosjektet er formatert med [ktlint](https://github.com/pinterest/ktlint).
+
+Se etter feil med:
+
+```
+./gradlew ktlintCheck
+```
+
+Automatisk rett feil med:
+```
+./gradlew ktlintFormat
+```
+
+
 # Henvendelser
 
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.

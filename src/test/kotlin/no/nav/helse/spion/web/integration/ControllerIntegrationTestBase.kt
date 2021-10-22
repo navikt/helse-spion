@@ -3,9 +3,12 @@ package no.nav.helse.spion.web.integration
 import io.ktor.application.Application
 import io.ktor.config.ApplicationConfig
 import io.ktor.config.MapApplicationConfig
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
-import io.ktor.server.testing.*
+import io.ktor.server.testing.TestApplicationCall
+import io.ktor.server.testing.TestApplicationEngine
+import io.ktor.server.testing.TestApplicationRequest
+import io.ktor.server.testing.createTestEnvironment
+import io.ktor.server.testing.withApplication
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.TestData
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -21,7 +24,7 @@ open class ControllerIntegrationTestBase : KoinTest {
     protected val defaultSubject = TestData.validIdentitetsnummer
     private val testConfig: ApplicationConfig
     protected val idTokenCookieName = "selvbetjening-idtoken"
-    var server : MockOAuth2Server? = null
+    var server: MockOAuth2Server? = null
 
     @BeforeAll
     fun before() {
@@ -48,9 +51,9 @@ open class ControllerIntegrationTestBase : KoinTest {
     }
 
     fun TestApplicationEngine.doAuthenticatedRequest(
-            method: HttpMethod,
-            uri: String,
-            setup: TestApplicationRequest.() -> Unit = {}
+        method: HttpMethod,
+        uri: String,
+        setup: TestApplicationRequest.() -> Unit = {}
     ): TestApplicationCall = handleRequest {
 
         this.uri = uri
@@ -60,7 +63,7 @@ open class ControllerIntegrationTestBase : KoinTest {
     }
 
     @KtorExperimentalAPI
-    private fun addIntegrationTestConfigValues(config : MapApplicationConfig) {
+    private fun addIntegrationTestConfigValues(config: MapApplicationConfig) {
         val acceptedIssuer = "default"
         val acceptedAudience = "default"
 

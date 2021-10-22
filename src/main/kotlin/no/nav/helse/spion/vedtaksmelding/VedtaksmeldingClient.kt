@@ -31,13 +31,15 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String) : 
         }
 
         consumer = KafkaConsumer<String, String>(props, StringDeserializer(), StringDeserializer())
-        consumer.subscribe(Collections.singletonList(topicName));
+        consumer.subscribe(Collections.singletonList(topicName))
 
-        Runtime.getRuntime().addShutdownHook(Thread {
-            log.debug("Got shutdown message, closing Kafka connection...")
-            consumer.close()
-            log.debug("Kafka connection closed")
-        })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                log.debug("Got shutdown message, closing Kafka connection...")
+                consumer.close()
+                log.debug("Kafka connection closed")
+            }
+        )
     }
 
     fun stop() = consumer.close()
@@ -47,7 +49,7 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String) : 
         try {
             val result = consumer.poll(Duration.ofSeconds(10)).map {
                 val typeHeader = it.headers().lastHeader("type") ?: missingTypeHeaderDefaultValue
-                val messageType =  typeHeader.value().decodeToString()
+                val messageType = typeHeader.value().decodeToString()
                 SpleisMelding(it.key(), it.offset(), messageType, it.value())
             }.toList()
             lastThrown = null
@@ -66,4 +68,3 @@ class VedtaksmeldingClient(props: MutableMap<String, Any>, topicName: String) : 
         lastThrown?.let { throw lastThrown as Exception }
     }
 }
-
