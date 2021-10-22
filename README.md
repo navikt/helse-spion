@@ -25,6 +25,15 @@ Automatisk rett feil med:
 ./gradlew ktlintFormat
 ```
 
+Eller legg til følgende commit-hook:
+```
+./gradlew addKtlintCheckGitPreCommitHook
+
+# eller
+
+./gradlew addKtlintFormatGitPreCommitHook
+```
+
 
 # Henvendelser
 
