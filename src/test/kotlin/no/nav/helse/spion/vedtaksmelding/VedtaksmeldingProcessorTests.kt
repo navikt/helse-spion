@@ -1,12 +1,10 @@
 package no.nav.helse.spion.vedtaksmelding
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.Bakgrunnsjobb
-
 import org.junit.jupiter.api.Test
 
 open class VedtaksmeldingProcessorTests {

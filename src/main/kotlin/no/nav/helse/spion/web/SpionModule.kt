@@ -19,8 +19,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.JacksonConverter
 import io.ktor.locations.Locations
 import io.ktor.response.respond
-import io.ktor.routing.routing
 import io.ktor.routing.IgnoreTrailingSlash
+import io.ktor.routing.routing
 import io.ktor.util.DataConversionException
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.nais.nais

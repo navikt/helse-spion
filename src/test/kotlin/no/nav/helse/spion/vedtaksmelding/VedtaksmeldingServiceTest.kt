@@ -7,7 +7,9 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.arbeidsgiver.integrasjoner.pdl.*
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClient
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlHentPersonNavn
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPersonNavnMetadata
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.BeforeEach
@@ -35,7 +37,6 @@ internal class VedtaksmeldingServiceTest {
                     )
                 )
             )
-
     }
 
     @Test
@@ -43,7 +44,7 @@ internal class VedtaksmeldingServiceTest {
         val melding = meldingsGenerator.next()
 
         service.processAndSaveMessage(melding)
-        verify(exactly = 1) { pdlMock.personNavn(melding.key)}
+        verify(exactly = 1) { pdlMock.personNavn(melding.key) }
 
         verify(exactly = 1) { ypDaoMock.upsert(any()) }
     }

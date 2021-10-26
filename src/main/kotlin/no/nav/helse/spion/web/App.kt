@@ -18,7 +18,6 @@ import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import org.koin.ktor.ext.getKoin
 import org.slf4j.LoggerFactory
 
-
 val mainLogger = LoggerFactory.getLogger("main")
 
 @KtorExperimentalAPI
@@ -54,10 +53,10 @@ private suspend fun autoDetectProbeableComponents(koin: org.koin.core.Koin) {
     val kubernetesProbeManager = koin.get<KubernetesProbeManager>()
 
     koin.getAll<LivenessComponent>()
-            .forEach { kubernetesProbeManager.registerLivenessComponent(it) }
+        .forEach { kubernetesProbeManager.registerLivenessComponent(it) }
 
     koin.getAll<ReadynessComponent>()
-            .forEach { kubernetesProbeManager.registerReadynessComponent(it) }
+        .forEach { kubernetesProbeManager.registerReadynessComponent(it) }
 }
 
 @KtorExperimentalAPI

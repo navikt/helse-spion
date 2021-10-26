@@ -20,9 +20,17 @@ import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.MockBakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.PostgresBakgrunnsjobbRepository
-import no.nav.helse.arbeidsgiver.integrasjoner.pdl.*
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClient
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlHentFullPerson
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlHentPersonNavn
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlIdent
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPersonNavnMetadata
 import no.nav.helse.arbeidsgiver.kubernetes.KubernetesProbeManager
-import no.nav.helse.spion.auth.*
+import no.nav.helse.spion.auth.AuthorizationsRepository
+import no.nav.helse.spion.auth.Authorizer
+import no.nav.helse.spion.auth.DefaultAuthorizer
+import no.nav.helse.spion.auth.DynamicMockAuthRepo
+import no.nav.helse.spion.auth.StaticMockAuthRepo
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.domene.Arbeidsgiver
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
@@ -38,8 +46,6 @@ import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProvider
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
-import org.koin.core.Koin
-import org.koin.core.definition.Kind
 import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -123,7 +129,7 @@ fun localDevConfig(config: ApplicationConfig) = module {
 
     single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
 
-    //single { object : RestStsClient { override fun getOidcToken(): String { return "fake token"} } as RestStsClient }
+    // single { object : RestStsClient { override fun getOidcToken(): String { return "fake token"} } as RestStsClient }
 
     single { createStaticPdlMock() as PdlClient }
     single { VedtaksmeldingService(get(), get(), get()) }
@@ -154,7 +160,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
         ) as AuthorizationsRepository
     }*/
 
-    //single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
+    // single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
     single { createStaticPdlMock() }
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
@@ -199,8 +205,8 @@ fun prodConfig(config: ApplicationConfig) = module {
     single { SpionService(get(), get()) }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    //single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
-    single { createStaticPdlMock() as PdlClient}
+    // single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
+    single { createStaticPdlMock() as PdlClient }
     single { generateEmptyMock() as VedtaksmeldingProvider }
 
     single { PostgresYtelsesperiodeRepository(get(), get()) as YtelsesperiodeRepository }
@@ -247,7 +253,6 @@ val createStaticPdlMock = fun(): PdlClient {
                     )
                 )
             )
-
     }
 }
 
@@ -297,4 +302,3 @@ fun ApplicationConfig.getjdbcUrlFromProperties(): String {
         this.property("database.name").getString()
     )
 }
-

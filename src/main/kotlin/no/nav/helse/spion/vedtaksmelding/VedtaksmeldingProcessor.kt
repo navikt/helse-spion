@@ -20,7 +20,6 @@ class VedtaksmeldingProcessor(
         vedtaksmeldingService.processAndSaveMessage(om.readValue(jobb.data, SpleisMelding::class.java))
     }
 
-
     override fun nesteForsoek(forsoek: Int, forrigeForsoek: LocalDateTime): LocalDateTime {
         return LocalDateTime.now().plusHours(2)
     }

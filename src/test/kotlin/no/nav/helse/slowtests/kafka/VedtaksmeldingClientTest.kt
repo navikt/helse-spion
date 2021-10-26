@@ -44,7 +44,7 @@ internal class VedtaksmeldingClientTest : KoinComponent {
     @BeforeAll
     internal fun setUp() {
         koin = KoinApplication.Companion.init().modules(common)
-        //koin = KoinApplication.create().modules(common)
+        // koin = KoinApplication.create().modules(common)
 
         adminClient = KafkaAdminClient.create(testProps)
 
