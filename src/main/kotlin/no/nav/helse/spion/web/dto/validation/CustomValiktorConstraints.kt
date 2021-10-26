@@ -8,14 +8,12 @@ interface CustomConstraint : Constraint {
         get() = "validation/validation-messages"
 }
 
-
 class IdentitetsnummerConstraint : CustomConstraint
 
 fun <E> Validator<E>.Property<String?>.isValidIdentitetsnummer() =
-        this.validate(IdentitetsnummerConstraint()) { FoedselsNrValidator.isValid(it) }
-
+    this.validate(IdentitetsnummerConstraint()) { FoedselsNrValidator.isValid(it) }
 
 class OrganisasjonsnummerConstraint : CustomConstraint
 
 fun <E> Validator<E>.Property<String?>.isValidOrganisasjonsnummer() =
-        this.validate(OrganisasjonsnummerConstraint()) { OrganisasjonsnummerValidator.isValid(it) }
+    this.validate(OrganisasjonsnummerConstraint()) { OrganisasjonsnummerValidator.isValid(it) }

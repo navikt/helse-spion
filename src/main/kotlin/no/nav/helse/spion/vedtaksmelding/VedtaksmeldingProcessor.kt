@@ -6,8 +6,8 @@ import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbProsesserer
 import java.time.LocalDateTime
 
 class VedtaksmeldingProcessor(
-        val vedtaksmeldingService: VedtaksmeldingService,
-        val om: ObjectMapper
+    val vedtaksmeldingService: VedtaksmeldingService,
+    val om: ObjectMapper
 ) : BakgrunnsjobbProsesserer {
 
     override val type: String get() = JOBB_TYPE

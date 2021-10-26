@@ -11,17 +11,17 @@ import java.time.LocalDate
 import kotlin.random.Random
 
 class SpleisVedtaksmeldingGenerator(
-        private val om: ObjectMapper = ObjectMapper().registerModules(KotlinModule(), JavaTimeModule()),
-        fixedListArbeidsgivere: MutableList<Arbeidsgiver>? = null,
-        maxUniqueArbeidsgivere: Int = 10,
-        maxUniquePersoner: Int = 100,
-        private val initDate: LocalDate = LocalDate.of(2020, 1, 1)
+    private val om: ObjectMapper = ObjectMapper().registerModules(KotlinModule(), JavaTimeModule()),
+    fixedListArbeidsgivere: MutableList<Arbeidsgiver>? = null,
+    maxUniqueArbeidsgivere: Int = 10,
+    maxUniquePersoner: Int = 100,
+    private val initDate: LocalDate = LocalDate.of(2020, 1, 1)
 ) : Iterable<SpleisMelding>, Iterator<SpleisMelding> {
 
     private val arbeidsgiverGenerator = ArbeidsgiverGenerator(fixedListArbeidsgivere, maxUniqueArbeidsgivere)
     private val personGenerator = PersonGenerator(maxUniquePersoner)
     private var numGeneratedVedtak = 0
-    private val maxPeriodeLength = 31L;
+    private val maxPeriodeLength = 31L
 
     private fun randomPeriode(): Periode {
         val fom = initDate.plusDays(Random.Default.nextLong(0, (numGeneratedVedtak % 2000 + 1).toLong()))
@@ -39,23 +39,27 @@ class SpleisVedtaksmeldingGenerator(
         val vedtak = SpleisVedtakDto(
             periode.fom,
             periode.tom,
-                2,
-                5,
-                listOf(SpleisVedtakDto.SpleisUtbetalingDto(
-                        arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!,
-                        "SPREF",
-                        10000,
-                        listOf(SpleisVedtakDto.SpleisUtbetalingDto.SpleisUtbetalingslinjeDto(
-                                periode.fom,
-                                periode.tom,
-                                10000/7,
-                                10000,
-                                1.0,
-                                2
-                    ))
-                )),
-                emptyList()
-            )
+            2,
+            5,
+            listOf(
+                SpleisVedtakDto.SpleisUtbetalingDto(
+                    arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!,
+                    "SPREF",
+                    10000,
+                    listOf(
+                        SpleisVedtakDto.SpleisUtbetalingDto.SpleisUtbetalingslinjeDto(
+                            periode.fom,
+                            periode.tom,
+                            10000 / 7,
+                            10000,
+                            1.0,
+                            2
+                        )
+                    )
+                )
+            ),
+            emptyList()
+        )
 
         return SpleisMelding(person.identitetsnummer, numGeneratedVedtak.toLong(), SpleisMeldingstype.Vedtak.name, om.writeValueAsString(vedtak))
     }
@@ -72,7 +76,6 @@ class SpleisVedtaksmeldingGenerator(
         return generate()
     }
 }
-
 
 private fun <E> List<E>.pickRandom(): E {
     return this[Random.Default.nextInt(0, this.size)]!!

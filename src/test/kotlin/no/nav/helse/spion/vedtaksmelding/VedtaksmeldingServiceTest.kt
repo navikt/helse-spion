@@ -44,6 +44,7 @@ internal class VedtaksmeldingServiceTest {
 
         service.processAndSaveMessage(melding)
         verify(exactly = 1) { pdlMock.personNavn(melding.key)}
+
         verify(exactly = 1) { ypDaoMock.upsert(any()) }
     }
 

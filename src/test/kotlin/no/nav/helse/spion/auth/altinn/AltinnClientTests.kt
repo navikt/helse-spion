@@ -24,9 +24,11 @@ class AltinnClientTests {
 
     val client = HttpClient(MockEngine) {
 
-        install(JsonFeature) { serializer = JacksonSerializer {
-            configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
-        } }
+        install(JsonFeature) {
+            serializer = JacksonSerializer {
+                configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+            }
+        }
 
         engine {
             addHandler { request ->
@@ -50,9 +52,8 @@ class AltinnClientTests {
         val altinnClient = AltinnClient("http://juice", "api-gw-key", "altinn-key", serviceCode, client)
         val authList = altinnClient.hentOrgMedRettigheterForPerson(identitetsnummer)
         assertThat(authList).hasSize(5)
-        assertThat(authList.find { it.socialSecurityNumber ==  "01065500791"}).isNotNull
+        assertThat(authList.find { it.socialSecurityNumber == "01065500791" }).isNotNull
     }
-
 
     @Test
     internal fun `timeout from altinn throws exception`() {

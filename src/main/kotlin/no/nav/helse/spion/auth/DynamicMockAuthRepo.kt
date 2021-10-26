@@ -16,7 +16,6 @@ import javax.sql.DataSource
 class DynamicMockAuthRepo(private val om: ObjectMapper, private val dataSource: DataSource) : AuthorizationsRepository {
     val cache = mutableMapOf<String, Pair<LocalDateTime, Set<AltinnOrganisasjon>>>()
 
-
     override fun hentOrgMedRettigheterForPerson(identitetsnummer: String): Set<AltinnOrganisasjon> {
         val hasValidCacheEntry = cache[identitetsnummer]?.first?.isAfter(LocalDateTime.now()) ?: false
         if (hasValidCacheEntry) {
@@ -25,30 +24,33 @@ class DynamicMockAuthRepo(private val om: ObjectMapper, private val dataSource: 
 
         dataSource.connection.use { connection ->
             val res = connection.prepareStatement(
-                    "select * from ytelsesperiode where random() < 0.5 limit 100")
-                    .executeQuery()
+                "select * from ytelsesperiode where random() < 0.5 limit 100"
+            )
+                .executeQuery()
 
             val resultatListe = mutableListOf<Ytelsesperiode>()
 
             while (res.next()) {
-                resultatListe.add(om.readValue(
+                resultatListe.add(
+                    om.readValue(
                         res.getString("data")
-                ))
+                    )
+                )
             }
 
             val nameFaker = Faker()
 
             val acl = resultatListe
-                    .distinctBy { it.arbeidsforhold.arbeidsgiver.arbeidsgiverId }
-                    .zipWithNext().flatMap {
-                        val juridisk = it.first.arbeidsforhold.arbeidsgiver
-                        val virksomhet = it.second.arbeidsforhold.arbeidsgiver
-                        val name = nameFaker.funnyName().name()
-                        listOf(
-                                AltinnOrganisasjon("$name AS", organizationNumber = juridisk.arbeidsgiverId, type = "Enterprise", organizationForm = "AS"),
-                                AltinnOrganisasjon("$name Øst", organizationNumber = virksomhet.arbeidsgiverId, parentOrganizationNumber = juridisk.arbeidsgiverId, type = "Business", organizationForm = "BEDR")
-                        )
-                    }.toSet()
+                .distinctBy { it.arbeidsforhold.arbeidsgiver.arbeidsgiverId }
+                .zipWithNext().flatMap {
+                    val juridisk = it.first.arbeidsforhold.arbeidsgiver
+                    val virksomhet = it.second.arbeidsforhold.arbeidsgiver
+                    val name = nameFaker.funnyName().name()
+                    listOf(
+                        AltinnOrganisasjon("$name AS", organizationNumber = juridisk.arbeidsgiverId, type = "Enterprise", organizationForm = "AS"),
+                        AltinnOrganisasjon("$name Øst", organizationNumber = virksomhet.arbeidsgiverId, parentOrganizationNumber = juridisk.arbeidsgiverId, type = "Business", organizationForm = "BEDR")
+                    )
+                }.toSet()
 
             if (cache.keys.size > 20) cache.clear()
 

@@ -36,9 +36,9 @@ spec:
       memory: 200Mi
   secureLogs:
     enabled: true
-  # azure:
-  #   application:
-  #     enabled: true
+  azure:
+    application:
+      enabled: true
 
   # accessPolicy:
   #   outbound:

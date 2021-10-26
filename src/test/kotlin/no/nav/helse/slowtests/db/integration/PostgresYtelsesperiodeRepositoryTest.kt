@@ -28,30 +28,29 @@ import java.time.LocalDate
 
 internal class PostgresYtelsesperiodeRepositoryTest : KoinComponent {
 
-    lateinit var repo: PostgresYtelsesperiodeRepository;
+    lateinit var repo: PostgresYtelsesperiodeRepository
     val testYtelsesPeriode = Ytelsesperiode(
-            periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
-            kafkaOffset = 2,
-            forbrukteSykedager = 2,
-            gjenståendeSykedager = 5,
-            arbeidsforhold = Arbeidsforhold(
-                    arbeidsforholdId = "1",
-                    arbeidstaker = Person("Solan", "Gundersen", "10987654321"),
-                    arbeidsgiver = Arbeidsgiver("555555555")
-            ),
-            refusjonsbeløp = BigDecimal(10000),
-            status = Ytelsesperiode.Status.UNDER_BEHANDLING,
-            grad = BigDecimal(50),
-            dagsats = BigDecimal(200),
-            ytelse = Ytelsesperiode.Ytelse.SP,
-            sistEndret = LocalDate.now()
+        periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)),
+        kafkaOffset = 2,
+        forbrukteSykedager = 2,
+        gjenståendeSykedager = 5,
+        arbeidsforhold = Arbeidsforhold(
+            arbeidsforholdId = "1",
+            arbeidstaker = Person("Solan", "Gundersen", "10987654321"),
+            arbeidsgiver = Arbeidsgiver("555555555")
+        ),
+        refusjonsbeløp = BigDecimal(10000),
+        status = Ytelsesperiode.Status.UNDER_BEHANDLING,
+        grad = BigDecimal(50),
+        dagsats = BigDecimal(200),
+        ytelse = Ytelsesperiode.Ytelse.SP,
+        sistEndret = LocalDate.now()
     )
 
     @BeforeEach
     internal fun setUp() {
         startKoin {
             loadKoinModules(common)
-
         }
         repo = PostgresYtelsesperiodeRepository(HikariDataSource(createLocalHikariConfig()), get())
         repo.upsert(testYtelsesPeriode)
@@ -61,7 +60,6 @@ internal class PostgresYtelsesperiodeRepositoryTest : KoinComponent {
     internal fun tearDown() {
         repo.delete(testYtelsesPeriode)
         stopKoin()
-
     }
 
     @Test
@@ -100,7 +98,6 @@ internal class PostgresYtelsesperiodeRepositoryTest : KoinComponent {
         assertThat(ypLagret).containsOnly(ypAnnenPeriode)
 
         repo.delete(ypAnnenPeriode)
-
     }
 
     @Test
@@ -112,7 +109,6 @@ internal class PostgresYtelsesperiodeRepositoryTest : KoinComponent {
         val savedYpList = repo.getYtelserForPerson("10987654321", "555555555")
 
         assertThat(savedYpList).containsOnly(ypNewer)
-
     }
 
     @Test
@@ -124,7 +120,6 @@ internal class PostgresYtelsesperiodeRepositoryTest : KoinComponent {
         repo.upsert(ypOlder)
 
         val savedYpList = repo.getYtelserForPerson("10987654321", "555555555")
-
 
         assertThat(savedYpList).containsOnly(ypNewer)
     }
@@ -152,7 +147,6 @@ internal class PostgresYtelsesperiodeRepositoryTest : KoinComponent {
         assertThatExceptionOfType(PSQLException::class.java).isThrownBy {
             repo.executeSave(testYtelsesPeriode, ds.connection)
         }
-
     }
 
     @Test
@@ -172,7 +166,7 @@ internal class PostgresYtelsesperiodeRepositoryTest : KoinComponent {
         val result = repo.getYtelserForPerson(testYtelsesPeriode.arbeidsforhold.arbeidstaker.identitetsnummer, testYtelsesPeriode.arbeidsforhold.arbeidsgiver.arbeidsgiverId, queryRange)
 
         assertThat(result).hasSize(3)
-                .containsOnly(withinRange, fomWithinRange, tomWithinRange)
+            .containsOnly(withinRange, fomWithinRange, tomWithinRange)
 
         yps.forEach {
             repo.delete(it)

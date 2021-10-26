@@ -25,7 +25,6 @@ class VirksomhetsOppslagTests : ControllerIntegrationTestBase() {
             spionModule()
         }) {
             doAuthenticatedRequest(HttpMethod.Get, validUrl) {
-
             }.apply {
                 val mapper = get<ObjectMapper>()
                 assertNotNull(response.content)
@@ -42,7 +41,6 @@ class VirksomhetsOppslagTests : ControllerIntegrationTestBase() {
             spionModule()
         }) {
             doAuthenticatedRequest(HttpMethod.Get, validUrl) {
-
             }.apply {
                 val mapper = get<ObjectMapper>()
                 assertNotNull(response.content)

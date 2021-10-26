@@ -15,4 +15,5 @@ abstract class KoinInjectedTest {
     internal fun createKoinApplicationEnvironmentWithCommonModule() {
         koin = KoinApplication.create().modules(common).koin
     }*/
+
 }

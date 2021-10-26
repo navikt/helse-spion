@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.Bakgrunnsjobb
-import org.junit.jupiter.api.BeforeEach
+
 import org.junit.jupiter.api.Test
 
 open class VedtaksmeldingProcessorTests {
@@ -23,4 +23,3 @@ open class VedtaksmeldingProcessorTests {
         verify(exactly = 1) { serviceMock.processAndSaveMessage(any()) }
     }
 }
-

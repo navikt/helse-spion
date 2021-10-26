@@ -31,13 +31,12 @@ class PersonGenerator(private val maxUniquePersons: Int = 1000) {
                 knr2 = FoedselsNrValidator.checksum(FoedselsNrValidator.Companion.tabeller.kontrollsiffer2, bday + pnr + knr1)
             }
 
-
             val fnr = bday + pnr + knr1 + knr2
 
             val person = Person(
-                    faker.name().firstName(),
-                    faker.name().lastName(),
-                    fnr
+                faker.name().firstName(),
+                faker.name().lastName(),
+                fnr
             )
             personer.add(person)
             person
