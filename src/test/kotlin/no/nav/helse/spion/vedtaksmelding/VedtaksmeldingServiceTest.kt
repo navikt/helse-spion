@@ -8,8 +8,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClient
-import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPerson
-import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPersonNavn
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlHentPersonNavn
+import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlPersonNavnMetadata
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.BeforeEach
@@ -26,7 +26,17 @@ internal class VedtaksmeldingServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { pdlMock.person(any()) } returns PdlPerson(listOf(PdlPersonNavn("Ola", null, "Normann")), null)
+        every { pdlMock.personNavn(any()) } returns
+            PdlHentPersonNavn.PdlPersonNavneliste(
+                listOf(
+                    PdlHentPersonNavn.PdlPersonNavneliste.PdlPersonNavn(
+                        "Ola",
+                        "M",
+                        "Avsender",
+                        PdlPersonNavnMetadata("freg")
+                    )
+                )
+            )
     }
 
     @Test
@@ -34,7 +44,8 @@ internal class VedtaksmeldingServiceTest {
         val melding = meldingsGenerator.next()
 
         service.processAndSaveMessage(melding)
-        verify(exactly = 1) { pdlMock.person(melding.key) }
+        verify(exactly = 1) { pdlMock.personNavn(melding.key) }
+
         verify(exactly = 1) { ypDaoMock.upsert(any()) }
     }
 

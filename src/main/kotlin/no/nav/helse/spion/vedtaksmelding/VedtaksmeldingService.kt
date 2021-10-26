@@ -29,7 +29,7 @@ class VedtaksmeldingService(
 
     private fun processVedtak(melding: SpleisMelding) {
         val vedtak = om.readValue(melding.messageBody, SpleisVedtakDto::class.java)
-        val pdlResponse = pdlClient.person(melding.key)?.navn?.firstOrNull()
+        val pdlResponse = pdlClient.personNavn(melding.key)?.navn?.firstOrNull()
 
         map(vedtak, melding.offset, melding.key, pdlResponse?.fornavn ?: "Ukjent", pdlResponse?.etternavn ?: "Ukjent")
             .forEach {

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.koin.core.KoinApplication
-import org.koin.core.KoinComponent
+import org.koin.core.component.KoinComponent
 import java.util.concurrent.TimeUnit
 
 /**
@@ -43,7 +43,8 @@ internal class VedtaksmeldingClientTest : KoinComponent {
 
     @BeforeAll
     internal fun setUp() {
-        koin = KoinApplication.create().modules(common)
+        koin = KoinApplication.Companion.init().modules(common)
+        // koin = KoinApplication.create().modules(common)
 
         adminClient = KafkaAdminClient.create(testProps)
 

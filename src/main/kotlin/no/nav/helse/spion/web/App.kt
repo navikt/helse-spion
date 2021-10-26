@@ -52,10 +52,10 @@ fun main() {
 private suspend fun autoDetectProbeableComponents(koin: org.koin.core.Koin) {
     val kubernetesProbeManager = koin.get<KubernetesProbeManager>()
 
-    koin.getAllOfType<LivenessComponent>()
+    koin.getAll<LivenessComponent>()
         .forEach { kubernetesProbeManager.registerLivenessComponent(it) }
 
-    koin.getAllOfType<ReadynessComponent>()
+    koin.getAll<ReadynessComponent>()
         .forEach { kubernetesProbeManager.registerReadynessComponent(it) }
 }
 

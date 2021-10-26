@@ -10,7 +10,7 @@ import no.nav.helse.spion.domene.AltinnOrganisasjon
 import no.nav.helse.spion.web.spionModule
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.koin.core.get
+import org.koin.core.component.get
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
