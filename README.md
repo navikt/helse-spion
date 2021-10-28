@@ -13,7 +13,7 @@ For å kjøre lokalt kan du starte  `docker-compose up` fra docker/local før du
 
 Prosjektet er formatert med [ktlint](https://github.com/pinterest/ktlint).
 
-Hvis du ikke liker noen regler, kan du fjerne dem. Les dokumentasjon på [ktlint](https://github.com/pinterest/ktlint).
+Hvis du ikke liker noen regler, kan du disable dem i [.editorconfig](.editorconfig). Les dokumentasjon på [ktlint](https://github.com/pinterest/ktlint).
 
 Se etter feil med:
 
