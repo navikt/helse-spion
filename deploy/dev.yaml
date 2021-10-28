@@ -46,7 +46,7 @@ spec:
 
   envFrom:
     #- configmap: loginservice-idporten # tilgjengeliggjør LOGINSERVICE_IDPORTEN_DISCOVERY_URL og LOGINSERVICE_IDPORTEN_AUDIENCE
-    - # Skrur av ^^^ i PREPROD siden loginservice ikke virker via naisdevice
+    #- Skrur av ^^^ i PREPROD siden loginservice ikke virker via naisdevice
     # servicebrukerens passord som er  hentet fra vault og lagt inn slik: https://doc.nais.io/security/secrets/kubernetes-secrets/
     - secret: helse-spion-altinn
     - secret: helse-spion-serviceuser
