@@ -13,11 +13,20 @@ For å kjøre lokalt kan du starte  `docker-compose up` fra docker/local før du
 
 Prosjektet er formatert med [ktlint](https://github.com/pinterest/ktlint).
 
+Hvis du ikke liker noen regler, kan du fjerne dem. Les dokumentasjon på [ktlint](https://github.com/pinterest/ktlint).
+
 Se etter feil med:
 
 ```
 ./gradlew ktlintCheck
 ```
+
+Legge riktig formatering i IDE:
+```
+./gradlew ktlintApplyToIdea
+```
+
+Installer også plugin ved navn "ktlint" i Intellij.
 
 Automatisk rett feil med:
 ```
