@@ -20,11 +20,13 @@ import io.ktor.jackson.JacksonConverter
 import io.ktor.locations.Locations
 import io.ktor.response.respond
 import io.ktor.routing.IgnoreTrailingSlash
+import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.util.DataConversionException
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spion.nais.nais
 import no.nav.helse.spion.web.api.spion
+import no.nav.helse.spion.web.api.systemRoutes
 import no.nav.helse.spion.web.dto.validation.Problem
 import no.nav.helse.spion.web.dto.validation.ValidationProblem
 import no.nav.helse.spion.web.dto.validation.ValidationProblemDetail
@@ -169,8 +171,13 @@ fun Application.spionModule(config: ApplicationConfig = environment.config) {
     nais()
 
     routing {
-        authenticate {
-            spion(get(), get())
+        // TODO: legg til basepath
+        //  val apiBasePath = config.getString("ktor.application.basepath")
+        route("/api/v1") {
+            authenticate {
+                systemRoutes()
+                spion(get(), get())
+            }
         }
     }
 }

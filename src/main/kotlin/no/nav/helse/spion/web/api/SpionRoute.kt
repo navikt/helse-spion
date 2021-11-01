@@ -21,26 +21,24 @@ import javax.ws.rs.ForbiddenException
 
 @KtorExperimentalAPI
 fun Route.spion(service: SpionService, authorizer: Authorizer) {
-    route("api/v1") {
-        route("/ytelsesperioder") {
+    route("/ytelsesperioder") {
 
-            post("/oppslag") {
-                val oppslag = call.receive<PersonOppslagDto>()
-                authorize(authorizer, oppslag.arbeidsgiverId)
-                call.respond(service.hentYtelserForPerson(oppslag.identitetsnummer, oppslag.arbeidsgiverId, oppslag.periode))
-            }
-
-            get<VirksomhetsOppslagDTO> { listing ->
-                authorize(authorizer, listing.virksomhetsnummer)
-                call.respond(service.hentYtelserForVirksomhet(listing.virksomhetsnummer, listing.periode))
-            }
+        post("/oppslag") {
+            val oppslag = call.receive<PersonOppslagDto>()
+            authorize(authorizer, oppslag.arbeidsgiverId)
+            call.respond(service.hentYtelserForPerson(oppslag.identitetsnummer, oppslag.arbeidsgiverId, oppslag.periode))
         }
 
-        route("/arbeidsgivere") {
-            get("/") {
-                val id = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
-                call.respond(service.hentArbeidsgivere(id))
-            }
+        get<VirksomhetsOppslagDTO> { listing ->
+            authorize(authorizer, listing.virksomhetsnummer)
+            call.respond(service.hentYtelserForVirksomhet(listing.virksomhetsnummer, listing.periode))
+        }
+    }
+
+    route("/arbeidsgivere") {
+        get("/") {
+            val id = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
+            call.respond(service.hentArbeidsgivere(id))
         }
     }
 }
