@@ -10,11 +10,13 @@ import io.ktor.application.install
 import io.ktor.auth.Authentication
 import io.ktor.auth.authenticate
 import io.ktor.config.ApplicationConfig
+import io.ktor.features.CORS
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DataConversion
 import io.ktor.features.ParameterConversionException
 import io.ktor.features.StatusPages
 import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.JacksonConverter
 import io.ktor.locations.Locations
@@ -24,6 +26,8 @@ import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.util.DataConversionException
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.arbeidsgiver.system.AppEnv
+import no.nav.helse.arbeidsgiver.system.getEnvironment
 import no.nav.helse.spion.nais.nais
 import no.nav.helse.spion.web.api.spion
 import no.nav.helse.spion.web.api.systemRoutes
@@ -44,17 +48,15 @@ import javax.ws.rs.ForbiddenException
 
 @KtorExperimentalAPI
 fun Application.spionModule(config: ApplicationConfig = environment.config) {
-    install(Koin) {
-        modules(selectModuleBasedOnProfile(config))
-    }
 
+    install(IgnoreTrailingSlash)
     install(Authentication) {
         tokenValidationSupport(config = config)
     }
 
     install(Locations)
 
-    install(IgnoreTrailingSlash)
+    configureCORSAccess(config)
 
     install(ContentNegotiation) {
         val commonObjectMapper = get<ObjectMapper>()
@@ -179,5 +181,22 @@ fun Application.spionModule(config: ApplicationConfig = environment.config) {
                 spion(get(), get())
             }
         }
+    }
+}
+
+private fun Application.configureCORSAccess(config: ApplicationConfig) {
+    install(CORS)
+    {
+        method(HttpMethod.Options)
+        method(HttpMethod.Post)
+        method(HttpMethod.Get)
+
+        when (config.getEnvironment()) {
+            AppEnv.PROD -> host("arbeidsgiver.nav.no", schemes = listOf("https"))
+            else -> anyHost()
+        }
+
+        allowCredentials = true
+        allowNonSimpleContentTypes = true
     }
 }
