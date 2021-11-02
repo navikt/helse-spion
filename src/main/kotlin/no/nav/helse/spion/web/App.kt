@@ -6,69 +6,125 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.util.KtorExperimentalAPI
-import kotlinx.coroutines.runBlocking
+import io.ktor.server.netty.NettyApplicationEngine
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.arbeidsgiver.kubernetes.KubernetesProbeManager
 import no.nav.helse.arbeidsgiver.kubernetes.LivenessComponent
 import no.nav.helse.arbeidsgiver.kubernetes.ReadynessComponent
+import no.nav.helse.arbeidsgiver.system.AppEnv
+import no.nav.helse.arbeidsgiver.system.getEnvironment
+import no.nav.helse.arbeidsgiver.system.getString
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingConsumer
-import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import no.nav.helse.spion.web.auth.localCookieDispenser
-import org.koin.ktor.ext.getKoin
+import org.flywaydb.core.Flyway
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.context.GlobalContext
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.slf4j.LoggerFactory
 
-val mainLogger = LoggerFactory.getLogger("main")
+class SpionApplication(val port: Int = 8080) : KoinComponent {
+    private val logger = LoggerFactory.getLogger(SpionApplication::class.simpleName)
+    private var webserver: NettyApplicationEngine? = null
+    private var appConfig: HoconApplicationConfig = HoconApplicationConfig(ConfigFactory.load())
+    private val runtimeEnvironment = appConfig.getEnvironment()
 
-@KtorExperimentalAPI
-fun main() {
-    Thread.currentThread().setUncaughtExceptionHandler { thread, err ->
-        mainLogger.error("uncaught exception in thread ${thread.name}: ${err.message}", err)
+    fun start() {
+        if (runtimeEnvironment == AppEnv.PREPROD || runtimeEnvironment == AppEnv.PROD) {
+            logger.info("Sover i 30s i påvente av SQL proxy sidecar")
+            Thread.sleep(30000)
+        }
+
+        startKoin { modules(selectModuleBasedOnProfile(appConfig)) }
+        migrateDatabase()
+
+        configAndStartBackgroundWorker()
+        autoDetectProbeableComponents()
+        configAndStartWebserver()
     }
 
-    embeddedServer(Netty, createApplicationEnvironment()).let { app ->
-        app.start(wait = false)
+    fun shutdown() {
+        webserver?.stop(1000, 1000)
+        get<BakgrunnsjobbService>().stop()
+        get<VedtaksmeldingConsumer>().stop()
+        stopKoin()
+    }
 
-        val koin = app.application.getKoin()
-        val bakgrunnsjobbService = koin.get<BakgrunnsjobbService>()
-        bakgrunnsjobbService.leggTilBakgrunnsjobbProsesserer(VedtaksmeldingProcessor.JOBB_TYPE, koin.get<VedtaksmeldingProcessor>())
-        bakgrunnsjobbService.startAsync(true)
+    private fun configAndStartWebserver() {
+        webserver = embeddedServer(
+            Netty,
+            applicationEngineEnvironment {
+                config = appConfig
+                connector {
+                    port = this@SpionApplication.port
+                }
 
-        runBlocking { autoDetectProbeableComponents(koin) }
-        mainLogger.info("La til probeable komponenter")
-
-        val vedtaksmeldingConsumer = koin.get<VedtaksmeldingConsumer>()
-        vedtaksmeldingConsumer.startAsync(true)
-
-        Runtime.getRuntime().addShutdownHook(
-            Thread {
-                vedtaksmeldingConsumer.stop()
-                app.stop(1000, 1000)
+                module {
+                    if (runtimeEnvironment != AppEnv.PROD) {
+                        localCookieDispenser(config)
+                    }
+                    spionModule(config)
+                }
             }
         )
+
+        webserver!!.start(wait = false)
+    }
+
+    private fun configAndStartBackgroundWorker() {
+        if (appConfig.getString("run_background_workers") == "true") {
+
+            get<VedtaksmeldingConsumer>().apply {
+                startAsync(true)
+            }
+
+            get<BakgrunnsjobbService>().apply {
+                startAsync(true)
+            }
+        }
+    }
+
+    private fun migrateDatabase() {
+        logger.info("Starter databasemigrering")
+
+        // gir get() riktig koin context?
+        Flyway.configure().baselineOnMigrate(true)
+            .dataSource(GlobalContext.get().get())
+            .load()
+            .migrate()
+
+        logger.info("Databasemigrering slutt")
+    }
+
+    private fun autoDetectProbeableComponents() {
+        val kubernetesProbeManager = get<KubernetesProbeManager>()
+
+        getKoin().getAll<LivenessComponent>()
+            .forEach { kubernetesProbeManager.registerLivenessComponent(it) }
+
+        getKoin().getAll<ReadynessComponent>()
+            .forEach { kubernetesProbeManager.registerReadynessComponent(it) }
+
+        logger.info("La til probeable komponenter")
     }
 }
 
-private suspend fun autoDetectProbeableComponents(koin: org.koin.core.Koin) {
-    val kubernetesProbeManager = koin.get<KubernetesProbeManager>()
+fun main() {
 
-    koin.getAll<LivenessComponent>()
-        .forEach { kubernetesProbeManager.registerLivenessComponent(it) }
-
-    koin.getAll<ReadynessComponent>()
-        .forEach { kubernetesProbeManager.registerReadynessComponent(it) }
-}
-
-@KtorExperimentalAPI
-fun createApplicationEnvironment() = applicationEngineEnvironment {
-    config = HoconApplicationConfig(ConfigFactory.load())
-
-    connector {
-        port = 8080
+    val logger = LoggerFactory.getLogger("main")
+    Thread.currentThread().setUncaughtExceptionHandler { thread, err ->
+        logger.error("uncaught exception in thread ${thread.name}: ${err.message}", err)
     }
 
-    module {
-        localCookieDispenser(config)
-        spionModule(config)
-    }
+    val application = SpionApplication()
+    application.start()
+
+    Runtime.getRuntime().addShutdownHook(
+        Thread {
+            logger.info("Fikk shutdown-signal, avslutter...")
+            application.shutdown()
+            logger.info("Avsluttet OK")
+        }
+    )
 }
