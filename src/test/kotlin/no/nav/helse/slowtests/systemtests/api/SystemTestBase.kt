@@ -64,7 +64,6 @@ open class SystemTestBase : KoinTest {
 
     @AfterAll
     fun after() {
-
     }
 
     init {
@@ -73,7 +72,6 @@ open class SystemTestBase : KoinTest {
             put("koin.profile", "TEST")
         }
     }
-
 
     /**
      * Hjelpefunksjon for å kalle HTTP-endepunktene med riktig port i testene

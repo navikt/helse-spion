@@ -25,7 +25,6 @@ import io.ktor.routing.IgnoreTrailingSlash
 import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.util.DataConversionException
-import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.arbeidsgiver.system.AppEnv
 import no.nav.helse.arbeidsgiver.system.getEnvironment
 import no.nav.helse.spion.nais.nais
@@ -35,7 +34,6 @@ import no.nav.helse.spion.web.dto.validation.Problem
 import no.nav.helse.spion.web.dto.validation.ValidationProblem
 import no.nav.helse.spion.web.dto.validation.ValidationProblemDetail
 import no.nav.security.token.support.ktor.tokenValidationSupport
-import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.get
 import org.slf4j.LoggerFactory
 import org.valiktor.ConstraintViolationException
@@ -46,7 +44,6 @@ import java.time.LocalDate
 import java.util.UUID
 import javax.ws.rs.ForbiddenException
 
-@KtorExperimentalAPI
 fun Application.spionModule(config: ApplicationConfig = environment.config) {
 
     install(IgnoreTrailingSlash)
