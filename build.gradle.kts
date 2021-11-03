@@ -80,7 +80,7 @@ dependencies {
     implementation("junit:junit:4.13.1") // overstyrer transiente 4.12
     implementation("com.google.guava:guava:30.0-jre") // overstyrer transiente 29.0-jre
     implementation("io.netty:netty-codec:4.1.59.Final") // overstyrer transiente 4.1.44
-    implementation("io.netty:netty-codec-http:4.1.59.Final") // overstyrer transiente 4.1.51.Final gjennom ktor-server-netty    
+    implementation("io.netty:netty-codec-http:4.1.70.Final") // overstyrer transiente 4.1.51.Final gjennom ktor-server-netty    
     // Snyk fikser slutt
 
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
