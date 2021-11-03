@@ -49,10 +49,6 @@ import javax.ws.rs.ForbiddenException
 @KtorExperimentalAPI
 fun Application.spionModule(config: ApplicationConfig = environment.config) {
 
-    install(Koin) {
-        modules(selectModuleBasedOnProfile(config))
-    }
-
     install(IgnoreTrailingSlash)
     install(Authentication) {
         tokenValidationSupport(config = config)

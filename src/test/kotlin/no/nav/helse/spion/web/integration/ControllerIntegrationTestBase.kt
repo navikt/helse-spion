@@ -11,13 +11,15 @@ import io.ktor.server.testing.createTestEnvironment
 import io.ktor.server.testing.withApplication
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.TestData
+import no.nav.helse.spion.web.selectModuleBasedOnProfile
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
 
-@KtorExperimentalAPI
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 open class ControllerIntegrationTestBase : KoinTest {
 
@@ -28,13 +30,15 @@ open class ControllerIntegrationTestBase : KoinTest {
 
     @BeforeAll
     fun before() {
-        server = MockOAuth2Server()
-        server!!.start()
+            server = MockOAuth2Server()
+            server!!.start()
+        startKoin { modules(selectModuleBasedOnProfile(testConfig)) }
     }
 
     @AfterAll
     fun after() {
         server!!.shutdown()
+        stopKoin()
     }
 
     init {
@@ -62,7 +66,6 @@ open class ControllerIntegrationTestBase : KoinTest {
         setup()
     }
 
-    @KtorExperimentalAPI
     private fun addIntegrationTestConfigValues(config: MapApplicationConfig) {
         val acceptedIssuer = "default"
         val acceptedAudience = "default"
