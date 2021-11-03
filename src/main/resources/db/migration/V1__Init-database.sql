@@ -9,7 +9,7 @@ CREATE INDEX fom ON ytelsesperiode ((data -> 'periode' ->> 'fom'));
 CREATE INDEX tom ON ytelsesperiode ((data -> 'periode' ->> 'tom'));
 
 ALTER TABLE ytelsesperiode
-    ADD CONSTRAINT pk_must_exist CHECK ( data - > 'arbeidsforhold' -> 'arbeidstaker' ? 'identitetsnummer'
+    ADD CONSTRAINT pk_must_exist CHECK ( data -> 'arbeidsforhold' -> 'arbeidstaker' ? 'identitetsnummer'
     AND data -> 'arbeidsforhold' -> 'arbeidsgiver' ? 'arbeidsgiverId'
     AND data -> 'periode' ? 'fom'
     AND data -> 'periode' ? 'tom'
