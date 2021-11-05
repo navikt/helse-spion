@@ -162,7 +162,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
 
     // single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
     single { createStaticPdlMock() }
-    single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
+    single { StaticMockAuthRepo(get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
 
     single {
