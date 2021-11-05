@@ -9,7 +9,6 @@ import io.ktor.response.respond
 import io.ktor.response.respondTextWriter
 import io.ktor.routing.get
 import io.ktor.routing.routing
-import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.pipeline.PipelineContext
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
@@ -23,7 +22,6 @@ import java.util.Collections
 
 private val collectorRegistry = CollectorRegistry.defaultRegistry
 
-@KtorExperimentalAPI
 fun Application.nais() {
 
     DefaultExports.initialize()
@@ -33,7 +31,6 @@ fun Application.nais() {
         get("/health/is-alive") {
             val kubernetesProbeManager = this@routing.get<KubernetesProbeManager>()
             val checkResults = kubernetesProbeManager.runLivenessProbe()
-            log.info(checkResults.toString())
             returnResultOfChecks(checkResults)
         }
 
@@ -41,7 +38,6 @@ fun Application.nais() {
             // returnResultOfChecks(this@routing, HealthCheckType.READYNESS, this)
             val kubernetesProbeManager = this@routing.get<KubernetesProbeManager>()
             val checkResults = kubernetesProbeManager.runReadynessProbe()
-            log.info(checkResults.toString())
             returnResultOfChecks(checkResults)
         }
 
