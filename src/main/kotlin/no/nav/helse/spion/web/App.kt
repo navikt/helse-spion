@@ -15,6 +15,7 @@ import no.nav.helse.arbeidsgiver.system.AppEnv
 import no.nav.helse.arbeidsgiver.system.getEnvironment
 import no.nav.helse.arbeidsgiver.system.getString
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingConsumer
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import no.nav.helse.spion.web.auth.localCookieDispenser
 import org.flywaydb.core.Flyway
 import org.koin.core.component.KoinComponent
@@ -80,6 +81,7 @@ class SpionApplication(val port: Int = 8080) : KoinComponent {
             }
 
             get<BakgrunnsjobbService>().apply {
+                registrer(get<VedtaksmeldingProcessor>())
                 startAsync(true)
             }
         }

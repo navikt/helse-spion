@@ -20,4 +20,11 @@ open class VedtaksmeldingProcessorTests {
         processor.prosesser(jobb)
         verify(exactly = 1) { serviceMock.processAndSaveMessage(any()) }
     }
+
+    @Test
+    internal fun `vedtaksmelding prosesseres ok`() {
+        val jobb = Bakgrunnsjobb(data = om.writeValueAsString(generator.next()), type = "vedtaksmelding")
+        processor.prosesser(jobb)
+        verify(exactly = 1) { serviceMock.processAndSaveMessage(any()) }
+    }
 }
