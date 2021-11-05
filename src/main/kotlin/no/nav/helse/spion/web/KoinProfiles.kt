@@ -29,6 +29,7 @@ import no.nav.helse.arbeidsgiver.kubernetes.KubernetesProbeManager
 import no.nav.helse.spion.auth.AuthorizationsRepository
 import no.nav.helse.spion.auth.Authorizer
 import no.nav.helse.spion.auth.DefaultAuthorizer
+import no.nav.helse.spion.auth.DynamicMockAuthRepo
 import no.nav.helse.spion.auth.StaticMockAuthRepo
 import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.domene.Arbeidsgiver
@@ -158,7 +159,8 @@ fun preprodConfig(config: ApplicationConfig) = module {
 
     // single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
     single { createStaticPdlMock() }
-    single { StaticMockAuthRepo(get()) as AuthorizationsRepository }
+    // single { StaticMockAuthRepo(get()) as AuthorizationsRepository }
+    single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
 
     single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
@@ -260,9 +262,10 @@ val createVedtaksMeldingKafkaMock = fun(om: ObjectMapper): VedtaksmeldingProvide
             Arbeidsgiver("711485759")
         )
 
+        val genrateMessages = false
         val generator = SpleisVedtaksmeldingGenerator(om, arbeidsgivere)
         override fun getMessagesToProcess(): List<SpleisMelding> {
-            return if (Random.Default.nextDouble() < 0.1)
+            return if (genrateMessages && Random.Default.nextDouble() < 0.1)
                 generator.take(Random.Default.nextInt(2, 50))
             else emptyList()
         }
