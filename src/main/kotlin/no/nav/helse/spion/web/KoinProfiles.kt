@@ -39,10 +39,13 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeReposit
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.vedtaksmelding.SpleisMelding
 import no.nav.helse.spion.vedtaksmelding.SpleisVedtaksmeldingGenerator
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingClient
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingConsumer
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProvider
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
+import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.common.config.SaslConfigs
 import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -163,8 +166,8 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
-    /*single {
+    // single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
+    single {
         VedtaksmeldingClient(
             mutableMapOf(
                 "bootstrap.servers" to config.getString("kafka.endpoint"),
@@ -175,7 +178,7 @@ fun preprodConfig(config: ApplicationConfig) = module {
             ),
             config.getString("kafka.topicname")
         ) as VedtaksmeldingProvider
-    }*/
+    }
 
     single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingConsumer(get(), get(), get()) }
