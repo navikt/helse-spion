@@ -5,9 +5,9 @@ import no.nav.helse.arbeidsgiver.integrasjoner.AccessTokenProvider
 import no.nav.helse.arbeidsgiver.integrasjoner.OAuth2TokenProvider
 import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClient
 import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClientImpl
-import no.nav.helse.fritakagp.integration.oauth2.DefaultOAuth2HttpClient
-import no.nav.helse.fritakagp.integration.oauth2.OAuth2ClientPropertiesConfig
-import no.nav.helse.fritakagp.integration.oauth2.TokenResolver
+import no.nav.helse.spion.integrasjon.oauth2.DefaultOAuth2HttpClient
+import no.nav.helse.spion.integrasjon.oauth2.OAuth2ClientPropertiesConfig
+import no.nav.helse.spion.integrasjon.oauth2.TokenResolver
 import no.nav.helse.spion.web.getString
 import no.nav.security.token.support.client.core.oauth2.ClientCredentialsTokenClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService

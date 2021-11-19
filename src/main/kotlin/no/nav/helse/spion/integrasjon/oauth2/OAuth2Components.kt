@@ -1,4 +1,4 @@
-package no.nav.helse.fritakagp.integration.oauth2
+package no.nav.helse.spion.integrasjon.oauth2
 
 import io.ktor.client.*
 import io.ktor.client.call.*
