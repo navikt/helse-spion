@@ -14,6 +14,7 @@ import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiod
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
 import no.nav.helse.spion.koin.createStaticPdlMock
+import no.nav.helse.spion.koin.externalSystemClients
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingClient
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingConsumer
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
@@ -26,6 +27,8 @@ import org.koin.dsl.module
 import javax.sql.DataSource
 
 fun preprodConfig(config: ApplicationConfig) = module {
+    externalSystemClients(config)
+
     single {
         HikariDataSource(
             createHikariConfig(
@@ -37,18 +40,8 @@ fun preprodConfig(config: ApplicationConfig) = module {
         )
     } bind DataSource::class
 
-    /*single {
-        AltinnClient(
-                config.getString("altinn.service_owner_api_url"),
-                config.getString("altinn.gw_api_key"),
-                config.getString("altinn.altinn_api_key"),
-                config.getString("altinn.service_id"),
-                get()
-        ) as AuthorizationsRepository
-    }*/
-
     // single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
-    single { createStaticPdlMock() }
+    // single { createStaticPdlMock() }
     // single { StaticMockAuthRepo(get()) as AuthorizationsRepository }
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
