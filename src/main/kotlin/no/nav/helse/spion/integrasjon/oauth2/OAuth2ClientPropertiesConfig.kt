@@ -1,4 +1,4 @@
-package no.nav.helse.spion.integrasjon.oauth2
+package no.nav.helse.spion.integrasjon.oauth2 // ktlint-disable filename
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod
 import io.ktor.config.*
