@@ -1,4 +1,4 @@
-package no.nav.helse.spion.web
+package no.nav.helse.spion.koin
 
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.config.ApplicationConfig
@@ -14,12 +14,12 @@ import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
-import no.nav.helse.spion.koin.createStaticPdlMock
-import no.nav.helse.spion.koin.createVedtaksMeldingKafkaMock
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingConsumer
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProvider
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
+import no.nav.helse.spion.web.getString
+import no.nav.helse.spion.web.getjdbcUrlFromProperties
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import javax.sql.DataSource

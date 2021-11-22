@@ -1,4 +1,4 @@
-package no.nav.helse.spion.web
+package no.nav.helse.spion.koin
 
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbRepository
 import no.nav.helse.arbeidsgiver.bakgrunnsjobb.BakgrunnsjobbService
@@ -10,7 +10,6 @@ import no.nav.helse.spion.auth.StaticMockAuthRepo
 import no.nav.helse.spion.domene.ytelsesperiode.repository.MockYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
-import no.nav.helse.spion.koin.createStaticPdlMock
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
 import org.koin.dsl.bind

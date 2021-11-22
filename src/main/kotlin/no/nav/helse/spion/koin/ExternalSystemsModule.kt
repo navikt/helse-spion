@@ -19,7 +19,6 @@ import org.koin.dsl.bind
 fun Module.externalSystemClients(config: ApplicationConfig) {
     val accessTokenProviderError = "Fant ikke config i application.conf"
 
-
     /*single {
         AltinnClient(
                 config.getString("altinn.service_owner_api_url"),
@@ -30,7 +29,7 @@ fun Module.externalSystemClients(config: ApplicationConfig) {
         ) as AuthorizationsRepository
     }*/
 
-    single (named("PROXY")){
+    single(named("PROXY")) {
         val clientConfig = OAuth2ClientPropertiesConfig(config, "proxyscope")
         val tokenResolver = TokenResolver()
         val oauthHttpClient = DefaultOAuth2HttpClient(get())
@@ -42,8 +41,7 @@ fun Module.externalSystemClients(config: ApplicationConfig) {
         )
         val azureAdConfig = clientConfig.clientConfig["azure_ad"] ?: error(accessTokenProviderError)
         OAuth2TokenProvider(accessTokenService, azureAdConfig)
-    }  bind AccessTokenProvider::class
+    } bind AccessTokenProvider::class
 
     single { PdlClientImpl(config.getString("pdl_url"), get(qualifier = named("PROXY")), get(), get()) } bind PdlClient::class
-
 }

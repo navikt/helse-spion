@@ -15,6 +15,10 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.config.ApplicationConfig
 import no.nav.helse.arbeidsgiver.kubernetes.KubernetesProbeManager
+import no.nav.helse.spion.koin.buildAndTestConfig
+import no.nav.helse.spion.koin.localDevConfig
+import no.nav.helse.spion.koin.preprodConfig
+import no.nav.helse.spion.koin.prodConfig
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
