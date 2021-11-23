@@ -1,9 +1,9 @@
-name: Test
+name: Integrasjonstest
 
 on: [pull_request]
 
 jobs:
-  buildAndTest:
+  slowTests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -14,13 +14,16 @@ jobs:
           distribution: 'adopt'
           cache: gradle
 
+      - name: compose up
+        run: cd docker/local && docker-compose up -d && sleep 10
+
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
 
-      - name: Build and test
+      - name: Build and run slowTests
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: --console=plain build test
+          arguments: --console=plain build slowTests jacocoTestReport sonarqube
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
@@ -33,3 +36,4 @@ jobs:
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
+
