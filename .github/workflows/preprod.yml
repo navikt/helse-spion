@@ -69,9 +69,8 @@ jobs:
 
   deploy:
     name: Deploy dev-gcp
-    needs: buildAndTest
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    needs: buildAndTest
     steps:
       - uses: actions/checkout@v2
       - uses: nais/deploy/actions/deploy@master
