@@ -78,6 +78,7 @@ val generateEmptyMock = fun(): VedtaksmeldingProvider {
         }
 
         override fun confirmProcessingDone() {
+            // unødvendig i mock
         }
     }
 }
