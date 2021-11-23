@@ -69,7 +69,7 @@ jobs:
 
   deploy:
     name: Deploy dev-gcp
-    needs: [buildAndTest]
+    needs: buildAndTest
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
