@@ -40,9 +40,15 @@ spec:
     application:
       enabled: true
 
-  # accessPolicy:
-  #   outbound:
-  #     external:
+  accessPolicy:
+    outbound:
+      external:
+        - host: helsearbeidsgiver-proxy.dev-fss-pub.nais.io
+
+      rules:
+        - application: helsearbeidsgiver-proxy
+          namespace: helsearbeidsgiver
+          cluster: dev-fss
 
   envFrom:
     #- configmap: loginservice-idporten # tilgjengeliggjør LOGINSERVICE_IDPORTEN_DISCOVERY_URL og LOGINSERVICE_IDPORTEN_AUDIENCE
@@ -51,16 +57,21 @@ spec:
     - secret: helse-spion-altinn
     - secret: helse-spion-serviceuser
   env:
-  - name: KOIN_PROFILE
-    value: PREPROD
-  - name: ALTINN_SERVICE_OWNER_GW_URL
-    value: https://api-gw-q1.adeo.no/ekstern/altinn/api/serviceowner
-  - name: VEDTAK_TOPICNAME
-    value: aapen-helse-sporbar
-  - name: KAFKA_ENDPOINTS
-    value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
-  - name: SECURITYTOKENSERVICE_REST_URL
-    value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
+    - name: KOIN_PROFILE
+      value: PREPROD
+    - name: ALTINN_SERVICE_OWNER_GW_URL
+      value: https://api-gw-q1.adeo.no/ekstern/altinn/api/serviceowner
+    - name: VEDTAK_TOPICNAME
+      value: aapen-helse-sporbar
+    - name: KAFKA_ENDPOINTS
+      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+    - name: SECURITYTOKENSERVICE_REST_URL
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
+    - name: PROXY_SCOPE
+        value: api://dev-fss.helsearbeidsgiver.helsearbeidsgiver-proxy/.default
+    - name: PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
+
 
   gcp:
     sqlInstances:

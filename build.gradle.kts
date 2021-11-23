@@ -114,6 +114,7 @@ dependencies {
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-ktor:$koinVersion")
     testImplementation("io.insert-koin:koin-test:$koinVersion")
+    implementation("no.nav.security:token-client-core:$tokenSupportVersion")
     implementation("no.nav.security:token-validation-ktor:$tokenSupportVersion")
     implementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
 
