@@ -40,13 +40,9 @@ fun preprodConfig(config: ApplicationConfig) = module {
         )
     } bind DataSource::class
 
-    // single { RestStsClientImpl(config.getString("service_user.username"), config.getString("service_user.password"), config.getString("sts_rest_url"), get()) }
-    // single { createStaticPdlMock() }
-    // single { StaticMockAuthRepo(get()) as AuthorizationsRepository }
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    // single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
     single {
         VedtaksmeldingClient(
             mutableMapOf(

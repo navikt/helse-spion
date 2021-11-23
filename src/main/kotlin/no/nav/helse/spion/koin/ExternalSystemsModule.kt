@@ -5,6 +5,8 @@ import no.nav.helse.arbeidsgiver.integrasjoner.AccessTokenProvider
 import no.nav.helse.arbeidsgiver.integrasjoner.OAuth2TokenProvider
 import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClient
 import no.nav.helse.arbeidsgiver.integrasjoner.pdl.PdlClientImpl
+import no.nav.helse.spion.auth.AuthorizationsRepository
+import no.nav.helse.spion.auth.altinn.AltinnClient
 import no.nav.helse.spion.integrasjon.oauth2.DefaultOAuth2HttpClient
 import no.nav.helse.spion.integrasjon.oauth2.OAuth2ClientPropertiesConfig
 import no.nav.helse.spion.integrasjon.oauth2.TokenResolver
@@ -19,15 +21,15 @@ import org.koin.dsl.bind
 fun Module.externalSystemClients(config: ApplicationConfig) {
     val accessTokenProviderError = "Fant ikke config i application.conf"
 
-    /*single {
+    single {
         AltinnClient(
-                config.getString("altinn.service_owner_api_url"),
-                config.getString("altinn.gw_api_key"),
-                config.getString("altinn.altinn_api_key"),
-                config.getString("altinn.service_id"),
-                get()
+            config.getString("altinn.service_owner_api_url"),
+            config.getString("altinn.gw_api_key"),
+            config.getString("altinn.altinn_api_key"),
+            config.getString("altinn.service_id"),
+            get()
         ) as AuthorizationsRepository
-    }*/
+    }
 
     single(named("PROXY")) {
         val clientConfig = OAuth2ClientPropertiesConfig(config, "proxyscope")
