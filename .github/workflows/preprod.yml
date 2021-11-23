@@ -35,7 +35,7 @@ jobs:
       - name: test and build
         run: bash ./gradlew --console=plain build test slowTest jacocoTestReport sonarqube
         env:
-          SONAR_TOKEN: ${{ secrets.sonartoken }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
@@ -45,7 +45,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and publish Docker image
+      - name: Build and publish.yml Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
