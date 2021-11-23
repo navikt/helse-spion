@@ -3,7 +3,8 @@ name: Preprod
 on:
   push:
     branches:
-      - 'preprod/**'
+      - main
+      - preprod/*
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/helse-spion:${{ github.sha }}
