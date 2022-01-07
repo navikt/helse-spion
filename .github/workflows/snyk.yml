@@ -1,6 +1,9 @@
 name: Snyk
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - '!dependabot/*'
 
 jobs:
   Snyk:
@@ -13,4 +16,4 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: --org=helsearbeidsgiver --project-name=Refusjonsportalen_Backend
+          args: --org=helsearbeidsgiver --project-name=Refusjonsportalen_Backend --fail-on=all

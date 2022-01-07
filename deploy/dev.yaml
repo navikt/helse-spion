@@ -68,7 +68,7 @@ spec:
     - name: SECURITYTOKENSERVICE_REST_URL
       value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
     - name: PROXY_SCOPE
-        value: api://dev-fss.helsearbeidsgiver.helsearbeidsgiver-proxy/.default
+      value: api://dev-fss.helsearbeidsgiver.helsearbeidsgiver-proxy/.default
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
 
