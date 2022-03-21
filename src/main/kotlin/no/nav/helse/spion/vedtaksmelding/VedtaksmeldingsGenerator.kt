@@ -37,38 +37,42 @@ class SpleisVedtaksmeldingGenerator(
         val arbeidsgiver = arbeidsgiverGenerator.getRandomArbeidsGiver()
         numGeneratedVedtak++
 
-          val vedtak = SpleisUtbetalingDto(
-              UtbetalingEventType.utbetaling_utbetalt,
-              randomId(),
-              person.identitetsnummer,
-              randomAktørId(),
-              periode.fom,
-              periode.tom,
-              4,
-              4,
-              true,
-              listOf(
-                  SpleisUtbetalingDto.ArbeidsgiverOppdragDTO(arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!,"SPREF","10000", 340,
-                  listOf(
-                      SpleisUtbetalingDto.ArbeidsgiverOppdragDTO.UtbetalingUtbetalingslinjer(
-                      periode.fom,
-                      periode.tom,
-                      4000,
-                      8000,
-                      100.0,
-                      15
-                  ))),
-              ),
-              UtbetalingType.UTBETALING,
-              listOf(UtbetalingsdagerDTO(
-                  "",
-                  periode.tom.plusDays(1),
-                  Forklaring.ManglerOpptjening,
-                  "begrunnelse"
-              ))
+        val vedtak = SpleisUtbetalingDto(
+            UtbetalingEventType.utbetaling_utbetalt,
+            randomId(),
+            person.identitetsnummer,
+            randomAktørId(),
+            periode.fom,
+            periode.tom,
+            4,
+            4,
+            true,
+            listOf(
+                SpleisUtbetalingDto.ArbeidsgiverOppdragDTO(
+                    arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!, "SPREF", "10000", 340,
+                    listOf(
+                        SpleisUtbetalingDto.ArbeidsgiverOppdragDTO.UtbetalingUtbetalingslinjer(
+                            periode.fom,
+                            periode.tom,
+                            4000,
+                            8000,
+                            100.0,
+                            15
+                        )
+                    )
+                ),
+            ),
+            UtbetalingType.UTBETALING,
+            listOf(
+                UtbetalingsdagerDTO(
+                    "",
+                    periode.tom.plusDays(1),
+                    Forklaring.ManglerOpptjening,
+                    "begrunnelse"
+                )
+            )
 
-          )
-
+        )
 
         return SpleisMelding(person.identitetsnummer, numGeneratedVedtak.toLong(), SpleisMeldingstype.Vedtak.name, om.writeValueAsString(vedtak))
     }
@@ -93,9 +97,6 @@ class SpleisVedtaksmeldingGenerator(
         return generate()
     }
 }
-
-
-
 
 private fun <E> List<E>.pickRandom(): E {
     return this[Random.Default.nextInt(0, this.size)]!!
