@@ -28,7 +28,7 @@ class VedtaksmeldingService(
     }
 
     private fun processVedtak(melding: SpleisMelding) {
-        val vedtak = om.readValue(melding.messageBody, SpleisVedtakDto::class.java)
+        val vedtak = om.readValue(melding.messageBody, SpleisUtbetalingDto::class.java)
         val pdlResponse = pdlClient.personNavn(melding.key)?.navn?.firstOrNull()
 
         map(vedtak, melding.offset, melding.key, pdlResponse?.fornavn ?: "Ukjent", pdlResponse?.etternavn ?: "Ukjent")
@@ -43,8 +43,8 @@ class VedtaksmeldingService(
         // Bruk Sykepengesøknad-teamet sitt API for å hente ut søknaden og bruk FOM-TOM fra denne
     }
 
-    fun map(vedtak: SpleisVedtakDto, kafkaOffset: Long, fnr: String, fornavn: String, etternavn: String): List<Ytelsesperiode> {
-        return vedtak.utbetalinger
+    fun map(vedtak: SpleisUtbetalingDto, kafkaOffset: Long, fnr: String, fornavn: String, etternavn: String): List<Ytelsesperiode> {
+        return vedtak.arbeidsgiverOppdrag
             .filter { it.fagområde == "SPREF" } // utbetalingen er en refusjon
             .flatMap {
                 it.utbetalingslinjer.map { utbetalingslinje ->
@@ -58,10 +58,10 @@ class VedtaksmeldingService(
                             Person(fornavn, etternavn, fnr),
                             Arbeidsgiver(it.mottaker)
                         ),
-                        (utbetalingslinje.beløp * utbetalingslinje.sykedager).toBigDecimal(),
+                        (utbetalingslinje.dagsats * utbetalingslinje.stønadsdager).toBigDecimal(),
                         Ytelsesperiode.Status.INNVILGET,
                         utbetalingslinje.grad.toBigDecimal(),
-                        utbetalingslinje.beløp.toBigDecimal(),
+                        utbetalingslinje.dagsats.toBigDecimal(),
                         Ytelsesperiode.Ytelse.SP,
                         LocalDate.now()
                     )

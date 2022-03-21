@@ -13,12 +13,15 @@ import no.nav.helse.spion.db.createHikariConfig
 import no.nav.helse.spion.domene.ytelsesperiode.repository.PostgresYtelsesperiodeRepository
 import no.nav.helse.spion.domene.ytelsesperiode.repository.YtelsesperiodeRepository
 import no.nav.helse.spion.domenetjenester.SpionService
+import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingClient
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingConsumer
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProcessor
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingProvider
 import no.nav.helse.spion.vedtaksmelding.VedtaksmeldingService
 import no.nav.helse.spion.web.getString
 import no.nav.helse.spion.web.getjdbcUrlFromProperties
+import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.common.config.SaslConfigs
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import javax.sql.DataSource
@@ -43,7 +46,18 @@ fun preprodConfig(config: ApplicationConfig) = module {
     single { DynamicMockAuthRepo(get(), get()) as AuthorizationsRepository }
     single { DefaultAuthorizer(get()) as Authorizer }
 
-    single { createVedtaksMeldingKafkaMock(get()) as VedtaksmeldingProvider }
+    single {
+        VedtaksmeldingClient(
+            mutableMapOf(
+                "bootstrap.servers" to config.getString("kafka.endpoint"),
+                CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SASL_SSL",
+                SaslConfigs.SASL_MECHANISM to "PLAIN",
+                SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
+                    "username=\"${config.getString("kafka.username")}\" password=\"${config.getString("kafka.password")}\";"
+            ),
+            config.getString("kafka.topicname")
+        ) as VedtaksmeldingProvider
+    }
 
     single { VedtaksmeldingService(get(), get(), get()) }
     single { VedtaksmeldingConsumer(get(), get(), get()) }
