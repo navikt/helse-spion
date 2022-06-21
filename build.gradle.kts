@@ -73,7 +73,7 @@ dependencies {
     }
 
     // Snyk fikser
-    implementation("org.eclipse.jetty:jetty-server:9.4.35.v20201120") // overstyrer
+    implementation("org.eclipse.jetty:jetty-server:11.0.10") // overstyrer
     implementation("org.apache.httpcomponents:httpclient:4.5.13") // overstyrer transiente 4.5.6 via ktor-client-apache
     implementation("org.glassfish.jersey.media:jersey-media-jaxb:2.31") // overstyrer transiente 2.30.1
     implementation("org.yaml:snakeyaml:1.26")
