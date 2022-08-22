@@ -120,7 +120,7 @@ dependencies {
 
     implementation(kotlin("stdlib"))
 
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("org.slf4j:slf4j-api:2.0.0")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("ch.qos.logback.contrib:logback-jackson:$logback_contrib_version")
     implementation("ch.qos.logback.contrib:logback-json-classic:$logback_contrib_version")
