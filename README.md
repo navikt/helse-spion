@@ -2,6 +2,8 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=navikt_helse-spion&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=navikt_helse-spion)
 # Refusjonsportalen 
 
+:warning: **Repoet er arkivert ettersom utviklingen er stoppet på ubestemt tid.** :warning:
+
 Refusjonsportalen gir arbeidsgiverne en løpende oversikt over refusjoner som er tilkjent dem, for deres egne arbeidstakere.
 
 ## Komme i gang
