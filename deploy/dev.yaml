@@ -62,7 +62,7 @@ spec:
     - name: ALTINN_SERVICE_OWNER_GW_URL
       value: https://api-gw-q1.adeo.no/ekstern/altinn/api/serviceowner
     - name: VEDTAK_TOPICNAME
-      value: aapen-helse-sporbar
+      value: tbd.utbetaling
     - name: KAFKA_ENDPOINTS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
     - name: SECURITYTOKENSERVICE_REST_URL

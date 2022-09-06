@@ -34,34 +34,55 @@ class SpleisVedtaksmeldingGenerator(
     private fun generate(): SpleisMelding {
         val periode = randomPeriode()
         val person = personGenerator.getRandomPerson()
+        val arbeidsgiver = arbeidsgiverGenerator.getRandomArbeidsGiver()
         numGeneratedVedtak++
 
-        val vedtak = SpleisVedtakDto(
+        val vedtak = SpleisUtbetalingDto(
+            UtbetalingEventType.utbetaling_utbetalt,
+            randomId(),
+            person.identitetsnummer,
+            randomAktørId(),
             periode.fom,
             periode.tom,
-            2,
-            5,
+            4,
+            4,
+            true,
             listOf(
-                SpleisVedtakDto.SpleisUtbetalingDto(
-                    arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!,
-                    "SPREF",
-                    10000,
+                SpleisUtbetalingDto.ArbeidsgiverOppdragDTO(
+                    arbeidsgiverGenerator.getRandomArbeidsGiver().arbeidsgiverId!!, "SPREF", "10000", 340,
                     listOf(
-                        SpleisVedtakDto.SpleisUtbetalingDto.SpleisUtbetalingslinjeDto(
+                        SpleisUtbetalingDto.ArbeidsgiverOppdragDTO.UtbetalingUtbetalingslinjer(
                             periode.fom,
                             periode.tom,
-                            10000 / 7,
-                            10000,
-                            1.0,
-                            2
+                            4000,
+                            8000,
+                            100.0,
+                            15
                         )
                     )
-                )
+                ),
             ),
-            emptyList()
+            UtbetalingType.UTBETALING,
+            listOf(
+                UtbetalingsdagerDTO(
+                    "",
+                    periode.tom.plusDays(1),
+                    Forklaring.ManglerOpptjening,
+                    "begrunnelse"
+                )
+            )
+
         )
 
         return SpleisMelding(person.identitetsnummer, numGeneratedVedtak.toLong(), SpleisMeldingstype.Vedtak.name, om.writeValueAsString(vedtak))
+    }
+
+    private fun randomAktørId(): Int {
+        return 1
+    }
+
+    private fun randomId(): String {
+        return ""
     }
 
     override fun iterator(): Iterator<SpleisMelding> {
